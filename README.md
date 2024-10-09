@@ -57,8 +57,6 @@ Kami memperoleh dataset dari Gofood by Gojek menggunakan metode scraping.
 
 - <b>Delete Product: </b>Menghapus produk yang sudah tidak tersedia atau tidak relevan.
 
-- <b>Manage Users: </b>Melihat daftar pengguna, mengedit profil pengguna, dan mengatur hak akses pengguna.
-
 - <b>Manage Reviews: </b>menghapus, atau mengedit ulasan yang tidak sesuai.
 
 - <b>Manage Forum: </b>Mengawasi dan mengelola konten forum
