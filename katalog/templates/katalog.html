@@ -212,19 +212,24 @@
                         </button>
                       <p class="text-gray-600 mb-2">kategori: ${sanitizedKategori}</p>
                       <h3 class="font-bold text-xl mb-2">${sanitizedItem}</h3>
-                      <p class="text-gray-600 mb-2">Lokasi: ${sanitizedLokasi}</p>
+                      <p class="text-gray-600 mb-2 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 2a6 6 0 016 6c0 4.5-6 10-6 10S4 12.5 4 8a6 6 0 016-6zm0 8a2 2 0 110-4 2 2 0 010 4z" clip-rule="evenodd" />
+                            </svg>
+                            ${sanitizedLokasi}
+                      </p>
                       <p class="font-bold text-lg mb-2">Price: $${sanitizedPrice}</p>
                       
-                      <!-- Edit and Delete Icons -->
-                      <div class="flex justify-between mt-4">
-                        <a href="/katalog/edit/${product.pk}" class="border-2 border-yellow-500 text-yellow-500 rounded-l-lg w-full py-2 transition duration-300 hover:bg-yellow-500 hover:text-white shadow-md text-center">
-                          Edit
-                        </a>
-              
-                        <a href="/katalog/delete/${product.pk}" class="border-2 border-red-500 text-red-500 rounded-r-lg w-full py-2 transition duration-300 hover:bg-red-500 hover:text-white shadow-md text-center">
-                          Delete
-                        </a>
-                      </div>
+                      {% if user.username == "admin" %}
+                        <div class="flex justify-between mt-4">
+                            <a href="/katalog/edit/{{ product.pk }}" class="border-2 border-yellow-500 text-yellow-500 rounded-l-lg w-full py-2 transition duration-300 hover:bg-yellow-500 hover:text-white shadow-md text-center">
+                            Edit
+                            </a>
+                            <a href="/katalog/delete/{{ product.pk }}" class="border-2 border-red-500 text-red-500 rounded-r-lg w-full py-2 transition duration-300 hover:bg-red-500 hover:text-white shadow-md text-center">
+                            Delete
+                            </a>
+                        </div>
+                      {% endif %}
                     </div>
                   </div>
                 `;
