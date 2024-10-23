@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'authentication',
     'katalog',
     'rateNreview',
+    'preference',
 ]
 
 MIDDLEWARE = [
