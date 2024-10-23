@@ -5,4 +5,5 @@ app_name = 'katalog'
 
 urlpatterns = [
     path('', show_katalog, name = 'show_katalog'),
+    path('preference/', include ('preference.urls')),
 ]

@@ -1,13 +1,20 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-@login_required(login_url='/auth/login')
+from preference.models import Preference
+
+# Create your views here.
+@login_required
 def show_main(request):
+    # Fetch the preferences for the current user
+    preference_entries = Preference.objects.filter(user=request.user)
+    
+    # Pass the preferences along with other context data
     context = {
-        'npm' : '2306123456',
-        'name': 'Pak Bepe',
-        'class': 'PBP E'
+        'nama_aplikasi': 'karesu',
+        'nama': request.user.username,
+        'npm': '2306219575',
+        'class': 'PBP B',
+        'preference_entries': preference_entries,  # Pass preferences to template
     }
 
     return render(request, "main.html", context)
-
-# Create your views here.
