@@ -19,17 +19,30 @@ from django.utils.html import strip_tags
 # Create your views here.
 @login_required(login_url='/auth/login')
 def show_katalog(request):
+    # Get sorting order from query parameters (default is ascending)
+    sort_order = request.GET.get('sort', 'asc')
+
+    # Retrieve and sort the products based on the sort_order
+    if sort_order == 'desc':
+        products = Product.objects.all().order_by('-price')
+    else:
+        products = Product.objects.all().order_by('price')
+
+    # Add sorted products to context
     context = {
         'nama': request.user.username,
-        'name' : 'Jeremi Felix Adiyatma',
-        'npm' : '2306219575',
-        'kelas' : 'PBP B',
-        'item' : 'Gitar Michael jackson',
-        'price' : 600000,
-        'description' : 'this is the guitar that Michael Jackson used on his tour in early 2009 months before he died',
+        'name': 'Jeremi Felix Adiyatma',
+        'npm': '2306219575',
+        'kelas': 'PBP B',
+        'item': 'Gitar Michael Jackson',
+        'price': 600000,
+        'description': 'this is the guitar that Michael Jackson used on his tour in early 2009 months before he died',
+        'products': products,
+        'sort_order': sort_order,  # Pass the sort_order to the template for dropdown state
     }
 
     return render(request, "katalog.html", context)
+
 @csrf_exempt
 @require_POST
 def add_product_entry_ajax(request):

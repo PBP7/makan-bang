@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'authentication',
     'katalog',
     'meal_planning'
+    'rateNreview',
 ]
 
 MIDDLEWARE = [
