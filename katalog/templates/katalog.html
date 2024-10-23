@@ -273,7 +273,12 @@
 
                         </div>
                       <h3 class="font-bold text-xl mb-2">${sanitizedItem}</h3>
-                      <p class="text-gray-600 mb-2">Lokasi: ${sanitizedLokasi}</p>
+                       <div class="flex items-center text-gray-600 mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-0" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 2a6 6 0 016 6c0 4.118-5.02 9.636-5.356 9.975a1 1 0 01-1.288 0C9.02 17.636 4 12.118 4 8a6 6 0 016-6zm0 8a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>${sanitizedLokasi}</span>
+                      </div>
                       <p class="font-bold text-lg mb-2">Price: $${sanitizedPrice}</p>
                       <div class="absolute bottom-0 left-0 p-2">
                         <button class="bg-green-500 text-white py-1 px-3 rounded-lg">Meal Plan</button>
@@ -425,7 +430,7 @@
     function displayFilteredProducts(filteredProducts) {
         document.getElementById("product_entry_cards").innerHTML = "";
         let htmlString = "";
-
+    
         if (filteredProducts.length === 0) {
             htmlString = `
                 <div class="flex flex-col items-center justify-center min-h-[24rem] p-6">
@@ -440,25 +445,67 @@
                 const sanitizedKategori = DOMPurify.sanitize(product.fields.kategori);
                 const sanitizedLokasi = DOMPurify.sanitize(product.fields.lokasi);
                 const sanitizedPrice = DOMPurify.sanitize(product.fields.price);
-
+    
                 htmlString += `
-                  <div class="relative break-inside-avoid cursor-pointer group" >
+                  <div class="relative break-inside-avoid cursor-pointer group">
                     <div class="relative top-5 bg-white shadow-md mb-6 p-4 border-2 border-gray-300 rounded-lg"
                       style="min-height: 29rem; max-height: 29rem;">
                       
                       <img src="${sanitizedPictureLink}" alt="${sanitizedItem}" class="h-48 w-full object-cover rounded-md mb-4" onclick="showProductDetail(${index})">
+                      
+                      <!-- Bookmark Button -->
+                      <div class="flex justify-start items-center mb-4">
+                        <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
+                            onclick="toggleBookmark(this)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        
+                        <!-- Category Icon and Text -->
+                        <div class="flex items-center ml-2">
+                            <div class="h-10 w-10 rounded-full overflow-hidden bg-gray-200">
+                                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXGKovePeweJrzbFFuC3Xrt8cCB47Ajd8kYA&s" alt="Category Icon" class="h-full w-full object-cover">
+                            </div>
+                            <span class="ml-2 text-gray-800">${sanitizedKategori}</span>
+                        </div>
+                      </div>
+    
                       <h3 class="font-bold text-xl mb-2">${sanitizedItem}</h3>
-                      <p class="text-gray-600 mb-2">Category: ${sanitizedKategori}</p>
-                      <p class="text-gray-600 mb-2">Location: ${sanitizedLokasi}</p>
+    
+                      <!-- Location with Icon -->
+                      <div class="flex items-center text-gray-600 mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 2a6 6 0 016 6c0 4.118-5.02 9.636-5.356 9.975a1 1 0 01-1.288 0C9.02 17.636 4 12.118 4 8a6 6 0 016-6zm0 8a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>${sanitizedLokasi}</span>
+                      </div>
+    
                       <p class="font-bold text-lg mb-2">Price: $${sanitizedPrice}</p>
+    
+                      <!-- Meal Plan Button -->
+                      <div class="absolute bottom-0 left-0 p-2">
+                        <button class="bg-green-500 text-white py-1 px-3 rounded-lg">Meal Plan</button>
+                      </div>
+    
+                      <!-- Star Review Button -->
+                      <div class="absolute bottom-0 right-0 p-2">
+                        <button class="star-btn text-gray-400" onclick="toggleStar(this, '${product.id}')">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.433 4.426a1 1 0 00.95.69h4.668c.969 0 1.371 1.24.588 1.81l-3.768 2.733a1 1 0 00-.364 1.118l1.433 4.426c.3.921-.755 1.688-1.538 1.118L10 14.347l-3.768 2.733c-.782.57-1.837-.197-1.538-1.118l1.433-4.426a1 1 0 00-.364-1.118L2.995 9.853c-.782-.57-.38-1.81.588-1.81h4.668a1 1 0 00.95-.69l1.433-4.426z" />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 `;
             });
         }
-
+    
         document.getElementById("product_entry_cards").innerHTML = htmlString;
     }
+    
+    
     function toggleStar(button) {
         const star = button.querySelector('svg');
         star.classList.toggle('text-yellow-500'); // Toggles between grey and yellow color
