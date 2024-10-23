@@ -9,25 +9,18 @@
 {% block content %}
 {% include 'navbar.html' %}
 
-
 <!-- Main Wrapper -->
 <div class="overflow-x-hidden min-h-screen flex flex-col" style="background: linear-gradient(to bottom, white, #87CEEB);padding-top: 88px">
-    <div class="flex justify-start py-2 p-7">
-        <input type="text" id="searchBar" placeholder="Search by category or name" 
-               class="border border-gray-300 rounded-md p-2 w-1/2 hover:border-indigo-700" 
-               onkeypress="searchProducts(event)">
-    </div>
+    
     <div class="flex justify-start py-2 p-7">
         <button onclick="showModal()"
           class="bg-indigo-700 hover:bg-indigo-600 text-white font-bold py-1 px-3 text-sm rounded-full shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105">
           + Add Product
         </button>
     </div>
-
-  
+     
 
   <!-- Product Entries -->
-<!-- Product Entries -->
     <div id="product_entry_cards" class = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6"></div>
 
 
@@ -140,6 +133,13 @@
 
 <!-- Script for handling product entries -->
 <script>
+    function sortProductsByPrice(order) {
+        // Redirecting to a URL that handles sorting based on the price order selected
+        const currentUrl = window.location.href.split('?')[0];
+        const newUrl = `${currentUrl}?sort=${order}`;
+        window.location.href = newUrl;
+    }
+    
     function addProductEntry(event) {
         event.preventDefault();
         
@@ -204,23 +204,21 @@
                 const sanitizedPictureLink = DOMPurify.sanitize(product.fields.picture_link);
     
                 htmlString += `
-                  <div class="relative break-inside-avoid cursor-pointer group" >
+                <div class="relative break-inside-avoid cursor-pointer group">
                     <div class="relative top-5 bg-white shadow-md mb-6 p-4 border-2 border-gray-300 rounded-lg"
-                      style="min-height: 29rem; max-height: 29rem; width: calc(100vw - 60); max-width: calc(100vw - 60vw);">
-                      
-                      
-                      
-                      <img src="${sanitizedPictureLink}" alt="${sanitizedItem}" class="h-48 w-full object-cover rounded-md mb-4" onclick="showProductDetail(${index})">
-                       <div class="flex justify-start items-center mb-4">
+                        style="min-height: 29rem; max-height: 29rem; width: calc(100vw - 60); max-width: calc(100vw - 60vw);">
+                        
+                        <img src="${sanitizedPictureLink}" alt="${sanitizedItem}" class="h-48 w-full object-cover rounded-md mb-4" onclick="showProductDetail(${index})">
+
+                        <!-- Row for bookmark button and category icon/text -->
+                        <div class="flex justify-start items-center mb-4">
                             <!-- Bookmark Button aligned to the left -->
-                            {% if user.username != "admin" %}
                             <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
                                 onclick="toggleBookmark(this)">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
                                 </svg>
                             </button>
-                            {% endif %}
 
                            <div class="flex items-center">
                                 <!-- Circle with the image inside -->
@@ -234,22 +232,29 @@
 
 
                         </div>
-                      <h3 class="font-bold text-xl mb-2">${sanitizedItem}</h3>
-                      <p class="text-gray-600 mb-2">Lokasi: ${sanitizedLokasi}</p>
-                      <p class="font-bold text-lg mb-2">Price: $${sanitizedPrice}</p>
-                      
-                      {% if user.username == "admin" %}
+
+                        <h3 class="font-bold text-xl mb-2">${sanitizedItem}</h3>
+                        <p class="text-gray-600 mb-2 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 2a6 6 0 016 6c0 4.5-6 10-6 10S4 12.5 4 8a6 6 0 016-6zm0 8a2 2 0 110-4 2 2 0 010 4z" clip-rule="evenodd" />
+                        </svg>
+                        ${sanitizedLokasi}
+                        </p>
+                        <p class="font-bold text-lg mb-2">Price: $${sanitizedPrice}</p>
+                        {% if user.username == "admin" %}
                         <div class="flex justify-between mt-4">
-                            <a href="/katalog/edit/${ product.pk }" class="border-2 border-yellow-500 text-yellow-500 rounded-l-lg w-full py-2 transition duration-300 hover:bg-yellow-500 hover:text-white shadow-md text-center">
+                            <a href="/katalog/edit/{{ product.pk }}" class="border-2 border-yellow-500 text-yellow-500 rounded-l-lg w-full py-2 transition duration-300 hover:bg-yellow-500 hover:text-white shadow-md text-center">
                             Edit
                             </a>
-                            <a href="/katalog/delete/${ product.pk }" class="border-2 border-red-500 text-red-500 rounded-r-lg w-full py-2 transition duration-300 hover:bg-red-500 hover:text-white shadow-md text-center">
+                            <a href="/katalog/delete/{{ product.pk }}" class="border-2 border-red-500 text-red-500 rounded-r-lg w-full py-2 transition duration-300 hover:bg-red-500 hover:text-white shadow-md text-center">
                             Delete
                             </a>
                         </div>
                       {% endif %}
                     </div>
-                  </div>
+                </div>
+
+
                 `;
     
                 // Store product details in a global array for later reference
@@ -354,62 +359,6 @@
         btn.classList.toggle('bg-green-700');  // Dark green when bookmarked
         btn.classList.toggle('bg-white');  // White when not bookmarked
         btn.classList.toggle('text-white');  // Make icon white on green background
-    }
-    function searchProducts(event) {
-        if (event.key === 'Enter') {
-            const searchTerm = event.target.value.trim().toLowerCase();
-            filterProducts(searchTerm);
-        }
-    }
-
-    function filterProducts(searchTerm) {
-        // Fetch all product entries
-        getProductEntries().then((products) => {
-            const filteredProducts = products.filter(product => {
-                const productName = product.fields.item.toLowerCase();
-                const productCategory = product.fields.kategori.toLowerCase();
-                return productName.includes(searchTerm) || productCategory ===(searchTerm);
-            });
-            displayFilteredProducts(filteredProducts);
-        });
-    }
-
-    function displayFilteredProducts(filteredProducts) {
-        document.getElementById("product_entry_cards").innerHTML = "";
-        let htmlString = "";
-
-        if (filteredProducts.length === 0) {
-            htmlString = `
-                <div class="flex flex-col items-center justify-center min-h-[24rem] p-6">
-                    <img src="{% static 'images/raster/sad-image.png' %}" alt="Sad face" class="w-32 h-32 mb-4"/>
-                    <p class="text-center text-gray-600 mt-4">No product entries found.</p>
-                </div>
-            `;
-        } else {
-            filteredProducts.forEach((product, index) => {
-                const sanitizedItem = DOMPurify.sanitize(product.fields.item);
-                const sanitizedPictureLink = DOMPurify.sanitize(product.fields.picture_link);
-                const sanitizedKategori = DOMPurify.sanitize(product.fields.kategori);
-                const sanitizedLokasi = DOMPurify.sanitize(product.fields.lokasi);
-                const sanitizedPrice = DOMPurify.sanitize(product.fields.price);
-
-                htmlString += `
-                  <div class="relative break-inside-avoid cursor-pointer group" >
-                    <div class="relative top-5 bg-white shadow-md mb-6 p-4 border-2 border-gray-300 rounded-lg"
-                      style="min-height: 29rem; max-height: 29rem;">
-                      
-                      <img src="${sanitizedPictureLink}" alt="${sanitizedItem}" class="h-48 w-full object-cover rounded-md mb-4" onclick="showProductDetail(${index})">
-                      <h3 class="font-bold text-xl mb-2">${sanitizedItem}</h3>
-                      <p class="text-gray-600 mb-2">Category: ${sanitizedKategori}</p>
-                      <p class="text-gray-600 mb-2">Location: ${sanitizedLokasi}</p>
-                      <p class="font-bold text-lg mb-2">Price: $${sanitizedPrice}</p>
-                    </div>
-                  </div>
-                `;
-            });
-        }
-
-        document.getElementById("product_entry_cards").innerHTML = htmlString;
     }
     
  
