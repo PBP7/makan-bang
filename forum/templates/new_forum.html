@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block meta %}
+<title>Add New Forum</title>
+{% endblock meta %}
+
+{% block content %}
+{% include 'navbar.html' %}
+
+<div class="flex flex-col min-h-screen bg-white">
+  <div class="container mx-auto px-4 py-8 mt-16 max-w-xl">
+  
+    <div class="bg-white shadow-md rounded-lg p-6 form-style">
+      <h1 class="text-2xl font-bold text-center mb-6 text-black">Add New Forum</h1>
+      <form method="POST" class="space-y-4">
+        {% csrf_token %}
+        
+        <!-- title -->
+        <div class="py-2">
+          <label for="title" class="font-semibold text-gray-700 w-1/4">
+            Title
+          </label>
+          <div class="w-full">
+            <input type="text" name="title" id="title" class="border border-gray-300 rounded-lg p-3 w-full">
+          </div>
+        </div>
+
+        <!-- discussion -->
+        <div class="py-2">
+          <label for="question" class="font-semibold text-gray-700 w-1/4">
+            Question
+          </label>
+          <div class="w-full">
+            <textarea name="question" id="question" rows="6" class="border border-gray-300 rounded-lg p-3 w-full"></textarea>
+          </div>
+        </div>
+        
+        <!-- select topic-->
+        <div class="py-2">
+          <label for="topic" class="font-semibold text-gray-700 w-1/4">
+            Topic
+          </label>
+          <div class="w-full">
+            <select name="topic" id="topic" class="border border-gray-300 rounded-lg p-3 w-full">
+              <option value="Information">Information</option>
+              <option value="Restaurants">Restaurants</option>
+              <option value="Foods">Foods</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex justify-center mt-4">
+          <button type="submit" class="bg-[#85827f] hover:bg-[#615f5d] text-white font-semibold px-4 py-2 rounded-lg transition duration-300 ease-in-out w-full">
+            Add New Forum Entry
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

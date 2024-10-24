@@ -25,8 +25,6 @@ urlpatterns = [
     path('', include('main.urls')),
     path('katalog/', include('katalog.urls')),
     path('preferences/', include('preference.urls')),
-
-    
-
+    path('forum/', include('forum.urls')),
 ]
 

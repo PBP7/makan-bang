@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from preference.models import Preference
 
 # Create your views here.
-@login_required
+@login_required(login_url='/auth/login')
 def show_main(request):
     # Fetch the preferences for the current user
     preference_entries = Preference.objects.filter(user=request.user)
