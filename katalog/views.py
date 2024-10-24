@@ -83,6 +83,7 @@ def delete_product_entry(request, id):
     product_entry.delete()
     # Kembali ke halaman awal
     return HttpResponseRedirect(reverse('katalog:show_katalog'))
+
 def edit_product_entry(request, id):
     # Get mood entry berdasarkan id
     product_entry = Product.objects.get(pk = id)

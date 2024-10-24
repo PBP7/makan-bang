@@ -1,24 +1,51 @@
-from django.shortcuts import render
-from datetime import datetime  # Import datetime
-import calendar  # Import calendar
+from django.shortcuts import render, redirect  # Pastikan redirect juga diimpor
+from django.views import View
+from datetime import datetime
+import calendar
+from katalog.models import Product  # Impor model Product
+from .models import MealPlan  # Impor model MealPlan
+from django.shortcuts import get_object_or_404, redirect
 
-
+# Meal Planning View
 def meal_planning(request):
-    # Mendapatkan tanggal saat ini
+    # Get current date
     today = datetime.today()
     current_year = today.year
     current_month = today.month
 
-    # Mendapatkan hari-hari dalam bulan
+    # Get days in the current month
     month_days = calendar.monthcalendar(current_year, current_month)
 
-    # Nama bulan
+    # Month name
     month_name = today.strftime('%B')
+
+    # Ambil makanan dari MealPlan
+    meal_plan = MealPlan.objects.filter(user=request.user).first()
+    food_items = meal_plan.food_items.all() if meal_plan else []
 
     context = {
         'month_name': month_name,
         'month_days': month_days,
-        'current_day': today.day
+        'current_day': today.day,
+        'food_items': food_items,  # Kirim data makanan ke template
     }
 
     return render(request, 'meal_planning.html', context)
+
+
+def add_to_meal_plan(request, food_item_id):
+    food_item = Product.objects.get(pk=food_item_id)
+    meal_plan, created = MealPlan.objects.get_or_create(user=request.user)
+    meal_plan.food_items.add(food_item)
+    return redirect('meal_planning')  # Redirect ke halaman meal planning
+
+def delete_food_item(request, food_item_id):
+    if request.method == "POST":
+        meal_plan = get_object_or_404(MealPlan, user=request.user)
+        food_item = get_object_or_404(Product, pk=food_item_id)
+        
+        # Hapus food item dari meal plan
+        meal_plan.food_items.remove(food_item)
+        
+        # Redirect setelah penghapusan
+        return redirect('meal_planning')

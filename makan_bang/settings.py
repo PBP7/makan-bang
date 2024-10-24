@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'main',
     'authentication',
     'katalog',
-    'meal_planning'
+    'meal_planning',
     'rateNreview',
 ]
 

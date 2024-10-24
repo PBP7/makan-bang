@@ -25,7 +25,7 @@ urlpatterns = [
     path('', include('main.urls')),
     path('katalog/', include('katalog.urls')),
     path('rateNreview/', include('rateNreview.urls')),
-    path('meal_planning/', include('meal_planning.urls')),
+    path('meal-planning/', include('meal_planning.urls')),
 
 ]
 
