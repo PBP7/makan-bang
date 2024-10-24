@@ -24,5 +24,8 @@ urlpatterns = [
     path('auth/', include('authentication.urls')),
     path('', include('main.urls')),
     path('katalog/', include('katalog.urls')),
+    path('preferences/', include('preference.urls')),
     path('bookmark', include('bookmark.urls')),
 ]
+
+
