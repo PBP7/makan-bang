@@ -95,10 +95,7 @@
         <div class="card"> 
             <h2 class="text-2xl font-bold text-blue-600 mb-4">Food added</h2>
             
-            <p class="text-gray-600">Add the food items to your meal plan for the selected date.</p>
-           
             <div>
-                <h2>Added Food Items:</h2>
                 {% if food_items %}
                     <ul>
                         {% for food_item in food_items %}
@@ -133,7 +130,7 @@
             
                 <!-- Tombol untuk menambahkan makanan lain -->
                 <div class="mt-4">
-                    <a href="/katalog" class="bg-blue-500 text-white py-2 px-4 rounded-lg">Add Other Food</a>
+                    <a href="choices/" class="bg-blue-500 text-white py-2 px-4 rounded-lg">Add Other Food</a>
                 </div>
             </div>
             

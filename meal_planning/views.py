@@ -33,6 +33,15 @@ def meal_planning(request):
     return render(request, 'meal_planning.html', context)
 
 
+def choices_page(request):
+    # Mengambil semua produk dari database
+    product_entries = Product.objects.all()
+    
+    # Render ke template choices_page.html
+    return render(request, 'choices_page.html', {'product_entries': product_entries})
+
+
+
 def add_to_meal_plan(request, food_item_id):
     food_item = Product.objects.get(pk=food_item_id)
     meal_plan, created = MealPlan.objects.get_or_create(user=request.user)
@@ -49,3 +58,20 @@ def delete_food_item(request, food_item_id):
         
         # Redirect setelah penghapusan
         return redirect('meal_planning')
+
+
+
+def process_choices(request):
+    if request.method == 'POST':
+        # Ambil semua makanan yang dipilih dari form
+        selected_foods = request.POST.getlist('selected_foods')
+
+        # Iterasi setiap food_item_id yang dipilih
+        for food_item_id in selected_foods:
+            # Panggil fungsi add_to_meal_plan untuk setiap item
+            food_item = get_object_or_404(Product, pk=food_item_id)
+            meal_plan, created = MealPlan.objects.get_or_create(user=request.user)
+            meal_plan.food_items.add(food_item)
+        
+        # Setelah menambahkan semua makanan ke meal plan, redirect ke halaman meal planning
+        return redirect('meal_planning')  # Redirect ke halaman meal planning atau halaman lain yang diinginkan
