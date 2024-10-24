@@ -1,14 +1,79 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block content %}
 {% include 'navbar.html' %}
-<h1>Mental Health Tracker</h1>
 
-<h5>NPM: </h5>
-<p>{{ npm }}<p>
+<!-- hero -->
+<div class="relative bg-cover bg-center h-screen" style="background-image: url('{% static 'image/softbang.jpg' %}');">
+</div>
 
-<h5>Name:</h5>
-<p>{{ name }}</p>
+<!-- features -->
+<div class="relative w-full text-center mt-20">
+    <h2 class="font-inter text-[60px] lg:text-[100px] font-bold leading-tight">
+        <span class="font-semibold">F</span><span class="font-extrabold italic">eat</span><span class="font-semibold">ures</span>
+    </h2>
+</div>
 
-<h5>Class:</h5>
-<p>{{ class }}</p>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10 px-4 md:px-20">
+    <div class="relative bg-[#FCFAF7] p-6 rounded-lg shadow-md hover:shadow-xl">
+        <h3 class="text-xl font-bold text-[#3845AD]">Food Catalogue</h3>
+        <p class="mt-4">Save your favorite recipes and meal plans for future use!</p><br><br>
+        <a href="#" class="absolute bottom-6 right-6">
+            <img src="{% static 'image/morebutton.png' %}" alt="More" class="h-8 w-auto">
+        </a>
+    </div>
+    <div class="relative bg-[#FCFAF7] p-6 rounded-lg shadow-md hover:shadow-xl">
+        <h3 class="text-xl font-bold text-[#F65035]">Rate and Review</h3>
+        <p class="mt-4">Don't ever worry about how your food's gonna taste. Check people's rate and review!</p><br><br>
+        <a href="#" class="absolute bottom-6 right-6">
+            <img src="{% static 'image/morebutton.png' %}" alt="More" class="h-8 w-auto">
+        </a>
+    </div>
+    <div class="relative bg-[#FCFAF7] p-6 rounded-lg shadow-md hover:shadow-xl">
+        <h3 class="text-xl font-bold text-[#7FBFA2]">Preference</h3>
+        <p class="mt-4">Check foods that match your taste by setting preferences!</p><br><br>
+        <a href="#" class="absolute bottom-6 right-6">
+            <img src="{% static 'image/morebutton.png' %}" alt="More" class="h-8 w-auto">
+        </a>
+    </div>
+    <div class="relative bg-[#FCFAF7] p-6 rounded-lg shadow-md hover:shadow-xl">
+        <h3 class="text-xl font-bold text-[#bf5c5a]">Forum Discussion</h3>
+        <p class="mt-4">Discuss your favorite meals and recipes with others!</p><br><br>
+        <a href="/forum" class="absolute bottom-6 right-6">
+            <img src="{% static 'image/morebutton.png' %}" alt="More" class="h-8 w-auto">
+        </a>
+    </div>
+    <div class="relative bg-[#FCFAF7] p-6 rounded-lg shadow-md hover:shadow-xl">
+        <h3 class="text-xl font-bold text-[#bd9440]">Meal Planning</h3>
+        <p class="mt-4">Plan your weekly meals with ease and variety!</p><br><br>
+        <a href="#" class="absolute bottom-6 right-6">
+            <img src="{% static 'image/morebutton.png' %}" alt="More" class="h-8 w-auto">
+        </a>
+    </div>
+    <div class="relative bg-[#FCFAF7] p-6 rounded-lg shadow-md hover:shadow-xl">
+        <h3 class="text-xl font-bold text-[#3845AD]">Bookmark</h3>
+        <p class="mt-4">Save your favorite recipes and meal plans for future use!</p><br><br>
+        <a href="#" class="absolute bottom-6 right-6">
+            <img src="{% static 'image/morebutton.png' %}" alt="More" class="h-8 w-auto">
+        </a>
+    </div>
+</div>
+
+
+<!-- collaboration -->
+<div class="relative w-full text-center mt-20">
+    <h2 class="font-inter text-[40px] lg:text-[70px] font-bold leading-tight">
+        <span class="font-semibold">In </span><span class="font-extrabold italic">collaboration</span><span class="font-semibold"> with</span>
+    </h2><br>
+</div>
+
+<!-- footer -->
+<footer class="bg-[#FCFAF7] shadow-xl text-black font-inter font-semibold italic py-6 mt-10">
+    <div class="container mx-auto text-center">
+        <p>&copy; 2024 MAKAN BANG. All Rights Reserved.</p>
+        <p class="mt-2">by Kelompok PBP B07</p>
+    </div>
+</footer>
+
 {% endblock content %}
