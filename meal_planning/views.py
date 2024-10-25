@@ -15,20 +15,14 @@ def meal_planning(request):
     today = datetime.today()
     current_year = today.year
     current_month = today.month
+    selected_foods = request.session.get('selected_foods', [])
+    food_items = Product.objects.filter(pk__in=selected_foods)
 
     # Get days in the current month
     month_days = calendar.monthcalendar(current_year, current_month)
 
     # Month name
     month_name = today.strftime('%B')
-
-    # Ambil makanan dari MealPlan
-    meal_plan = MealPlan.objects.filter(user=request.user).first()
-    
-    if meal_plan:
-        food_items = meal_plan.food_items.all()
-    else:
-        food_items = []  # Kosongkan list makanan jika tidak ada rencana
 
     context = {
         'month_name': month_name,
@@ -38,8 +32,6 @@ def meal_planning(request):
     }
 
     return render(request, 'meal_planning.html', context)
-
-
 
 
 
@@ -76,44 +68,44 @@ def process_choices(request):
     if request.method == 'POST':
         # Ambil semua makanan yang dipilih dari form
         selected_foods = request.POST.getlist('selected_foods')
+        
+        # Simpan selected_foods ke dalam sesi
+        request.session['selected_foods'] = selected_foods
 
-        # Ambil semua food items yang dipilih dalam satu query
-        food_items = Product.objects.filter(pk__in=selected_foods)
-
-        # Ambil meal plan user atau buat yang baru
-        meal_plan, created = MealPlan.objects.get_or_create(user=request.user)
-
-        # Tambahkan semua makanan ke meal plan
-        meal_plan.food_items.add(*food_items)
-
-        # Setelah menambahkan semua makanan ke meal plan, redirect ke halaman meal planning
+        # Redirect ke halaman meal planning
         return redirect('meal_planning')
-    
+
     return HttpResponse('Invalid request', status=400)
+
 
 @login_required
 def finish_meal_plan(request):
     if request.method == 'POST':
         # Ambil data dari form (date, meal type, time)
         selected_date = request.POST.get('selected_date')
-        meal_type = request.POST.get('meal')
         meal_time = request.POST.get('time')
+        selected_foods = request.session.get('selected_foods', [])
+
+        # Pastikan selected_date dan meal_time ada
+        if not selected_date or not meal_time:
+            return HttpResponse('Date and time are required.', status=400)
 
         # Ambil meal plan user atau buat yang baru
-        meal_plan, created = MealPlan.objects.get_or_create(user=request.user, date=selected_date, meal_type=meal_type, time=meal_time)
+        meal_plan, created = MealPlan.objects.get_or_create(user=request.user, date=selected_date, time=meal_time)
 
         # Tambahkan item makanan ke meal plan jika ada
-        food_items = Product.objects.filter(id__in=request.session.get('food_items', []))
+        food_items = Product.objects.filter(pk__in=selected_foods)
         for food_item in food_items:
             meal_plan.food_items.add(food_item)
 
         # Hapus sesi untuk food items setelah selesai
-        request.session['food_items'] = []
+        del request.session['selected_foods']  # Menghapus sesi yang sesuai
 
         # Redirect ke halaman Create Plan setelah finish
         return redirect(reverse('create_plan'))  # Ganti dengan URL 'create_plan'
 
     return HttpResponse('Invalid request', status=400)
+
 
 @login_required
 def create_plan(request):
