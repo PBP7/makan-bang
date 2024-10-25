@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block meta %}
+<title>John Lennon's Music Store</title>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dist/purify.min.js"></script>
+{% endblock meta %}
+
+{% block content %}
+{% include 'navbar.html' %}
+<div class="overflow-x-hidden min-h-screen flex flex-col" style="background: linear-gradient(to bottom, white, #87CEEB);padding-top: 88px">
+    <div class="flex justify-start py-2 p-7"> 
+    {% if bookmarks %}
+        <ul>
+        {% for bookmark in bookmarks %}
+            <li>
+                {{ bookmark.product.name }} - {{ bookmark.product.price }}
+                <a href="{% url 'bookmark:remove_bookmark' bookmark.product.id %}">Remove</a>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>You have no bookmarks yet.</p>
+    {% endif %}
+</div>
+{% endblock %}
