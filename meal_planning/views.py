@@ -5,6 +5,12 @@ import calendar
 from katalog.models import Product  # Impor model Product
 from .models import MealPlan  # Impor model MealPlan
 from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.urls import reverse
+from .forms import MealPlanForm 
+
+
 
 # Meal Planning View
 def meal_planning(request):
@@ -75,3 +81,69 @@ def process_choices(request):
         
         # Setelah menambahkan semua makanan ke meal plan, redirect ke halaman meal planning
         return redirect('meal_planning')  # Redirect ke halaman meal planning atau halaman lain yang diinginkan
+    
+@login_required
+def finish_meal_plan(request):
+    if request.method == 'POST':
+        # Ambil data dari form (date, meal type, time)
+        selected_date = request.POST.get('selected_date')
+        meal_type = request.POST.get('meal')
+        meal_time = request.POST.get('time')
+
+        # Ambil meal plan user atau buat yang baru
+        meal_plan, created = MealPlan.objects.get_or_create(user=request.user, date=selected_date, meal_type=meal_type, time=meal_time)
+
+        # Tambahkan item makanan ke meal plan jika ada
+        food_items = Product.objects.filter(id__in=request.session.get('food_items', []))
+        for food_item in food_items:
+            meal_plan.food_items.add(food_item)
+
+        # Hapus sesi untuk food items setelah selesai
+        request.session['food_items'] = []
+
+        # Redirect ke halaman Create Plan setelah finish
+        return redirect(reverse('create_plan'))  # Ganti dengan URL 'create_plan'
+
+    return HttpResponse('Invalid request', status=400)
+
+@login_required
+def create_plan(request):
+    # Ambil semua meal plan yang dibuat oleh user yang sedang login
+    meal_plans = MealPlan.objects.filter(user=request.user)
+
+    # Kirim meal plans ke template
+    return render(request, 'create_plan.html', {'meal_plans': meal_plans})
+
+
+ # Asumsikan kamu sudah membuat form untuk MealPlan
+
+@login_required
+def edit_meal_plan(request, id):
+    # Ambil meal plan yang akan di-edit berdasarkan id
+    meal_plan = get_object_or_404(MealPlan, id=id, user=request.user)
+
+    if request.method == 'POST':
+        # Jika request-nya POST, update data meal plan
+        form = MealPlanForm(request.POST, instance=meal_plan)
+        if form.is_valid():
+            form.save()
+            return redirect('create_plan')  # Redirect ke halaman list meal plan setelah berhasil update
+    else:
+        # Jika request-nya GET, tampilkan form dengan data meal plan
+        form = MealPlanForm(instance=meal_plan)
+
+    # Render template dengan form
+    return render(request, 'edit_meal_plan.html', {'form': form, 'meal_plan': meal_plan})
+
+@login_required
+def delete_meal_plan(request, id):
+    # Ambil meal plan yang akan dihapus berdasarkan id
+    meal_plan = get_object_or_404(MealPlan, id=id, user=request.user)
+
+    if request.method == 'POST':
+        # Hapus meal plan dan redirect ke halaman list meal plan
+        meal_plan.delete()
+        return redirect('create_plan')
+
+    # Jika request-nya GET, tampilkan halaman konfirmasi penghapusan
+    return render(request, 'confirm_delete.html', {'meal_plan': meal_plan})
