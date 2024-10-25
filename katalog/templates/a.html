@@ -1,0 +1,628 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>John Lennon's Music Store</title>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dist/purify.min.js"></script>
+{% endblock meta %}
+
+{% block content %}
+{% include 'navbar.html' %}
+
+
+<!-- Main Wrapper -->
+<div class="overflow-x-hidden min-h-screen flex flex-col" style="background: linear-gradient(to bottom, white, #87CEEB);padding-top: 88px">
+    <div class="flex justify-start py-2 p-7">
+        <input type="text" id="searchBar" placeholder="Search by category or name" 
+               class="border border-gray-300 rounded-md p-2 w-1/2 hover:border-indigo-700" 
+               onkeypress="searchProducts(event)">
+    </div>
+    {%if user.username == "admin"%}
+    <div class="flex justify-start py-2 p-7">
+        <button onclick="showModal()"
+          class="bg-indigo-700 hover:bg-indigo-600 text-white font-bold py-1 px-3 text-sm rounded-full shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105">
+          + Add Product
+        </button>
+    </div>
+    {% endif %}
+
+  
+
+  <!-- Product Entries -->
+<!-- Product Entries -->
+    <div id="product_entry_cards" class = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6"></div>
+
+
+    <!-- Product Detail Modal -->
+    <div id="productDetailModal" tabindex="-1" aria-hidden="true" class="hidden fixed inset-0 z-50 w-full flex items-center justify-center bg-gray-800 bg-opacity-50 overflow-x-hidden overflow-y-auto transition-opacity duration-300 ease-out">
+        <div id="productDetailContent" class="relative bg-white rounded-lg shadow-lg w-5/6 sm:w-3/4 md:w-1/2 lg:w-1/3 mx-4 sm:mx-0 transform scale-95 opacity-0 transition-transform transition-opacity duration-300 ease-out max-h-[80vh] overflow-y-auto">
+            
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-4 border-b rounded-t">
+                <h3 class="text-xl font-semibold text-gray-900" id="modalProductName">Product Name</h3>
+                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" id="closeDetailModalBtn">
+                    <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+            </div>
+
+            <!-- Modal body -->
+            <div class="px-6 py-4 space-y-2">
+                <img id="modalProductImage" src="" alt="Product Image" class="h-48 w-full object-cover rounded-md mb-4">
+                <p class="text-gray-600"><strong>Category:</strong> <span id="modalProductCategory"></span></p>
+                <p class="text-gray-600 break-words"><strong>Restaurant:</strong> <span id="modalProductRestaurant"></span></p>
+                <p class="text-gray-600 break-words"><strong>Location:</strong> <span id="modalProductLocation"></span></p>
+                <p class="text-gray-600 break-words"><strong>Nutrition Info:</strong> <span id="modalProductNutrition"></span></p>
+                <p class="text-gray-600"><strong>GoFood Link:</strong> <a id="modalProductGofoodLink" href="" target="_blank" class="text-blue-500">View</a></p>
+                <p class="font-bold text-lg"><strong>Price:</strong> $<span id="modalProductPrice"></span></p>
+                <p id="modalProductDescription" class="text-gray-600 break-words"></p>
+            </div>
+
+            <!-- Modal footer -->
+            <div class="flex justify-end p-6 border-t border-gray-200 rounded-b">
+                <button type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg" id="closeProductDetailButton">Close</button>
+            </div>
+        </div>
+    </div>
+    <!-- Rating Modal -->
+    <div id="ratingModal" tabindex="-1" aria-hidden="true" class="hidden fixed inset-0 z-50 w-full flex items-center justify-center bg-gray-800 bg-opacity-50 overflow-x-hidden overflow-y-auto transition-opacity duration-300 ease-out">
+        <div id="ratingModalContent" class="relative bg-white rounded-lg shadow-lg w-5/6 sm:w-3/4 md:w-1/2 lg:w-1/3 mx-4 sm:mx-0 transform scale-95 opacity-0 transition-transform transition-opacity duration-300 ease-out max-h-[80vh] overflow-y-auto">
+            
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-4 border-b rounded-t">
+                <h3 class="text-xl font-semibold text-gray-900">Rate Product</h3>
+                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" id="closeRatingModalBtn">
+                    <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+            </div>
+
+            <!-- Modal body -->
+            <div class="px-6 py-4 space-y-6">
+                <form id="ratingForm">
+                    <input type="hidden" id="ratingProductId" name="product_id">
+                    
+                    <!-- Rating -->
+                    <div class="mb-4">
+                        <label for="rating" class="block text-sm font-medium text-gray-700">Rating (1-5)</label>
+                        <input type="number" id="ratingInput" name="rating" min="1" max="5" class="mt-1 block w-full border border-gray-300 rounded-md p-2 hover:border-indigo-700" required>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Modal footer -->
+            <div class="flex justify-end p-6 border-t border-gray-200 rounded-b">
+                <button type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg" id="closeRatingButton">Cancel</button>
+                <button type="submit" id="submitRatingButton" form="ratingForm" class="bg-indigo-700 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg">Submit Rating</button>
+            </div>
+        </div>
+    </div>
+
+
+
+  
+  <!-- Modal for Adding Product -->
+    <div id="crudModal" tabindex="-1" aria-hidden="true" 
+    class="hidden fixed inset-0 z-50 w-full flex items-center justify-center bg-gray-800 bg-opacity-50 overflow-x-hidden overflow-y-auto transition-opacity duration-300 ease-out">
+
+        <!-- Modal Content Container -->
+        <div id="crudModalContent" class="relative bg-white rounded-lg shadow-lg w-5/6 sm:w-3/4 md:w-1/2 lg:w-1/3 mx-4 sm:mx-0 transform scale-95 opacity-0 transition-transform transition-opacity duration-300 ease-out max-h-[80vh] overflow-y-auto">
+        
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-4 border-b rounded-t">
+                <h3 class="text-xl font-semibold text-gray-900">Create Product Entry</h3>
+                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" id="closeModalBtn">
+                    <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 1 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+            </div>
+
+            <!-- Modal body -->
+            <div class="px-6 py-4 space-y-6">
+                <form id="productEntryForm">
+                    <div class="mb-4">
+                        <label for="item" class="block text-sm font-medium text-gray-700">Item</label>
+                        <input type="text" id="item" name="item" class="mt-1 block w-full border border-gray-300 rounded-md p-2 hover:border-indigo-700" placeholder="Enter product name" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="pictureLink" class="block text-sm font-medium text-gray-700">Picture Link</label>
+                        <input type="text" id="pictureLink" name="picture_link" class="mt-1 block w-full border border-gray-300 rounded-md p-2 hover:border-indigo-700" placeholder="Enter picture link" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="restaurant" class="block text-sm font-medium text-gray-700">Restaurant</label>
+                        <input type="text" id="restaurant" name="restaurant" class="mt-1 block w-full border border-gray-300 rounded-md p-2 hover:border-indigo-700" placeholder="Enter restaurant name" required>
+                    </div>
+                    <!-- Add missing fields to match the model -->
+                    <div class="mb-4">
+                        <label for="kategori" class="block text-sm font-medium text-gray-700">Kategori</label>
+                        <input type="text" id="kategori" name="kategori" class="mt-1 block w-full border border-gray-300 rounded-md p-2 hover:border-indigo-700" placeholder="Enter product category" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="lokasi" class="block text-sm font-medium text-gray-700">Lokasi</label>
+                        <input type="text" id="lokasi" name="lokasi" class="mt-1 block w-full border border-gray-300 rounded-md p-2 hover:border-indigo-700" placeholder="Enter location" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="nutrition" class="block text-sm font-medium text-gray-700">Nutrition Info</label>
+                        <input type="text" id="nutrition" name="nutrition" class="mt-1 block w-full border border-gray-300 rounded-md p-2 hover:border-indigo-700" placeholder="Enter nutrition information" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="linkGofood" class="block text-sm font-medium text-gray-700">Link Gofood</label>
+                        <input type="text" id="linkGofood" name="link_gofood" class="mt-1 block w-full border border-gray-300 rounded-md p-2 hover:border-indigo-700" placeholder="Enter Gofood link" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="price" class="block text-sm font-medium text-gray-700">Price</label>
+                        <input type="number" id="price" name="price" class="mt-1 block w-full border border-gray-300 rounded-md p-2 hover:border-indigo-700" placeholder="Enter product price" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                        <textarea id="description" name="description" rows="3" class="mt-1 block w-full h-52 resize-none border border-gray-300 rounded-md p-2 hover:border-indigo-700" placeholder="Describe the product" required></textarea>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Modal footer -->
+            <div class="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2 p-6 border-t border-gray-200 rounded-b justify-center md:justify-end">
+                <button type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg" id="cancelButton">Cancel</button>
+                <button type="submit" id="submitProductEntry" form="productEntryForm" class="bg-indigo-700 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg">Create Product Entry</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed bottom-4 right-4 z-50">
+        <a href="/meal-planning/meal-planning">
+            <button class="bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg">Meal Plan</button>
+        </a>
+    </div>
+
+  
+</div>
+
+<!-- Script for handling product entries -->
+<script>
+    function addProductEntry(event) {
+        event.preventDefault();
+    
+        const form = document.querySelector('#productEntryForm');
+        const priceInput = document.getElementById('price').value;
+    
+        // Check if price is not 0, doesn't start with 0, and is a positive integer
+        if (!/^[1-9]\d*$/.test(priceInput)) {
+            alert("Price must be a positive integer, greater than 0, and cannot start with 0.");
+            return; // Prevent form submission
+        }
+    
+        // Check if the form is valid before submitting
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+    
+        // Proceed with AJAX form submission
+        fetch("{% url 'katalog:add_product_entry_ajax' %}", {
+            method: "POST",
+            body: new FormData(form),
+        })
+        .then(response => {
+            refreshProductEntries();
+            form.reset(); // Clear the form after successful submission
+            hideModal(); // Close the modal
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+        
+        return false;
+    }
+    
+    
+    
+    
+    
+    async function getProductEntries(){
+        return fetch("{% url 'katalog:show_json' %}").then((res) => res.json());
+    }
+
+    async function refreshProductEntries() {
+        document.getElementById("product_entry_cards").innerHTML = "";
+        document.getElementById("product_entry_cards").className = "";
+        const productEntries = await getProductEntries();
+        let htmlString = "";
+        let classNameString = "";
+    
+        if (productEntries.length === 0) {
+            classNameString = "flex flex-col items-center justify-center min-h-[24rem] p-6";
+            htmlString = `
+                <div class="flex flex-col items-center justify-center min-h-[24rem] p-6">
+                    <img src="{% static 'images/raster/sad-image.png' %}" alt="Sad face" class="w-32 h-32 mb-4"/>
+                    <p class="text-center text-gray-600 mt-4">No product entries found.</p>
+                </div>
+            `;
+        } else {
+            classNameString = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6";
+            productEntries.forEach((product, index) => {
+                const sanitizedItem = DOMPurify.sanitize(product.fields.item);
+                const sanitizedDescription = DOMPurify.sanitize(product.fields.description);
+                const sanitizedRestaurant = DOMPurify.sanitize(product.fields.restaurant);
+                const sanitizedKategori = DOMPurify.sanitize(product.fields.kategori);
+                const sanitizedLokasi = DOMPurify.sanitize(product.fields.lokasi);
+                const sanitizedNutrition = DOMPurify.sanitize(product.fields.nutrition);
+                const sanitizedLinkGofood = DOMPurify.sanitize(product.fields.link_gofood);
+                const sanitizedPrice = DOMPurify.sanitize(product.fields.price);
+                const sanitizedPictureLink = DOMPurify.sanitize(product.fields.picture_link);
+    
+                htmlString += `
+                  <div class="relative break-inside-avoid cursor-pointer group" >
+                    <div class="relative top-5 bg-white shadow-md mb-6 p-4 border-2 border-gray-300 rounded-lg"
+                      style="min-height: 29rem; max-height: 29rem; width: calc(100vw - 60); max-width: calc(100vw - 60vw);">
+                      
+                      
+                      
+                      <img src="${sanitizedPictureLink}" alt="${sanitizedItem}" class="h-48 w-full object-cover rounded-md mb-4" onclick="showProductDetail(${index})">
+                       <div class="flex justify-start items-center mb-4">
+                            <!-- Bookmark Button aligned to the left -->
+                            {% if user.username != "admin" %}
+                            <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
+                                onclick="toggleBookmark(this)">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                            {% endif %}
+
+                           <div class="flex items-center">
+                                <!-- Circle with the image inside -->
+                                <div class="h-10 w-10 rounded-full overflow-hidden bg-gray-200">
+                                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXGKovePeweJrzbFFuC3Xrt8cCB47Ajd8kYA&s" alt="Category Icon" class="h-full w-full object-cover">
+                                </div>
+
+                                <!-- Category text -->
+                                <span class=" text-gray-800">${sanitizedKategori}</span>
+                             </div>
+
+
+                        </div>
+                      <h3 class="font-bold text-xl mb-2 truncate">${sanitizedItem}</h3>
+                       <div class="flex items-center text-gray-600 mb-2">
+                            <!-- Location Icon with a fixed width -->
+                            <div class="flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 2a6 6 0 016 6c0 4.118-5.02 9.636-5.356 9.975a1 1 0 01-1.288 0C9.02 17.636 4 12.118 4 8a6 6 0 016-6zm0 8a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            
+                            <!-- Location text with truncate -->
+                            <span class="truncate">${sanitizedLokasi}</span>
+                        </div>
+                      <p class="font-bold text-lg mb-2">Price: $${sanitizedPrice}</p>
+
+                        {% if user.username != "admin" %}
+                            <!-- Star Review Button -->
+                       <div class="absolute bottom-0 right-0 p-2">
+                            <button class="star-btn text-gray-400" onclick="toggleStar(this, '{{ product.id }}')">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.433 4.426a1 1 0 00.95.69h4.668c.969 0 1.371 1.24.588 1.81l-3.768 2.733a1 1 0 00-.364 1.118l1.433 4.426c.3.921-.755 1.688-1.538 1.118L10 14.347l-3.768 2.733c-.782.57-1.837-.197-1.538-1.118l1.433-4.426a1 1 0 00-.364-1.118L2.995 9.853c-.782-.57-.38-1.81.588-1.81h4.668a1 1 0 00.95-.69l1.433-4.426z" />
+                                </svg>
+                            </button>
+                       </div>
+                       {% endif %}
+                      
+                      {% if user.username == "admin" %}
+                        <div class="flex justify-between mt-4">
+                            <a href="/katalog/edit/${ product.pk }" class="border-2 border-yellow-500 text-yellow-500 rounded-l-lg w-full py-2 transition duration-300 hover:bg-yellow-500 hover:text-white shadow-md text-center">
+                            Edit
+                            </a>
+                            <a href="/katalog/delete/${ product.pk }" class="border-2 border-red-500 text-red-500 rounded-r-lg w-full py-2 transition duration-300 hover:bg-red-500 hover:text-white shadow-md text-center">
+                            Delete
+                            </a>
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                `;
+    
+                // Store product details in a global array for later reference
+                window.productDetails = productEntries.map((product) => ({
+                    item: DOMPurify.sanitize(product.fields.item),
+                    pictureLink: DOMPurify.sanitize(product.fields.picture_link),
+                    restaurant: DOMPurify.sanitize(product.fields.restaurant),
+                    kategori: DOMPurify.sanitize(product.fields.kategori),
+                    lokasi: DOMPurify.sanitize(product.fields.lokasi),
+                    nutrition: DOMPurify.sanitize(product.fields.nutrition),
+                    linkGofood: DOMPurify.sanitize(product.fields.link_gofood),
+                    price: DOMPurify.sanitize(product.fields.price),
+                    description: DOMPurify.sanitize(product.fields.description)
+                }));
+            });
+        }
+    
+        document.getElementById("product_entry_cards").className = classNameString;
+        document.getElementById("product_entry_cards").innerHTML = htmlString;
+    }
+    
+    
+    // Modal functions
+    function showModal() {
+        const modal = document.getElementById('crudModal');
+        const modalContent = document.getElementById('crudModalContent');
+
+        modal.classList.remove('hidden'); 
+        setTimeout(() => {
+            modalContent.classList.remove('opacity-0', 'scale-95');
+            modalContent.classList.add('opacity-100', 'scale-100');
+        }, 50); 
+    }
+
+    function hideModal() {
+        const modal = document.getElementById('crudModal');
+        const modalContent = document.getElementById('crudModalContent');
+
+        modalContent.classList.remove('opacity-100', 'scale-100');
+        modalContent.classList.add('opacity-0', 'scale-95');
+
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 150); 
+    }
+    function showProductModal() {
+        const modal = document.getElementById('productDetailModal');
+        const modalContent = document.getElementById('productDetailContent');
+    
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modalContent.classList.remove('opacity-0', 'scale-95');
+            modalContent.classList.add('opacity-100', 'scale-100');
+        }, 50);
+    }
+    
+    // Function to hide the modal
+    function hideProductModal() {
+        const modal = document.getElementById('productDetailModal');
+        const modalContent = document.getElementById('productDetailContent');
+    
+        modalContent.classList.remove('opacity-100', 'scale-100');
+        modalContent.classList.add('opacity-0', 'scale-95');
+    
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 150);
+    }
+    function showProductDetail(index) {
+        const product = window.productDetails[index];
+    
+        document.getElementById('modalProductName').innerText = product.item;
+        document.getElementById('modalProductImage').src = product.pictureLink;
+        document.getElementById('modalProductCategory').innerText = product.kategori;
+        document.getElementById('modalProductRestaurant').innerText = product.restaurant;
+        document.getElementById('modalProductLocation').innerText = product.lokasi;
+        document.getElementById('modalProductNutrition').innerText = product.nutrition;
+        document.getElementById('modalProductGofoodLink').href = product.link_gofood;
+        document.getElementById('modalProductPrice').innerText = product.price;
+        document.getElementById('modalProductDescription').innerText = product.description;
+    
+        showProductModal();
+    }
+    function editProduct(index) {
+        const product = window.productDetails[index];
+        
+        // Implement logic to show the product in the "Create Product Entry" modal for editing
+        showModal();  // Open the modal for editing
+        // Populate modal fields with existing product data for editing
+        document.getElementById('item').value = product.item;
+        document.getElementById('pictureLink').value = product.pictureLink;
+        document.getElementById('restaurant').value = product.restaurant;
+        document.getElementById('kategori').value = product.kategori;
+        document.getElementById('lokasi').value = product.lokasi;
+        document.getElementById('nutrition').value = product.nutrition;
+        document.getElementById('linkGofood').value = product.linkGofood;
+        document.getElementById('price').value = product.price;
+        document.getElementById('description').value = product.description;
+    }
+    function toggleBookmark(btn) {
+        btn.classList.toggle('bg-green-700');  // Dark green when bookmarked
+        btn.classList.toggle('bg-white');  // White when not bookmarked
+        btn.classList.toggle('text-white');  // Make icon white on green background
+    }
+    function searchProducts(event) {
+        if (event.key === 'Enter') {
+            const searchTerm = event.target.value.trim().toLowerCase();
+            filterProducts(searchTerm);
+        }
+    }
+
+    function filterProducts(searchTerm) {
+        // Fetch all product entries
+        getProductEntries().then((products) => {
+            const filteredProducts = products.filter(product => {
+                const productName = product.fields.item.toLowerCase();
+                const productCategory = product.fields.kategori.toLowerCase();
+                return productName.includes(searchTerm) || productCategory ===(searchTerm);
+            });
+            displayFilteredProducts(filteredProducts);
+        });
+    }
+
+    function displayFilteredProducts(filteredProducts) {
+        document.getElementById("product_entry_cards").innerHTML = "";
+        let htmlString = "";
+    
+        if (filteredProducts.length === 0) {
+            htmlString = `
+                <div class="flex flex-col items-center justify-center min-h-[24rem] p-6">
+                    <img src="{% static 'images/raster/sad-image.png' %}" alt="Sad face" class="w-32 h-32 mb-4"/>
+                    <p class="text-center text-gray-600 mt-4">No product entries found.</p>
+                </div>
+            `;
+        } else {
+            filteredProducts.forEach((product, index) => {
+                const sanitizedItem = DOMPurify.sanitize(product.fields.item);
+                const sanitizedPictureLink = DOMPurify.sanitize(product.fields.picture_link);
+                const sanitizedKategori = DOMPurify.sanitize(product.fields.kategori);
+                const sanitizedLokasi = DOMPurify.sanitize(product.fields.lokasi);
+                const sanitizedPrice = DOMPurify.sanitize(product.fields.price);
+    
+                htmlString += `
+                  <div class="relative break-inside-avoid cursor-pointer group">
+                    <div class="relative top-5 bg-white shadow-md mb-6 p-4 border-2 border-gray-300 rounded-lg"
+                      style="min-height: 29rem; max-height: 29rem;">
+                      
+                      <img src="${sanitizedPictureLink}" alt="${sanitizedItem}" class="h-48 w-full object-cover rounded-md mb-4" onclick="showProductDetail(${index})">
+                      
+                      <!-- Bookmark Button -->
+                      <div class="flex justify-start items-center mb-4">
+                        <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
+                            onclick="toggleBookmark(this)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        
+                        <!-- Category Icon and Text -->
+                        <div class="flex items-center ml-2">
+                            <div class="h-10 w-10 rounded-full overflow-hidden bg-gray-200">
+                                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXGKovePeweJrzbFFuC3Xrt8cCB47Ajd8kYA&s" alt="Category Icon" class="h-full w-full object-cover">
+                            </div>
+                            <span class="ml-2 text-gray-800">${sanitizedKategori}</span>
+                        </div>
+                      </div>
+    
+                      <h3 class="font-bold text-xl mb-2">${sanitizedItem}</h3>
+    
+                      <!-- Location with Icon -->
+                      <div class="flex items-center text-gray-600 mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 2a6 6 0 016 6c0 4.118-5.02 9.636-5.356 9.975a1 1 0 01-1.288 0C9.02 17.636 4 12.118 4 8a6 6 0 016-6zm0 8a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>${sanitizedLokasi}</span>
+                      </div>
+    
+                      <p class="font-bold text-lg mb-2">Price: $${sanitizedPrice}</p>
+    
+                      <!-- Meal Plan Button -->
+                      <div class="absolute bottom-0 left-0 p-2">
+                        <button class="bg-green-500 text-white py-1 px-3 rounded-lg">Meal Plan</button>
+                      </div>
+    
+                      <!-- Star Review Button -->
+                      <!-- Star Review Button with explicit ID check -->
+                        <div class="absolute bottom-0 right-0 p-2">
+                            <button class="star-btn text-gray-400" onclick="toggleStar(this, '${product.pk || ''}')">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.433 4.426a1 1 0 00.95.69h4.668c.969 0 1.371 1.24.588 1.81l-3.768 2.733a1 1 0 00-.364 1.118l1.433 4.426c.3.921-.755 1.688-1.538 1.118L10 14.347l-3.768 2.733c-.782.57-1.837-.197-1.538-1.118l1.433-4.426a1 1 0 00-.364-1.118L2.995 9.853c-.782-.57-.38-1.81.588-1.81h4.668a1 1 0 00.95-.69l1.433-4.426z" />
+                                </svg>
+                            </button>
+                        </div>
+
+                    </div>
+                  </div>
+                `;
+            });
+        }
+    
+        document.getElementById("product_entry_cards").innerHTML = htmlString;
+    }
+    
+    
+    function toggleStar(button) {
+        const star = button.querySelector('svg');
+        star.classList.toggle('text-yellow-500'); // Toggles between grey and yellow color
+        star.classList.toggle('text-gray-400');
+    }
+    // Show Rating Modal
+function showRatingModal(productId) {
+    const modal = document.getElementById('ratingModal');
+    const modalContent = document.getElementById('ratingModalContent');
+    const ratingProductIdInput = document.getElementById('ratingProductId');
+
+    // Set product ID in the hidden input field
+    ratingProductIdInput.value = productId;
+
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modalContent.classList.remove('opacity-0', 'scale-95');
+        modalContent.classList.add('opacity-100', 'scale-100');
+    }, 50);
+}
+
+// Hide Rating Modal
+    function hideRatingModal() {
+        const modal = document.getElementById('ratingModal');
+        const modalContent = document.getElementById('ratingModalContent');
+
+        modalContent.classList.remove('opacity-100', 'scale-100');
+        modalContent.classList.add('opacity-0', 'scale-95');
+
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 150);
+    }
+    function toggleStar(button, productId) {
+        const star = button.querySelector('svg');
+        star.classList.toggle('text-yellow-500'); // Toggles between grey and yellow color
+        star.classList.toggle('text-gray-400');
+    
+        // Show the rating modal when the star is clicked
+        showRatingModal(productId);
+    }
+    
+
+    // Submit Rating
+    document.getElementById('submitRatingButton').addEventListener('click', function(event) {
+        event.preventDefault();
+
+        const form = document.getElementById('ratingForm');
+        const productId = document.getElementById('ratingProductId').value;
+        const rating = document.getElementById('ratingInput').value;
+
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        // AJAX request to submit rating
+        fetch('/rateNreview/submit_rating/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                product_id: productId,
+                rating: rating
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                alert(`New average rating: ${data.average_rating}`);
+            }
+            hideRatingModal();
+        })
+        .catch(error => console.error('Error:', error));
+    });
+
+    // Event listeners to close the modal
+    document.getElementById('closeRatingModalBtn').addEventListener('click', hideRatingModal);
+    document.getElementById('closeRatingButton').addEventListener('click', hideRatingModal);
+
+ 
+    
+    // Attach event listeners to close the modal
+    document.getElementById('closeDetailModalBtn').addEventListener('click', hideProductModal);
+    document.getElementById('closeProductDetailButton').addEventListener('click', hideProductModal);
+
+    document.getElementById('cancelButton').addEventListener('click', hideModal);
+    document.getElementById('closeModalBtn').addEventListener('click', hideModal);
+    document.getElementById("submitProductEntry").onclick = addProductEntry
+
+    refreshProductEntries();
+</script>
+
+{% endblock content %}

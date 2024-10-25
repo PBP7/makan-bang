@@ -9,17 +9,24 @@ from django.utils.html import strip_tags
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
+from django.template.loader import render_to_string
 
 
 # Create your views here.
 @login_required
 def show_preference(request):
     preference_entries = Preference.objects.filter(user=request.user)  
+    form = PreferenceForm()
+    
     context = {
-        'preference_entries': preference_entries
+        'preference_entries': preference_entries,
+        'form': form 
     }
     return render(request, "add_preference.html", context)
 
+def preference_page(request):
+    preferences = Preference.objects.filter(user=request.user)  # assuming user-specific preferences
+    return render(request, 'preference.html', {'preferences': preferences})
 
 @login_required
 @csrf_exempt
@@ -36,7 +43,7 @@ def add_preference_ajax(request):
             new_preference.save()
 
             # Return a JSON response
-            return JsonResponse({"status": "success", "id": new_preference.id}, status=201)
+            return JsonResponse({"status": "success", "id": new_preference.id, "preference_name": new_preference.preference}, status=201)
 
     return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)
 
@@ -51,3 +58,10 @@ def delete_preference_ajax(request, preference_id):
         return JsonResponse({"status": "success"}, status=200)
     except Preference.DoesNotExist:
         return JsonResponse({"status": "error", "message": "Preference not found"}, status=404)
+
+@login_required
+def get_preferences(request):
+    """Return the updated preferences list as HTML for AJAX requests."""
+    preferences = Preference.objects.filter(user=request.user)
+    html = render_to_string('preference_list.html', {'preference_entries': preferences}, request=request)
+    return JsonResponse({'html': html})
