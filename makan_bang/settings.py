@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'preference',
     'forum',
     'widget_tweaks',
+    'meal_planning',
 ]
 
 MIDDLEWARE = [
