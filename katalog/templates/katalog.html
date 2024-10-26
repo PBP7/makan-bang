@@ -11,7 +11,7 @@
 
 
 <!-- Main Wrapper -->
-<div class="overflow-x-hidden min-h-screen flex flex-col" style="background: linear-gradient(to bottom, white, #87CEEB);padding-top: 88px">
+<div class="min-h-screen flex flex-col bg-white" style="padding-top: 88px;">
     <div class="flex justify-start py-2 p-7">
         <input type="text" id="searchBar" placeholder="Search by category or name" 
                class="border border-gray-300 rounded-md p-2 w-1/2 hover:border-indigo-700" 
@@ -257,15 +257,14 @@
                 const sanitizedPictureLink = DOMPurify.sanitize(product.fields.picture_link);
     
                 htmlString += `
-                  <div class="relative break-inside-avoid cursor-pointer group" >
-                    <div class="relative top-5 bg-white shadow-md mb-6 p-4 border-2 border-gray-300 rounded-lg"
-                      style="min-height: 29rem; max-height: 29rem; width: calc(100vw - 60); max-width: calc(100vw - 60vw);">
-                      
-                      
-                      
-                      <img src="${sanitizedPictureLink}" alt="${sanitizedItem}" class="h-48 w-full object-cover rounded-md mb-4" onclick="showProductDetail(${index})">
-                       <div class="flex justify-start items-center mb-4">
-                            <!-- Bookmark Button aligned to the left -->
+                  <div class="relative break-inside-avoid cursor-pointer group">
+                        <div class="relative top-5 bg-white shadow-md mb-6 p-4 border-2 border-gray-300 rounded-lg"
+                            style="min-height: 29rem; max-height: 29rem; width: calc(100vw - 60); max-width: calc(100vw - 60vw);">
+                            
+                            <img src="${sanitizedPictureLink}" alt="${sanitizedItem}" class="h-48 w-full object-cover rounded-md mb-4"
+                            onclick="showProductDetail(${index})">
+
+                            <div class="flex justify-start items-center mb-4 space-x-3">
                             {% if user.username != "admin" %}
                             <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
                                 onclick="toggleBookmark(this)">
@@ -275,17 +274,10 @@
                             </button>
                             {% endif %}
 
-                           <div class="flex items-center">
-                                <!-- Circle with the image inside -->
-                                <div class="h-10 w-10 rounded-full overflow-hidden bg-gray-200">
-                                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXGKovePeweJrzbFFuC3Xrt8cCB47Ajd8kYA&s" alt="Category Icon" class="h-full w-full object-cover">
-                                </div>
-
-                                <!-- Category text -->
-                                <span class=" text-gray-800">${sanitizedKategori}</span>
-                             </div>
-
-
+                            <!-- Category text inside a box -->
+                            <div class="bg-gray-700 text-white font-semibold rounded-lg px-3 py-1 text-center">
+                                ${sanitizedKategori}
+                            </div>
                         </div>
                       <h3 class="font-bold text-xl mb-2 truncate">${sanitizedItem}</h3>
                        <div class="flex items-center text-gray-600 mb-2">
@@ -297,7 +289,7 @@
                             </div>
                             
                             <!-- Location text with truncate -->
-                            <span class="truncate">${sanitizedLokasi}</span>
+                            <span class="truncate">${sanitizedRestaurant}</span>
                         </div>
                       <p class="font-bold text-lg mb-2">Price: $${sanitizedPrice}</p>
 
@@ -498,7 +490,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M10 2a6 6 0 016 6c0 4.118-5.02 9.636-5.356 9.975a1 1 0 01-1.288 0C9.02 17.636 4 12.118 4 8a6 6 0 016-6zm0 8a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
                         </svg>
-                        <span>${sanitizedLokasi}</span>
+                        <span>${sanitizedRestaurant}</span>
                       </div>
     
                       <p class="font-bold text-lg mb-2">Price: $${sanitizedPrice}</p>
