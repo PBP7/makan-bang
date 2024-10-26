@@ -9,6 +9,7 @@
 {% block content %}
 {% include 'navbar.html' %}
 
+{% csrf_token %}
 
 <!-- Main Wrapper -->
 <div class="min-h-screen flex flex-col bg-white" style="padding-top: 88px;">
@@ -54,8 +55,9 @@
 
                     <div class="flex justify-start items-center mb-4 space-x-3">
                     {% if user.username != "admin" %}
-                    <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
-                        onclick="toggleBookmark(this)">
+                    <button class="bookmark-btn {% if product.id|stringformat:'s' in user_bookmarks %}text-yellow-500{% else %}text-gray-600{% endif %}"
+                        onclick="toggleBookmark(this, {{ product.id }})"
+                        data-product-id="{% if product.id %}{{ product.id }}{% else %}sheet_{{ forloop.counter0 }}{% endif %}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
                         </svg>
@@ -339,7 +341,8 @@
                 <div class="flex justify-start items-center mb-4 space-x-3">
                 {% if user.username != "admin" %}
                 <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
-                    onclick="toggleBookmark(this)">
+                    onclick="toggleBookmark(this, '${product.pk}')"
+                    data-product-id="${product.pk}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
                     </svg>
@@ -490,7 +493,8 @@
                             <div class="flex justify-start items-center mb-4 space-x-3">
                             {% if user.username != "admin" %}
                             <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
-                                onclick="toggleBookmark(this)">
+                                onclick="toggleBookmark(this, '${sanitizedItem}', '${sanitizedRestaurant}')"
+                                data-product-id="${product.pk}">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
                                 </svg>
@@ -638,10 +642,30 @@
         document.getElementById('price').value = product.price;
         document.getElementById('description').value = product.description;
     }
-    function toggleBookmark(btn) {
-        btn.classList.toggle('bg-green-700');  // Dark green when bookmarked
-        btn.classList.toggle('bg-white');  // White when not bookmarked
-        btn.classList.toggle('text-white');  // Make icon white on green background
+    function toggleBookmark(button, productId) {
+        fetch(`/bookmark/toggle_bookmark/${productId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.is_bookmarked) {
+                button.classList.add('text-yellow-500');
+                button.classList.remove('text-gray-600');
+            } else {
+                button.classList.remove('text-yellow-500');
+                button.classList.add('text-gray-600');
+            }
+        })
+        .catch(error => console.error('Error:', error));
     }
     function toggleStar(button) {
         const star = button.querySelector('svg');
@@ -771,9 +795,62 @@ function showRatingModal(productId) {
 
     // Initialize products on page load
     refreshProductEntries();
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function toggleBookmark(button, productId) {
+        fetch(`/bookmark/toggle_bookmark/${productId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.is_bookmarked) {
+                button.classList.add('text-yellow-500');
+                button.classList.remove('text-gray-600');
+            } else {
+                button.classList.remove('text-yellow-500');
+                button.classList.add('text-gray-600');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    // Initialize bookmark buttons
+    document.addEventListener('DOMContentLoaded', function() {
+        const bookmarkButtons = document.querySelectorAll('.bookmark-btn');
+        bookmarkButtons.forEach(button => {
+            const productId = button.getAttribute('data-product-id');
+            fetch(`/bookmark/is_bookmarked/${productId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.is_bookmarked) {
+                        button.classList.add('text-yellow-500');
+                        button.classList.remove('text-gray-600');
+                    }
+                });
+        });
+    });
 </script>
 
 {% endblock content %}
+
 
 
 

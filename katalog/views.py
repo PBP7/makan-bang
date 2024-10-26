@@ -20,6 +20,7 @@ from .services import get_all_rows
 from django.http import JsonResponse
 from django.db.models import Q
 import json
+from bookmark.models import Bookmark
 
 # Create your views here.
 def show_katalog(request):
@@ -34,6 +35,7 @@ def show_katalog(request):
 
     # Get dataset products
     dataset_products = get_all_rows("DATASET PBP7")
+    user_bookmarks = set(Bookmark.objects.filter(user=request.user).values_list('external_product_id', flat=True))
     formatted_dataset_products = []
     for product in dataset_products:
         formatted_product = {
@@ -57,6 +59,7 @@ def show_katalog(request):
         'nama': request.user.username,
         'products': all_products,
         'sort_order': sort_order,  # Pass the sort_order to the template for dropdown state
+        'user_bookmarks': user_bookmarks,
     }
 
     return render(request, "katalog.html", context)

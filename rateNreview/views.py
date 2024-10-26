@@ -23,6 +23,8 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponseForbidden
 from django.db.models import Exists, OuterRef
 from django.http import HttpResponseBadRequest
+from .models import Review
+from katalog.services import get_all_rows  # Import the function to get data from Google Sheets
 
 @csrf_exempt
 def submit_rating(request):
@@ -99,24 +101,34 @@ def product_reviews(request, product_id):
 def add_review(request):
     if request.method == 'POST':
         product_id = request.POST.get('product_id')
+        product_source = request.POST.get('product_source')
         rating = request.POST.get('rating')
         review_text = request.POST.get('review_text')
 
-        # Check if required fields are missing
         if not review_text:
             return HttpResponseBadRequest("Review text cannot be empty.")
 
-        # Proceed with review creation if all fields are valid
-        product = get_object_or_404(Product, pk=product_id)
-        rating_obj, created = Rating.objects.get_or_create(
-            user=request.user, product=product, defaults={'rating': rating}
-        )
-        if not created:
-            rating_obj.rating = rating
-            rating_obj.save()
+        if product_source == 'local':
+            product = get_object_or_404(Product, pk=product_id.split('_')[1])
+        else:  # product_source == 'sheet'
+            sheet_products = get_all_rows("DATASET PBP7")
+            product_index = int(product_id.split('_')[1])
+            product_data = sheet_products[product_index]
+            product = {
+                'name': product_data['Nama Produk'],
+                'restaurant': product_data['Restoran'],
+                'category': product_data['Kategori']
+            }
 
-        # Create or update the review
-        Review.objects.create(user=request.user, product=product, review_text=review_text)
+        # Create the review
+        Review.objects.create(
+            user=request.user,
+            product_name=product['name'] if isinstance(product, dict) else product.item,
+            restaurant=product['restaurant'] if isinstance(product, dict) else product.restaurant,
+            category=product['category'] if isinstance(product, dict) else product.kategori,
+            rating=rating,
+            review_text=review_text
+        )
 
         return redirect('rateNreview:show_rateNreview')
     return HttpResponseForbidden("Invalid request method.")
@@ -186,3 +198,72 @@ def delete_review(request, product_id):
 
 
 
+
+def show_review(request):
+    # Fetch local products
+    local_products = Product.objects.all()
+    
+    # Fetch products from Google Sheets
+    sheet_products = get_all_rows("DATASET PBP7")
+    
+    # Combine and format all products
+    all_products = [
+        {
+            'id': f"local_{product.id}",
+            'name': product.item,
+            'picture_link': product.picture_link,
+            'restaurant': product.restaurant,
+            'category': product.kategori,
+        }
+        for product in local_products
+    ] + [
+        {
+            'id': f"sheet_{index}",
+            'name': product['Nama Produk'],
+            'picture_link': product['Link Foto'],
+            'restaurant': product['Restoran'],
+            'category': product['Kategori'],
+        }
+        for index, product in enumerate(sheet_products)
+    ]
+    
+    context = {
+        'products': all_products,
+    }
+    return render(request, 'rateNreview.html', context)
+
+@login_required
+def add_review(request):
+    if request.method == 'POST':
+        product_id = request.POST.get('product_id')
+        rating = request.POST.get('rating')
+        review_text = request.POST.get('review_text')
+        
+        # Determine if it's a local or sheet product
+        if product_id.startswith('local_'):
+            product = Product.objects.get(id=product_id.split('_')[1])
+            product_name = product.item
+            restaurant = product.restaurant
+            category = product.kategori
+        else:  # sheet product
+            sheet_products = get_all_rows("DATASET PBP7")
+            index = int(product_id.split('_')[1])
+            product = sheet_products[index]
+            product_name = product['Nama Produk']
+            restaurant = product['Restoran']
+            category = product['Kategori']
+        
+        # Create and save the review
+        review = Review(
+            user=request.user,
+            product_name=product_name,
+            restaurant=restaurant,
+            category=category,
+            rating=rating,
+            review_text=review_text
+        )
+        review.save()
+        
+        return JsonResponse({'status': 'success'})
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
