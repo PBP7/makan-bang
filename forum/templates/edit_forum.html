@@ -25,21 +25,23 @@
                 
                 <!-- title -->
                 <div class="py-2">
-                    <label for="title" class="font-semibold text-gray-700 w-1/4">
-                        Title
-                    </label>
+                    <label for="title" class="font-semibold text-gray-700 w-1/4">Title</label>
                     <div class="w-full">
                         <input type="text" name="title" id="title" class="border border-gray-300 rounded-lg p-3 w-full" value="{{ form.title.value }}">
+                        {% if form.title.errors %}
+                            <p class="text-red-500 text-sm">{{ form.title.errors.0 }}</p>
+                        {% endif %}
                     </div>
                 </div>
 
                 <!-- discussion -->
                 <div class="py-2">
-                    <label for="question" class="font-semibold text-gray-700 w-1/4">
-                        Discussion
-                    </label>
+                    <label for="question" class="font-semibold text-gray-700 w-1/4">Discussion</label>
                     <div class="w-full">
                         <textarea name="question" id="question" rows="6" class="border border-gray-300 rounded-lg p-3 w-full">{{ form.question.value }}</textarea>
+                        {% if form.question.errors %}
+                            <p class="text-red-500 text-sm">{{ form.question.errors.0 }}</p>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -61,7 +63,7 @@
 
                 <!-- edit button -->
                 <div class="flex justify-end mt-4">
-                    <input type="submit" value="Edit Forum" class="bg-black hover:bg-[#3845AD] text-white font-bold py-2 px-6 rounded-md">
+                    <input type="submit" value="Save Changes" class="bg-black hover:bg-[#3845AD] text-white font-bold py-2 px-6 rounded-md">
                 </div>
 
             </form>

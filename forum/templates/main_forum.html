@@ -45,13 +45,6 @@
                 Your Posts
             </a>
 
-            <!-- Topic Filter Dropdown -->
-            <!-- <select id="topic-filter" class="bg-white text-black py-2 px-4 rounded">
-                <option value="all">All Topic</option>
-                {% for topic in topics %}
-                    <option value="{{ topic }}">{{ topic }}</option>
-                {% endfor %}
-            </select> -->
         </div>
 
         {% if not questions %}
@@ -70,21 +63,29 @@
 
 <!-- add forum modal AJAX -->
 <div id="forumModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden justify-center items-center">
-    <div class="bg-white w-full max-w-2xl p-6 rounded-lg shadow-lg">
+    <div class="bg-white w-full max-w-2xl p-6 rounded-lg shadow-lg relative">
+        <button type="button" id="closeModalButton" class="absolute top-7 right-7 text-gray-500 hover:text-gray-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+
         <h2 class="text-xl font-bold mb-4">New Forum Discussion</h2>
         <form id="modalForumForm">
             {% csrf_token %}
-            
+
             <!-- title -->
             <div class="py-2">
                 <label for="title" class="font-semibold text-gray-700">Title</label>
                 <input type="text" name="title" id="title" class="border border-gray-300 rounded-lg p-3 w-full">
+                <p class="text-red-500 text-sm mt-2 hidden" id="titleError"></p>
             </div>
 
             <!-- discussion-->
             <div class="py-2">
                 <label for="question" class="font-semibold text-gray-700">Discussion</label>
                 <textarea name="question" id="question" rows="4" class="border border-gray-300 rounded-lg p-3 w-full"></textarea>
+                <p class="text-red-500 text-sm mt-2 hidden" id="questionError"></p>
             </div>
 
             <!-- select topic -->
@@ -100,8 +101,9 @@
             </div>
 
             <div class="flex justify-end mt-4">
-                <button type="submit" class="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded">Create</button>
-                <button type="button" id="closeModalButton" class="bg-red-500 hover:bg-red-700 text-white py-2 px-4 rounded ml-2">Close</button>
+                <button type="submit" class="bg-black hover:bg-[#212a73] text-white font-bold py-2 px-4 rounded-md">
+                    Post Forum
+                </button>
             </div>
         </form>
         <div id="errorMessages" class="text-red-500 mt-4"></div>
@@ -132,10 +134,36 @@ document.addEventListener("DOMContentLoaded", function () {
     form.addEventListener('submit', function (event) {
         event.preventDefault();
 
-        const formData = new FormData(form);
+        const title = form.querySelector('#title').value.trim();
+        const question = form.querySelector('#question').value.trim();
+        const topic = form.querySelector('#topic').value;
+
+        // Clear previous error messages
+        errorMessages.textContent = '';
+        titleError.textContent = '';
+        questionError.textContent = '';
+        titleError.classList.add('hidden');
+        questionError.classList.add('hidden');
+
+        let isValid = true;
+
+        // Client-side validation
+        if (!title) {
+            titleError.textContent = 'Title cannot be empty.';
+            titleError.classList.remove('hidden');
+            isValid = false;
+        }
+        if (!question) {
+            questionError.textContent = 'Discussion cannot be empty.';
+            questionError.classList.remove('hidden');
+            isValid = false;
+        }
+
+        if (!isValid) return;
 
         // CSRF token handling
         const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const formData = new FormData(form);
 
         fetch("{% url 'forum:new_forum_ajax' %}", {
             method: "POST",
@@ -151,16 +179,23 @@ document.addEventListener("DOMContentLoaded", function () {
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
                 form.reset();
-                errorMessages.textContent = '';
                 location.reload();
             } else if (data.errors) {
-                errorMessages.innerHTML = '';
-                for (const [field, messages] of Object.entries(data.errors)) {
-                    messages.forEach(message => {
-                        const errorItem = document.createElement('div');
-                        errorItem.textContent = message;
-                        errorMessages.appendChild(errorItem);
-                    });
+                // errorMessages.innerHTML = '';
+                // for (const [field, messages] of Object.entries(data.errors)) {
+                //     messages.forEach(message => {
+                //         const errorItem = document.createElement('div');
+                //         errorItem.textContent = message;
+                //         errorMessages.appendChild(errorItem);
+                //     });
+                // }
+                if (data.errors.title) {
+                titleError.textContent = data.errors.title[0];
+                titleError.classList.remove('hidden');
+                }
+                if (data.errors.question) {
+                    questionError.textContent = data.errors.question[0];
+                    questionError.classList.remove('hidden');
                 }
             }
         })

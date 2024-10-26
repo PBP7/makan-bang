@@ -5,13 +5,19 @@
 {% include 'navbar.html' %}
 
 <!-- hero -->
-<div class="relative bg-cover bg-center h-screen" style="background-image: url('{% static 'image/softbang.jpg' %}');">
+<div class="relative bg-cover bg-center h-screen flex items-center justify-center" style="background-image: url('{% static 'image/heropic.png' %}');">
+    <div class="text-center" style="margin-top: 300px;"> <!-- Increased margin-top to push it further down -->
+        <a href="#features" class="inline-block mt-8 text-white text-xl font-inter font-medium underline">
+            <span class="shadow-md">Explore More</span>
+            <img src="{% static 'image/arrowdown.png' %}" alt="Down Arrow" class="shadow-l mx-auto mt-4 h-8 w-auto">
+        </a>
+    </div>
 </div>
 
 <!-- features -->
-<div class="relative w-full text-center mt-20">
+<div id="features" class="relative w-full text-center mt-20">
     <h2 class="font-inter text-[60px] lg:text-[100px] font-bold leading-tight">
-        <span class="font-semibold">F</span><span class="font-extrabold italic">eat</span><span class="font-semibold">ures</span>
+        <span class="font-medium">F</span><span class="font-extrabold italic">eat</span><span class="font-semibold">ures</span>
     </h2>
 </div>
 
@@ -64,16 +70,31 @@
 <!-- collaboration -->
 <div class="relative w-full text-center mt-20">
     <h2 class="font-inter text-[40px] lg:text-[70px] font-bold leading-tight">
-        <span class="font-semibold">In </span><span class="font-extrabold italic">collaboration</span><span class="font-semibold"> with</span>
+        <span class="font-medium">In </span><span class="font-bold italic">collaboration</span><span class="font-medium"> with</span>
     </h2><br>
+
+    <!-- Add the three icons below the heading -->
+    <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-4 md:space-x-8 mt-10">
+        <img src="{% static 'image/enjoyjkt.png' %}" alt="Enjoy Jakarta" class="h-32 w-auto">
+        <img src="{% static 'image/gofood.png' %}" alt="GoFood" class="h-32 w-auto">
+        <img src="{% static 'image/traveloka.png' %}" alt="Traveloka" class="h-32 w-auto">
+    </div>
 </div>
 
-<!-- footer -->
-<footer class="bg-[#FCFAF7] shadow-xl text-black font-inter font-semibold italic py-6 mt-10">
-    <div class="container mx-auto text-center">
-        <p>&copy; 2024 MAKAN BANG. All Rights Reserved.</p>
-        <p class="mt-2">by Kelompok PBP B07</p>
-    </div>
-</footer>
+<div class="relative w-full text-center mt-20">
+    <h5 class="font-inter text-[25px] lg:text-[40px] font-bold leading-tight">
+        <span class="font-medium">A project by group </span><span class="font-extrabold">PBP B07</span>
+    </h5>
+    <h5 class="font-inter text-[20px] lg:text-[35px] font-bold leading-tight"></h5>
+        <span class="font-medium">Special thanks to </span><span class="font-extrabold">Pak Baginda, Kak Ravie, & all PBP lecturers and TA's</span>
+    </h5>
+</div><br><br><br>
+
+<script>
+    document.querySelector('a[href="#features"]').addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelector('#features').scrollIntoView({ behavior: 'smooth' });
+    });
+</script>
 
 {% endblock content %}

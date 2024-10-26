@@ -7,7 +7,7 @@ class ForumQuestion(models.Model):
     ('Information', 'Information'),
     ('Foods', 'Foods'),
     ('Restaurants', 'Restaurants'),
-    ('Recommendation', 'Reccomendation'),
+    ('Recommendation', 'Recommendation'),
     ('Experience', 'Experience'),
     ]
         
@@ -16,11 +16,13 @@ class ForumQuestion(models.Model):
     question = models.TextField()
     topic = models.CharField(max_length=25, choices=TOPIC_CHOICES, default='Information') 
     replycount = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class ForumReply(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     question = models.ForeignKey(ForumQuestion, related_name='replies', on_delete=models.CASCADE)
     reply = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f'Reply by {self.user.username} on {self.question.title}'

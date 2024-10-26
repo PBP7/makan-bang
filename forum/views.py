@@ -37,23 +37,30 @@ def create_new_forum(request):
 @csrf_exempt
 @require_POST
 def new_forum_ajax(request):
-    question_form = NewForumForm(request.POST)
-    
-    if question_form.is_valid():
-        question = question_form.save(commit=False)
-        question.user = request.user
-        question.save()
+    title = strip_tags(request.POST.get("title"))
+    question = strip_tags(request.POST.get("question"))
+    topic = request.POST.get("topic")
+    user = request.user
 
-        return JsonResponse({
-            "message": "Forum created successfully",
-            "forum_id": question.id,
-            "forum_title": question.title,
-        }, status=201)
-    else:
-        return JsonResponse({
-            "errors": question_form.errors,
-            "message": "Form is invalid"
-        }, status=400)
+    errors = {}
+    if not title:
+        errors['title'] = ["Title cannot be empty."]
+    if not question:
+        errors['question'] = ["Discussion cannot be empty."]
+
+    if errors:
+        return JsonResponse({"errors": errors}, status=400)
+
+    new_question = ForumQuestion(
+        title=title, question=question, topic=topic, user=user
+    )
+    new_question.save()
+
+    return JsonResponse({
+        "message": "Forum created successfully",
+        "forum_id": new_question.id,
+        "forum_title": new_question.title,
+    }, status=201)
 
 def edit_forum(request, id):
     forum = ForumQuestion.objects.get(pk = id)
@@ -124,9 +131,6 @@ def your_posts(request):
 @login_required
 def delete_comment(request, comment_id):
     comment = get_object_or_404(ForumReply, pk=comment_id)
-
-    if comment.user != request.user:
-        return HttpResponseForbidden("You are not allowed to delete this reply.")
     
     forum_question = comment.question
     comment.delete()

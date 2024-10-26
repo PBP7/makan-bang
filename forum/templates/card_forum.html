@@ -1,3 +1,4 @@
+{% load static %}
 <div class="relative break-inside-avoid w-full">
     <div class="block bg-white shadow-lg rounded-md hover:shadow-xl flex flex-col border border-gray-200 no-underline">
     
@@ -27,7 +28,7 @@
             
             <!-- by -->
             <div class="text-sm text-gray-500 mb-6">
-                <span>by {{ question.user }}</span>
+                <span>by </span><span class="font-bold">{{ question.user }}</span> — <span>{{ question.created_at|date:"d/m/Y" }}</span>
             </div>
             
             <!-- discussion max 130 letters -->
@@ -44,15 +45,15 @@
             </div>
         </a>
 
-        {% if question.user == request.user %}
-        <div class="flex justify-end p-4 space-x-4 bg-[#FCFAF7] rounded-b-lg">
-            <a href="{% url 'forum:edit_forum' question.pk %}" class="text-sm text-[#474645] hover:text-[#A29086]">
-                Edit
-            </a>
-            <a href="{% url 'forum:delete_forum' question.pk %}" class="text-sm text-[#666463] hover:text-red-700">
-                Delete
-            </a>
-        </div>
+        {% if question.user == request.user or request.user.username == 'admin' %}
+            <div class="flex justify-end p-4 space-x-4 bg-[#FCFAF7] rounded-b-lg">
+                <a href="{% url 'forum:edit_forum' question.pk %}" class="text-sm text-[#474645] hover:text-[#A29086]">
+                    <img src="{% static 'image/pencil.png' %}" alt="Edit" class="h-6 w-6">
+                </a>
+                <a href="{% url 'forum:delete_forum' question.pk %}" class="text-sm text-[#666463] hover:text-red-700" onclick="return confirm('Are you sure you want to delete this post?');">
+                    <img src="{% static 'image/trash.png' %}" alt="Delete" class="h-6 w-6">
+                </a>
+            </div>
         {% endif %}
     </div>
 </div>
