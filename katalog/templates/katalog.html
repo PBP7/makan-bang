@@ -204,6 +204,8 @@
 
 <!-- Script for handling product entries -->
 <script>
+    const isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
+
     function addProductEntry(event) {
         event.preventDefault();
     
@@ -404,6 +406,10 @@
         }, 150);
     }
     function showProductDetail(index) {
+        if (!isAuthenticated) {
+            window.location.href = '/auth/login';
+            return;
+        }
         const product = window.productDetails[index];
     
         document.getElementById('modalProductName').innerText = product.item;
