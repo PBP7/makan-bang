@@ -39,7 +39,7 @@
             
             <!-- Modal header -->
             <div class="flex items-center justify-between p-4 border-b rounded-t">
-                <h3 class="text-xl font-semibold text-gray-900" id="modalProductName">Product Name</h3>
+                <h3 class="text-xl font-semibold text-gray-900 break-words" id="modalProductName">Product Name</h3>
                 <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" id="closeDetailModalBtn">
                     <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
@@ -49,13 +49,32 @@
             </div>
 
             <!-- Modal body -->
-            <div class="px-6 py-4 space-y-2">
+            <div class="px-6 py-4 space-y-1">
                 <img id="modalProductImage" src="" alt="Product Image" class="h-48 w-full object-cover rounded-md mb-4">
-                <p class="text-gray-600"><strong>Category:</strong> <span id="modalProductCategory"></span></p>
-                <p class="text-gray-600 break-words"><strong>Restaurant:</strong> <span id="modalProductRestaurant"></span></p>
-                <p class="text-gray-600 break-words"><strong>Location:</strong> <span id="modalProductLocation"></span></p>
-                <p class="text-gray-600 break-words"><strong>Nutrition Info:</strong> <span id="modalProductNutrition"></span></p>
-                <p class="text-gray-600"><strong>GoFood Link:</strong> <a id="modalProductGofoodLink" href="" target="_blank" class="text-blue-500">View</a></p>
+                <span class="inline-block bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm mb-4" id = "modalProductCategory">Category</span> 
+                
+                <p class="text-gray-600 break-words">
+                    <!-- Reduced the size of the restaurant icon to match the location icon -->
+                    <img src="/static/image/iconRestoran.png" alt="Restaurant" class="w-5 h-5 inline-block object-cover mr-1">
+                    <span id="modalProductRestaurant"></span>
+                </p>
+                <p class="text-gray-600 break-words">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="inline-block h-5 w-5 text-gray-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 10a3 3 0 100-6 3 3 0 000 6z" />
+                    </svg>
+                    <span id ="modalProductLocation"></span>
+                </p>
+                <p class="text-gray-600 break-words">
+                    <!-- Reduced the size of the restaurant icon to match the location icon -->
+                    <img src="/static/image/iconNutrition.png" alt="Nutrition" class="w-5 h-5 inline-block object-cover mr-1">
+                    <span id="modalProductNutrition"></span>
+                </p>
+                <p class="text-gray-600 break-words">
+                    <!-- Reduced the size of the restaurant icon to match the location icon -->
+                    <img src="/static/image/iconLink.png" alt="GofoodLink" class="w-5 h-5 inline-block object-cover mr-1">
+                    <a id="modalProductGofoodLink" href="" target="_blank" class="text-blue-500">View</a>
+                </p>
+                
                 <p class="font-bold text-lg"><strong>Price:</strong> $<span id="modalProductPrice"></span></p>
                 <p id="modalProductDescription" class="text-gray-600 break-words"></p>
             </div>
@@ -267,7 +286,7 @@
                             <div class="flex justify-start items-center mb-4 space-x-3">
                             {% if user.username != "admin" %}
                             <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
-                                onclick="toggleBookmark(this)">
+                                onclick="addBookmark('{{ product.id }}',this)" class="bookmark-btn">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
                                 </svg>
@@ -275,7 +294,7 @@
                             {% endif %}
 
                             <!-- Category text inside a box -->
-                            <div class="bg-gray-700 text-white font-semibold rounded-lg px-3 py-1 text-center">
+                            <div class="inline-block bg-gray-200 text-gray-800 px-3 py-0 rounded-full text-sm mb-2">
                                 ${sanitizedKategori}
                             </div>
                         </div>
@@ -415,11 +434,7 @@
         document.getElementById('price').value = product.price;
         document.getElementById('description').value = product.description;
     }
-    function toggleBookmark(btn) {
-        btn.classList.toggle('bg-green-700');  // Dark green when bookmarked
-        btn.classList.toggle('bg-white');  // White when not bookmarked
-        btn.classList.toggle('text-white');  // Make icon white on green background
-    }
+
     function searchProducts(event) {
         if (event.key === 'Enter') {
             const searchTerm = event.target.value.trim().toLowerCase();
@@ -460,56 +475,62 @@
     
                 htmlString += `
                   <div class="relative break-inside-avoid cursor-pointer group">
-                    <div class="relative top-5 bg-white shadow-md mb-6 p-4 border-2 border-gray-300 rounded-lg"
-                      style="min-height: 29rem; max-height: 29rem;">
-                      
-                      <img src="${sanitizedPictureLink}" alt="${sanitizedItem}" class="h-48 w-full object-cover rounded-md mb-4" onclick="showProductDetail(${index})">
-                      
-                      <!-- Bookmark Button -->
-                      <div class="flex justify-start items-center mb-4">
-                        <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
-                            onclick="toggleBookmark(this)">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
-                            </svg>
-                        </button>
-                        
-                        <!-- Category Icon and Text -->
-                        <div class="flex items-center ml-2">
-                            <div class="h-10 w-10 rounded-full overflow-hidden bg-gray-200">
-                                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXGKovePeweJrzbFFuC3Xrt8cCB47Ajd8kYA&s" alt="Category Icon" class="h-full w-full object-cover">
-                            </div>
-                            <span class="ml-2 text-gray-800">${sanitizedKategori}</span>
-                        </div>
-                      </div>
-    
-                      <h3 class="font-bold text-xl mb-2">${sanitizedItem}</h3>
-    
-                      <!-- Location with Icon -->
-                      <div class="flex items-center text-gray-600 mb-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 2a6 6 0 016 6c0 4.118-5.02 9.636-5.356 9.975a1 1 0 01-1.288 0C9.02 17.636 4 12.118 4 8a6 6 0 016-6zm0 8a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                        </svg>
-                        <span>${sanitizedRestaurant}</span>
-                      </div>
-    
-                      <p class="font-bold text-lg mb-2">Price: $${sanitizedPrice}</p>
-    
-                      <!-- Meal Plan Button -->
-                      <div class="absolute bottom-0 left-0 p-2">
-                        <button class="bg-green-500 text-white py-1 px-3 rounded-lg">Meal Plan</button>
-                      </div>
-    
-                      <!-- Star Review Button -->
-                      <!-- Star Review Button with explicit ID check -->
-                        <div class="absolute bottom-0 right-0 p-2">
-                            <button class="star-btn text-gray-400" onclick="toggleStar(this, '${product.pk || ''}')">
+                        <div class="relative top-5 bg-white shadow-md mb-6 p-4 border-2 border-gray-300 rounded-lg"
+                            style="min-height: 29rem; max-height: 29rem; width: calc(100vw - 60); max-width: calc(100vw - 60vw);">
+                            
+                            <img src="${sanitizedPictureLink}" alt="${sanitizedItem}" class="h-48 w-full object-cover rounded-md mb-4"
+                            onclick="showProductDetail(${index})">
+
+                            <div class="flex justify-start items-center mb-4 space-x-3">
+                            {% if user.username != "admin" %}
+                            <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
+                                onclick="addBookmark('{{ product.id }}',this)" class="bookmark-btn">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.433 4.426a1 1 0 00.95.69h4.668c.969 0 1.371 1.24.588 1.81l-3.768 2.733a1 1 0 00-.364 1.118l1.433 4.426c.3.921-.755 1.688-1.538 1.118L10 14.347l-3.768 2.733c-.782.57-1.837-.197-1.538-1.118l1.433-4.426a1 1 0 00-.364-1.118L2.995 9.853c-.782-.57-.38-1.81.588-1.81h4.668a1 1 0 00.95-.69l1.433-4.426z" />
+                                <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
                                 </svg>
                             </button>
-                        </div>
+                            {% endif %}
 
+                            <!-- Category text inside a box -->
+                            <div class="inline-block bg-gray-200 text-gray-800 px-3 py-0 rounded-full text-sm mb-2">
+                                ${sanitizedKategori}
+                            </div>
+                        </div>
+                      <h3 class="font-bold text-xl mb-2 truncate">${sanitizedItem}</h3>
+                       <div class="flex items-center text-gray-600 mb-2">
+                            <!-- Location Icon with a fixed width -->
+                            <div class="flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 2a6 6 0 016 6c0 4.118-5.02 9.636-5.356 9.975a1 1 0 01-1.288 0C9.02 17.636 4 12.118 4 8a6 6 0 016-6zm0 8a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            
+                            <!-- Location text with truncate -->
+                            <span class="truncate">${sanitizedRestaurant}</span>
+                        </div>
+                      <p class="font-bold text-lg mb-2">Price: $${sanitizedPrice}</p>
+
+                        {% if user.is_authenticated and user.username != "admin" %}
+                            <!-- "Give Review" Button -->
+                            <div class="absolute bottom-0 right-0 p-2">
+                                <a href="{% url 'rateNreview:show_rateNreview' %}" 
+                                class="text-blue-600 font-semibold border-2 border-blue-600 rounded-lg px-3 py-1 hover:bg-blue-600 hover:text-white transition duration-300">
+                                Give Review
+                                </a>
+                            </div>
+                        {% endif %}
+
+                      
+                      {% if user.username == "admin" %}
+                        <div class="flex justify-between mt-4">
+                            <a href="/katalog/edit/${ product.pk }" class="border-2 border-yellow-500 text-yellow-500 rounded-l-lg w-full py-2 transition duration-300 hover:bg-yellow-500 hover:text-white shadow-md text-center">
+                            Edit
+                            </a>
+                            <a href="/katalog/delete/${ product.pk }" class="border-2 border-red-500 text-red-500 rounded-r-lg w-full py-2 transition duration-300 hover:bg-red-500 hover:text-white shadow-md text-center">
+                            Delete
+                            </a>
+                        </div>
+                      {% endif %}
                     </div>
                   </div>
                 `;
@@ -615,6 +636,26 @@ function showRatingModal(productId) {
     document.getElementById("submitProductEntry").onclick = addProductEntry
 
     refreshProductEntries();
+
+    function toggleBookmark(productId) {
+    fetch(`/toggle_bookmark/${productId}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}"
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const button = document.querySelector(`#bookmark-button-${productId}`);
+        if (data.bookmarked) {
+            button.classList.add("bookmarked");
+        } else {
+            button.classList.add("not-bookmarked");
+            button.classList.remove("bookmarked");
+        }
+    })
+    .catch(error => console.error("Error:", error));
+    }
 </script>
 
 {% endblock content %}
