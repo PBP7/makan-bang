@@ -253,7 +253,7 @@
                             <!-- Bookmark Button aligned to the left -->
                             {% if user.username != "admin" %}
                             <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
-                                onclick="toggleBookmark(this)">
+                                onclick="addBookmark('{{ product.id }}',this)" class="bookmark-btn">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
                                 </svg>
@@ -403,11 +403,7 @@
         document.getElementById('price').value = product.price;
         document.getElementById('description').value = product.description;
     }
-    function toggleBookmark(btn) {
-        btn.classList.toggle('bg-green-700');  // Dark green when bookmarked
-        btn.classList.toggle('bg-white');  // White when not bookmarked
-        btn.classList.toggle('text-white');  // Make icon white on green background
-    }
+
     function searchProducts(event) {
         if (event.key === 'Enter') {
             const searchTerm = event.target.value.trim().toLowerCase();
@@ -456,7 +452,7 @@
                       <!-- Bookmark Button -->
                       <div class="flex justify-start items-center mb-4">
                         <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
-                            onclick="toggleBookmark(this)">
+                            onclick="addBookmark('{{ product.id }}')" class="bookmark-btn">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
                             </svg>
@@ -601,6 +597,27 @@ function showRatingModal(productId) {
     document.getElementById("submitProductEntry").onclick = addProductEntry
 
     refreshProductEntries();
+
+    function toggleBookmark(productId) {
+    fetch(`/toggle_bookmark/${productId}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}"
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const button = document.querySelector(`#bookmark-button-${productId}`);
+        if (data.bookmarked) {
+            button.classList.add("bookmarked");
+            button.classList.remove("not-bookmarked");
+        } else {
+            button.classList.add("not-bookmarked");
+            button.classList.remove("bookmarked");
+        }
+    })
+    .catch(error => console.error("Error:", error));
+    }
 </script>
 
 {% endblock content %}
