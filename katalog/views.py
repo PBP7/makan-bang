@@ -17,7 +17,6 @@ from django.views.decorators.http import require_POST
 from django.utils.html import strip_tags
 
 # Create your views here.
-@login_required(login_url='/auth/login')
 def show_katalog(request):
     # Get sorting order from query parameters (default is ascending)
     sort_order = request.GET.get('sort', 'asc')
@@ -31,12 +30,6 @@ def show_katalog(request):
     # Add sorted products to context
     context = {
         'nama': request.user.username,
-        'name': 'Jeremi Felix Adiyatma',
-        'npm': '2306219575',
-        'kelas': 'PBP B',
-        'item': 'Gitar Michael Jackson',
-        'price': 600000,
-        'description': 'this is the guitar that Michael Jackson used on his tour in early 2009 months before he died',
         'products': products,
         'sort_order': sort_order,  # Pass the sort_order to the template for dropdown state
     }
@@ -83,6 +76,7 @@ def delete_product_entry(request, id):
     product_entry.delete()
     # Kembali ke halaman awal
     return HttpResponseRedirect(reverse('katalog:show_katalog'))
+
 def edit_product_entry(request, id):
     # Get mood entry berdasarkan id
     product_entry = Product.objects.get(pk = id)

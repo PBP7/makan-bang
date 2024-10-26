@@ -17,12 +17,14 @@
                class="border border-gray-300 rounded-md p-2 w-1/2 hover:border-indigo-700" 
                onkeypress="searchProducts(event)">
     </div>
+    {%if user.username == "Admin"%}
     <div class="flex justify-start py-2 p-7">
         <button onclick="showModal()"
           class="bg-indigo-700 hover:bg-indigo-600 text-white font-bold py-1 px-3 text-sm rounded-full shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105">
           + Add Product
         </button>
     </div>
+    {% endif %}
 
   
 
@@ -50,12 +52,12 @@
             <div class="px-6 py-4 space-y-2">
                 <img id="modalProductImage" src="" alt="Product Image" class="h-48 w-full object-cover rounded-md mb-4">
                 <p class="text-gray-600"><strong>Category:</strong> <span id="modalProductCategory"></span></p>
-                <p class="text-gray-600"><strong>Restaurant:</strong> <span id="modalProductRestaurant"></span></p>
-                <p class="text-gray-600"><strong>Location:</strong> <span id="modalProductLocation"></span></p>
-                <p class="text-gray-600"><strong>Nutrition Info:</strong> <span id="modalProductNutrition"></span></p>
+                <p class="text-gray-600 break-words"><strong>Restaurant:</strong> <span id="modalProductRestaurant"></span></p>
+                <p class="text-gray-600 break-words"><strong>Location:</strong> <span id="modalProductLocation"></span></p>
+                <p class="text-gray-600 break-words"><strong>Nutrition Info:</strong> <span id="modalProductNutrition"></span></p>
                 <p class="text-gray-600"><strong>GoFood Link:</strong> <a id="modalProductGofoodLink" href="" target="_blank" class="text-blue-500">View</a></p>
                 <p class="font-bold text-lg"><strong>Price:</strong> $<span id="modalProductPrice"></span></p>
-                <p id="modalProductDescription" class="text-gray-600"></p>
+                <p id="modalProductDescription" class="text-gray-600 break-words"></p>
             </div>
 
             <!-- Modal footer -->
@@ -172,6 +174,12 @@
         </div>
     </div>
 
+    <div class="fixed bottom-4 right-4 z-50">
+        <a href="/meal-planning/create">
+            <button class="bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg">Meal Plan</button>
+        </a>
+    </div>
+
   
 </div>
 
@@ -179,18 +187,23 @@
 <script>
     function addProductEntry(event) {
         event.preventDefault();
-        
-        // Reference to the form
+    
         const form = document.querySelector('#productEntryForm');
-        
+        const priceInput = document.getElementById('price').value;
+    
+        // Check if price is not 0, doesn't start with 0, and is a positive integer
+        if (!/^[1-9]\d*$/.test(priceInput)) {
+            alert("Price must be a positive integer, greater than 0, and cannot start with 0.");
+            return; // Prevent form submission
+        }
+    
         // Check if the form is valid before submitting
         if (!form.checkValidity()) {
-            // If the form is invalid, trigger native form validation messages
             form.reportValidity();
             return;
         }
-        
-        // If the form is valid, proceed with form submission via fetch
+    
+        // Proceed with AJAX form submission
         fetch("{% url 'katalog:add_product_entry_ajax' %}", {
             method: "POST",
             body: new FormData(form),
@@ -203,9 +216,11 @@
         .catch(error => {
             console.error('Error:', error);
         });
-    
+        
         return false;
     }
+    
+    
     
     
     
@@ -251,7 +266,7 @@
                       <img src="${sanitizedPictureLink}" alt="${sanitizedItem}" class="h-48 w-full object-cover rounded-md mb-4" onclick="showProductDetail(${index})">
                        <div class="flex justify-start items-center mb-4">
                             <!-- Bookmark Button aligned to the left -->
-                            {% if user.username != "admin" %}
+                            {% if user.username != "Admin" %}
                             <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
                                 onclick="addBookmark('{{ product.id }}',this)" class="bookmark-btn">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -272,28 +287,32 @@
 
 
                         </div>
-                      <h3 class="font-bold text-xl mb-2">${sanitizedItem}</h3>
+                      <h3 class="font-bold text-xl mb-2 truncate">${sanitizedItem}</h3>
                        <div class="flex items-center text-gray-600 mb-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-0" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 2a6 6 0 016 6c0 4.118-5.02 9.636-5.356 9.975a1 1 0 01-1.288 0C9.02 17.636 4 12.118 4 8a6 6 0 016-6zm0 8a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                        </svg>
-                        <span>${sanitizedLokasi}</span>
-                      </div>
-                      <p class="font-bold text-lg mb-2">Price: $${sanitizedPrice}</p>
-                      <div class="absolute bottom-0 left-0 p-2">
-                        <button class="bg-green-500 text-white py-1 px-3 rounded-lg">Meal Plan</button>
-                      </div>
-
-                            <!-- Star Review Button -->
-                       <div class="absolute bottom-0 right-0 p-2">
-                            <button class="star-btn text-gray-400" onclick="toggleStar(this, '{{ product.id }}')">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.433 4.426a1 1 0 00.95.69h4.668c.969 0 1.371 1.24.588 1.81l-3.768 2.733a1 1 0 00-.364 1.118l1.433 4.426c.3.921-.755 1.688-1.538 1.118L10 14.347l-3.768 2.733c-.782.57-1.837-.197-1.538-1.118l1.433-4.426a1 1 0 00-.364-1.118L2.995 9.853c-.782-.57-.38-1.81.588-1.81h4.668a1 1 0 00.95-.69l1.433-4.426z" />
+                            <!-- Location Icon with a fixed width -->
+                            <div class="flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 2a6 6 0 016 6c0 4.118-5.02 9.636-5.356 9.975a1 1 0 01-1.288 0C9.02 17.636 4 12.118 4 8a6 6 0 016-6zm0 8a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
                                 </svg>
-                            </button>
-                       </div>
+                            </div>
+                            
+                            <!-- Location text with truncate -->
+                            <span class="truncate">${sanitizedLokasi}</span>
+                        </div>
+                      <p class="font-bold text-lg mb-2">Price: $${sanitizedPrice}</p>
+
+                        {% if user.is_authenticated and user.username != "Admin" %}
+                            <!-- "Give Review" Button -->
+                            <div class="absolute bottom-0 right-0 p-2">
+                                <a href="{% url 'rateNreview:show_rateNreview' %}" 
+                                class="text-blue-600 font-semibold border-2 border-blue-600 rounded-lg px-3 py-1 hover:bg-blue-600 hover:text-white transition duration-300">
+                                Give Review
+                                </a>
+                            </div>
+                        {% endif %}
+
                       
-                      {% if user.username == "admin" %}
+                      {% if user.username == "Admin" %}
                         <div class="flex justify-between mt-4">
                             <a href="/katalog/edit/${ product.pk }" class="border-2 border-yellow-500 text-yellow-500 rounded-l-lg w-full py-2 transition duration-300 hover:bg-yellow-500 hover:text-white shadow-md text-center">
                             Edit
@@ -377,7 +396,7 @@
         const product = window.productDetails[index];
     
         document.getElementById('modalProductName').innerText = product.item;
-        document.getElementById('modalProductImage').src = product.picture_link;
+        document.getElementById('modalProductImage').src = product.pictureLink;
         document.getElementById('modalProductCategory').innerText = product.kategori;
         document.getElementById('modalProductRestaurant').innerText = product.restaurant;
         document.getElementById('modalProductLocation').innerText = product.lokasi;
@@ -390,6 +409,7 @@
     }
     function editProduct(index) {
         const product = window.productDetails[index];
+        
         // Implement logic to show the product in the "Create Product Entry" modal for editing
         showModal();  // Open the modal for editing
         // Populate modal fields with existing product data for editing
@@ -452,7 +472,7 @@
                       <!-- Bookmark Button -->
                       <div class="flex justify-start items-center mb-4">
                         <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
-                            onclick="addBookmark('{{ product.id }}')" class="bookmark-btn">
+                            onclick="addBookmark('{{ product.id }}, this')" class="bookmark-btn">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
                             </svg>
@@ -485,13 +505,15 @@
                       </div>
     
                       <!-- Star Review Button -->
-                      <div class="absolute bottom-0 right-0 p-2">
-                        <button class="star-btn text-gray-400" onclick="toggleStar(this, '${product.id}')">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.433 4.426a1 1 0 00.95.69h4.668c.969 0 1.371 1.24.588 1.81l-3.768 2.733a1 1 0 00-.364 1.118l1.433 4.426c.3.921-.755 1.688-1.538 1.118L10 14.347l-3.768 2.733c-.782.57-1.837-.197-1.538-1.118l1.433-4.426a1 1 0 00-.364-1.118L2.995 9.853c-.782-.57-.38-1.81.588-1.81h4.668a1 1 0 00.95-.69l1.433-4.426z" />
-                          </svg>
-                        </button>
-                      </div>
+                      <!-- Star Review Button with explicit ID check -->
+                        <div class="absolute bottom-0 right-0 p-2">
+                            <button class="star-btn text-gray-400" onclick="toggleStar(this, '${product.pk || ''}')">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.433 4.426a1 1 0 00.95.69h4.668c.969 0 1.371 1.24.588 1.81l-3.768 2.733a1 1 0 00-.364 1.118l1.433 4.426c.3.921-.755 1.688-1.538 1.118L10 14.347l-3.768 2.733c-.782.57-1.837-.197-1.538-1.118l1.433-4.426a1 1 0 00-.364-1.118L2.995 9.853c-.782-.57-.38-1.81.588-1.81h4.668a1 1 0 00.95-.69l1.433-4.426z" />
+                                </svg>
+                            </button>
+                        </div>
+
                     </div>
                   </div>
                 `;

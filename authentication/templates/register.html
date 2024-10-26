@@ -32,13 +32,13 @@
 
           <div class="mb-4">  
             <label for="username" class="block text-sm font-medium text-[#e89997]">Username</label>
-            <label for="{{ form.username.id_for_label }}" class="sr-only">Username</label>
+            <!-- <label for="{{ form.username.id_for_label }}" class="sr-only">Create a unique username</label> -->
             <input 
               id="{{ form.username.id_for_label }}" 
               name="{{ form.username.name }}" 
               type="text" 
-              required class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-brown-600 focus:border-brown-600 sm:text-sm"
-              placeholder="Username"
+              required class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-[#F9CDCC] focus:border-[#F9CDCC] sm:text-sm"
+              placeholder="Create a unique username"
             >
             {% for error in form.username.errors %}
               <p class="text-sm text-red-600">{{ error }}</p>
@@ -47,13 +47,13 @@
   
           <div class="mb-4">  
             <label for="password" class="block text-sm font-medium text-[#e89997]">Password</label>
-            <label for="{{ form.password1.id_for_label }}" class="sr-only">Password</label>
+            <!-- <label for="{{ form.password1.id_for_label }}" class="sr-only">Choose a password</label> -->
             <input 
               id="{{ form.password1.id_for_label }}" 
               name="{{ form.password1.name }}" 
               type="password" 
-              required class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-brown-600 focus:border-brown-600 sm:text-sm"
-              placeholder="Password"
+              required class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-[#F9CDCC] focus:border-[#F9CDCC] sm:text-sm"
+              placeholder="Choose a password"
             >
             {% for error in form.password1.errors %}
               <p class="text-sm text-red-600">{{ error }}</p>
@@ -62,13 +62,13 @@
   
           <div class="mb-4">  
             <label for="password" class="block text-sm font-medium text-[#e89997]">Confirm Password</label>
-            <label for="{{ form.password2.id_for_label }}" class="sr-only">Confirm Password</label>
+            <!-- <label for="{{ form.password2.id_for_label }}" class="sr-only">Confirm your password</label> -->
             <input 
               id="{{ form.password2.id_for_label }}" 
               name="{{ form.password2.name }}" 
               type="password" 
-              required class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-brown-600 focus:border-brown-600 sm:text-sm"
-              placeholder="Confirm Password"
+              required class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-[#F9CDCC] focus:border-[#F9CDCC] sm:text-sm"
+              placeholder="Confirm your password"
             >
             {% for error in form.password2.errors %}
               <p class="text-sm text-red-600">{{ error }}</p>

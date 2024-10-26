@@ -26,4 +26,7 @@ urlpatterns = [
     path('katalog/', include('katalog.urls')),
     path('preferences/', include('preference.urls')),
     path('bookmark/', include('bookmark.urls')),
+    path('forum/', include('forum.urls')),
+    path('rateNreview/', include('rateNreview.urls')),
+    path('meal-planning/', include('meal_planning.urls')),
 ]
