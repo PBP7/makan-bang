@@ -76,7 +76,7 @@
                     
                     <span class="truncate">{{ product.restaurant }}</span>
                 </div>
-                <p class="font-bold text-lg mb-2">Price: ${{ product.price }}</p>
+                <p class="font-bold text-lg mb-2">Price: Rp{{ product.price }}</p>
 
                 {% if user.is_authenticated and user.username != "admin" %}
                     <div class="absolute bottom-0 right-0 p-2">
@@ -130,7 +130,7 @@
                 <p class="text-gray-600 break-words"><strong>Location:</strong> <span id="modalProductLocation"></span></p>
                 <p class="text-gray-600 break-words"><strong>Nutrition Info:</strong> <span id="modalProductNutrition"></span></p>
                 <p class="text-gray-600"><strong>GoFood Link:</strong> <a id="modalProductGofoodLink" href="" target="_blank" class="text-blue-500">View</a></p>
-                <p class="font-bold text-lg"><strong>Price:</strong> $<span id="modalProductPrice"></span></p>
+                <p class="font-bold text-lg"><strong>Price:</strong> Rp<span id="modalProductPrice"></span></p>
                 <p id="modalProductDescription" class="text-gray-600 break-words"></p>
             </div>
 
@@ -360,7 +360,7 @@
                 
                 <span class="truncate">${sanitizedRestaurant}</span>
             </div>
-            <p class="font-bold text-lg mb-2">Price: $${sanitizedPrice}</p>
+            <p class="font-bold text-lg mb-2">Price: Rp${sanitizedPrice}</p>
 
             {% if user.is_authenticated and user.username != "admin" %}
                 <div class="absolute bottom-0 right-0 p-2">
@@ -514,7 +514,7 @@
                             <!-- Location text with truncate -->
                             <span class="truncate">${sanitizedRestaurant}</span>
                         </div>
-                      <p class="font-bold text-lg mb-2">Price: $${sanitizedPrice}</p>
+                      <p class="font-bold text-lg mb-2">Price: Rp${sanitizedPrice}</p>
 
                         {% if user.is_authenticated and user.username != "admin" %}
                             <!-- "Give Review" Button -->
@@ -749,8 +749,8 @@ function showRatingModal(productId) {
         const products = Array.from(productEntryCards.children);
 
         products.sort((a, b) => {
-            const priceA = parseFloat(a.querySelector('.font-bold.text-lg').textContent.replace('Price: $', ''));
-            const priceB = parseFloat(b.querySelector('.font-bold.text-lg').textContent.replace('Price: $', ''));
+            const priceA = parseFloat(a.querySelector('.font-bold.text-lg').textContent.replace('Price: Rp', ''));
+            const priceB = parseFloat(b.querySelector('.font-bold.text-lg').textContent.replace('Price: Rp', ''));
             return order === 'lowest' ? priceA - priceB : priceB - priceA;
         });
 
