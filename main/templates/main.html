@@ -24,48 +24,119 @@
 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10 px-4 md:px-20">
     <div class="relative bg-[#FCFAF7] p-6 rounded-lg shadow-md hover:shadow-xl">
         <h3 class="text-xl font-bold text-[#3845AD]">Food Catalogue</h3>
-        <p class="mt-4">Save your favorite recipes and meal plans for future use!</p><br><br>
+        <p class="mt-4">Explore a curated list of food options available across Jakarta. Discover new places and filter through various options!</p><br><br>
         <a href="#" class="absolute bottom-6 right-6">
             <img src="{% static 'image/morebutton.png' %}" alt="More" class="h-8 w-auto">
         </a>
     </div>
     <div class="relative bg-[#FCFAF7] p-6 rounded-lg shadow-md hover:shadow-xl">
         <h3 class="text-xl font-bold text-[#F65035]">Rate and Review</h3>
-        <p class="mt-4">Don't ever worry about how your food's gonna taste. Check people's rate and review!</p><br><br>
+        <p class="mt-4">Share your opinions and explore feedback from others! Rate and review to help the community discover the best food experiences.</p><br><br>
         <a href="#" class="absolute bottom-6 right-6">
             <img src="{% static 'image/morebutton.png' %}" alt="More" class="h-8 w-auto">
         </a>
     </div>
     <div class="relative bg-[#FCFAF7] p-6 rounded-lg shadow-md hover:shadow-xl">
         <h3 class="text-xl font-bold text-[#7FBFA2]">Preference</h3>
-        <p class="mt-4">Check foods that match your taste by setting preferences!</p><br><br>
+        <p class="mt-4">Personalize your food journey! Set your taste preferences and explore meals tailored just for you.</p><br><br>
         <a href="#" class="absolute bottom-6 right-6">
             <img src="{% static 'image/morebutton.png' %}" alt="More" class="h-8 w-auto">
         </a>
     </div>
     <div class="relative bg-[#FCFAF7] p-6 rounded-lg shadow-md hover:shadow-xl">
         <h3 class="text-xl font-bold text-[#bf5c5a]">Forum Discussion</h3>
-        <p class="mt-4">Discuss your favorite meals and recipes with others!</p><br><br>
+        <p class="mt-4">Connect with other foodies! Share your experiences, discuss meals, and get tips from like-minded food lovers.</p><br><br>
         <a href="/forum" class="absolute bottom-6 right-6">
             <img src="{% static 'image/morebutton.png' %}" alt="More" class="h-8 w-auto">
         </a>
     </div>
     <div class="relative bg-[#FCFAF7] p-6 rounded-lg shadow-md hover:shadow-xl">
         <h3 class="text-xl font-bold text-[#bd9440]">Meal Planning</h3>
-        <p class="mt-4">Plan your weekly meals with ease and variety!</p><br><br>
+        <p class="mt-4">Take the stress out of mealtime. Plan your daily meals with ease, ensuring variety and deliciousness every day.</p><br><br>
         <a href="#" class="absolute bottom-6 right-6">
             <img src="{% static 'image/morebutton.png' %}" alt="More" class="h-8 w-auto">
         </a>
     </div>
     <div class="relative bg-[#FCFAF7] p-6 rounded-lg shadow-md hover:shadow-xl">
         <h3 class="text-xl font-bold text-[#3845AD]">Bookmark</h3>
-        <p class="mt-4">Save your favorite recipes and meal plans for future use!</p><br><br>
+        <p class="mt-4">Save meal ideas and plans you want to revisit. Your go-to meals and inspirations are just a click away!</p><br><br>
         <a href="#" class="absolute bottom-6 right-6">
             <img src="{% static 'image/morebutton.png' %}" alt="More" class="h-8 w-auto">
         </a>
-    </div>
+    </div><br><br><br>
 </div>
 
+<div class="bg-[#FCFAF7] shadow-lg text-white p-8 space-y-7">
+    <div class="relative w-full text-center mt-7">
+        <h2 class="font-inter text-[45px] lg:text-[65px] font-bold text-black leading-tight">
+            <span class="font-medium italic">Why </span><span class="font-bold font-inter">MAKAN BANG</span><span class="font-medium italic">?</span>
+        </h2><br>
+    </div>
+
+        <!-- Expandable Item 1 -->
+    <div class="border-b border-black py-4">
+        <button onclick="toggleExpand('item1')" class="w-full flex justify-between items-center text-left group">
+            <h3 class="text-3xl font-semibold text-black transition-transform duration-300 group-hover:scale-105 group-hover:text-[#51826c]">Explore Jakarta's Food Scene</h3>
+            <span id="icon-item1" class="transform transition-transform duration-300">
+                <svg class="icon-collapsed" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="black">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+                <svg class="icon-expanded hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="black">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </span>
+        </button>
+        <div id="item1" class="hidden mt-4 text-lg text-black">
+            <p>
+                Makan Bang connects you to Jakarta's bustling food scene, offering a vast selection of popular and hidden culinary gems.
+                Filter through options to discover new flavors, from local favorites to must-try eateries. With GoFood integration, you can
+                even order your picks directly for delivery.
+            </p>
+        </div>
+    </div>
+
+    <!-- Expandable Item 2 -->
+    <div class="border-b border-black py-4">
+        <button onclick="toggleExpand('item2')" class="w-full flex justify-between items-center text-left group">
+            <h3 class="text-3xl font-semibold text-black transition-transform duration-300 group-hover:scale-105 group-hover:text-[#bd9440]">Personalized Recommendations</h3>
+            <span id="icon-item2" class="transform transition-transform duration-300">
+                <svg class="icon-collapsed" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="black">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+                <svg class="icon-expanded hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="black">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </span>
+        </button>
+        <div id="item2" class="hidden mt-4 text-lg text-black">
+            <p>
+                With Makan Bang's preference feature, get personalized meal recommendations that match your taste. Choose your food preferences,
+                and the app will tailor suggestions to ensure you’re exploring dishes that suit your palate.
+            </p>
+        </div>
+    </div>
+
+    <!-- Expandable Item 3 -->
+    <div class="border-b border-black py-4">
+        <button onclick="toggleExpand('item3')" class="w-full flex justify-between items-center text-left group">
+            <h3 class="text-3xl font-semibold text-black transition-transform duration-300 group-hover:scale-105 group-hover:text-[#bf5c5a]">Comprehensive Food Information</h3>
+            <span id="icon-item3" class="transform transition-transform duration-300">
+                <svg class="icon-collapsed" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="black">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+                <svg class="icon-expanded hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="black">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </span>
+        </button>
+        <div id="item3" class="hidden mt-4 text-lg text-black">
+            <p>
+                Makan Bang provides nutritional insights into each menu item, so you know exactly what you’re eating. Plan meals with an eye on
+                health, making informed choices that align with your dietary needs and lifestyle goals.
+            </p>
+        </div>
+    </div><br><br>
+</div>
 
 <!-- collaboration -->
 <div class="relative w-full text-center mt-20">
@@ -85,9 +156,6 @@
     <h5 class="font-inter text-[25px] lg:text-[40px] font-bold leading-tight">
         <span class="font-medium">A project by group </span><span class="font-extrabold">PBP B07</span>
     </h5>
-    <h5 class="font-inter text-[20px] lg:text-[35px] font-bold leading-tight"></h5>
-        <span class="font-medium">Special thanks to </span><span class="font-extrabold">Pak Baginda, Kak Ravie, & all PBP lecturers and TA's</span>
-    </h5>
 </div><br><br><br>
 
 <script>
@@ -95,6 +163,24 @@
         e.preventDefault();
         document.querySelector('#features').scrollIntoView({ behavior: 'smooth' });
     });
+
+    function toggleExpand(itemId) {
+        const content = document.getElementById(itemId);
+        const iconCollapsed = document.querySelector(`#icon-${itemId} .icon-collapsed`);
+        const iconExpanded = document.querySelector(`#icon-${itemId} .icon-expanded`);
+
+        // Toggle visibility of content
+        content.classList.toggle("hidden");
+
+        // Toggle SVG icon visibility
+        if (content.classList.contains("hidden")) {
+            iconCollapsed.classList.remove("hidden");
+            iconExpanded.classList.add("hidden");
+        } else {
+            iconCollapsed.classList.add("hidden");
+            iconExpanded.classList.remove("hidden");
+        }
+    }
 </script>
 
 {% endblock content %}
