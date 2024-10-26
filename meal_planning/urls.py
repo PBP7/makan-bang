@@ -12,5 +12,6 @@ urlpatterns = [
     path('meal-plan/<int:id>/edit/', edit_meal_plan, name='edit_meal_plan'),
     path('meal-plan/<int:id>/delete/', delete_meal_plan, name='delete_meal_plan'),
     
+    
 
 ]
