@@ -52,7 +52,7 @@
 </head>
 
 <body>
-    <form action="{% url 'finish_meal_plan' %}" method="POST">
+    <form action="{% url 'finish_meal_plan' %}" method="POST" autocomplete="off">
         {% csrf_token %}
         <div class="flex-container">
             <div class="card">
@@ -61,27 +61,17 @@
                     <div class="date-picker">
                         <input type="hidden" id="selected_date" name="selected_date" value="">
                         <label for="datepicker" class="block text-gray-700 mb-2">Select Date</label>
-                        <input type="text" id="datepicker" class="mt-2 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400">
+                        <input type="text" id="datepicker" class="mt-2 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400" required>
                     </div>
-                </div>
+                </div>                
 
-                <div class="mt-4">
-                    <h3 class="text-lg font-bold text-gray-800">Select Meal:</h3>
-                    <label class="flex items-center">
-                        <input type="radio" name="meal" value="breakfast" class="mr-2"> Breakfast
-                    </label>
-                    <label class="flex items-center">
-                        <input type="radio" name="meal" value="lunch" class="mr-2"> Lunch
-                    </label>
-                    <label class="flex items-center">
-                        <input type="radio" name="meal" value="dinner" class="mr-2"> Dinner
-                    </label>
-                </div>
+               <!-- Meal Plan Overview -->
 
                 <div class="text-center mb-4 mt-4">
                     <label for="time" class="block text-gray-700">Time</label>
                     <input id="time" name="time" type="time" class="mt-2 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400" required>
                 </div>
+
                 
             </div>
 
@@ -125,6 +115,13 @@
         <div class="flex justify-center mt-8">
             <button type="submit" class="bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg">Selesai</button>
         </div>
+
+        <div class="flex justify-center mt-4">
+            <button type="button" onclick="clearForm()" class="bg-red-500 text-white py-2 px-4 rounded-lg">Clear Form</button>
+        </div>
+        
+        
+        
     </form>
 
     <script>
@@ -136,7 +133,24 @@
             },
             allowInput: true // Allow manual input
         });
-
+    
+        function clearForm() {
+            // Kosongkan tanggal
+            document.getElementById('datepicker').value = '';
+    
+            // Kosongkan waktu
+            document.getElementById('time').value = '';
+    
+            // Kosongkan hidden input untuk tanggal yang dipilih
+            document.getElementById('selected_date').value = '';
+    
+            // Reset semua checkbox di dalam ul
+            const foodItems = document.querySelectorAll('input[type="checkbox"]');
+            foodItems.forEach((checkbox) => {
+                checkbox.checked = false; // Nonaktifkan checkbox
+            });
+        }
     </script>
+    
 </body>
 </html>
