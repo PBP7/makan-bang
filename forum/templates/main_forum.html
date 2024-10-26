@@ -32,20 +32,56 @@
         <h1 class="text-2xl font-bold mb-4">Forum Discussions</h1>
         
         <!-- public/your posts -->
-        <div class="mb-4 flex items-center space-x-4 pb-2">
-            <a href="{% url 'forum:public_forum' %}" 
-               class="text-lg font-semibold pb-2 {% if current_tab == 'public' %}text-black border-b-2 border-black{% else %}text-gray-500 hover:text-black{% endif %}">
-                Public Forum
-            </a>
+        <div class="mb-4 flex items-center justify-between pb-2">
+            <div class="flex items-center space-x-4">
+                <a href="{% url 'forum:public_forum' %}" 
+                   class="text-lg font-semibold pb-2 {% if current_tab == 'public' %}text-black border-b-2 border-black{% else %}text-gray-500 hover:text-black{% endif %}">
+                    All
+                </a>
+                
+                <span class="text-gray-500 font-bold">|</span>
+                
+                <a href="{% url 'forum:your_posts' %}" 
+                   class="text-lg font-semibold pb-2 {% if current_tab == 'your_posts' %}text-black border-b-2 border-black{% else %}text-gray-500 hover:text-black{% endif %}">
+                    Your Posts
+                </a>
+            </div>
+        
+            <!-- Dropdown Menu positioned to the right -->
+            <div class="relative inline-block text-left">
+                <button
+                    id="dropdownButton"
+                    class="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none"
+                    type="button"
+                    aria-haspopup="true"
+                    aria-expanded="true"
+                >
+                    {{ current_topic|default:"All Topic" }}
+                    <svg class="-mr-1 ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
             
-            <span class="text-gray-500 font-bold">|</span>
-            
-            <a href="{% url 'forum:your_posts' %}" 
-               class="text-lg font-semibold pb-2 {% if current_tab == 'your_posts' %}text-black border-b-2 border-black{% else %}text-gray-500 hover:text-black{% endif %}">
-                Your Posts
-            </a>
+                <div
+                    id="dropdownMenu"
+                    class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 hidden z-50"
+                    role="menu"
+                    aria-orientation="vertical"
+                    aria-labelledby="dropdownButton"
+                >
+                    <div class="py-1" role="none">
+                        <a href="{% url 'forum:show_forum' %}" class="text-gray-700 block px-4 py-2 text-sm {% if current_topic == 'All Topic' %}font-bold{% endif %}" role="menuitem">All Topic</a>
+                        <a href="{% url 'forum:show_forum' %}?topic=Information" class="text-gray-700 block px-4 py-2 text-sm {% if current_topic == 'Information' %}font-bold{% endif %}" role="menuitem">Information</a>
+                        <a href="{% url 'forum:show_forum' %}?topic=Experience" class="text-gray-700 block px-4 py-2 text-sm {% if current_topic == 'Experience' %}font-bold{% endif %}" role="menuitem">Experience</a>
+                        <a href="{% url 'forum:show_forum' %}?topic=Recommendation" class="text-gray-700 block px-4 py-2 text-sm {% if current_topic == 'Recommendation' %}font-bold{% endif %}" role="menuitem">Recommendation</a>
+                        <a href="{% url 'forum:show_forum' %}?topic=Restaurants" class="text-gray-700 block px-4 py-2 text-sm {% if current_topic == 'Restaurants' %}font-bold{% endif %}" role="menuitem">Restaurants</a>
+                        <a href="{% url 'forum:show_forum' %}?topic=Foods" class="text-gray-700 block px-4 py-2 text-sm {% if current_topic == 'Foods' %}font-bold{% endif %}" role="menuitem">Foods</a>
+                    </div>
+                </div>
+            </div>            
+        </div>        
+        
 
-        </div>
 
         {% if not questions %}
         <p>No forum available!</p>
@@ -120,6 +156,20 @@ document.addEventListener("DOMContentLoaded", function () {
     const closeModalButton = document.getElementById('closeModalButton');
     const form = document.getElementById('modalForumForm');
     const errorMessages = document.getElementById('errorMessages');
+
+    const dropdownButton = document.getElementById("dropdownButton");
+    const dropdownMenu = document.getElementById("dropdownMenu");
+
+    dropdownButton.addEventListener("click", function() {
+        dropdownMenu.classList.toggle("hidden");
+    });
+
+    // Close the dropdown if clicked outside
+    window.addEventListener("click", function(event) {
+        if (!dropdownButton.contains(event.target)) {
+            dropdownMenu.classList.add("hidden");
+        }
+    });
 
     openModalButton.addEventListener('click', function () {
         modal.classList.remove('hidden');

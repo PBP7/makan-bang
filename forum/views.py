@@ -10,10 +10,18 @@ from forum.forms import NewForumForm, ForumReplyForm
 # Create your views here.
 
 @login_required(login_url="authentication:login")
+@login_required(login_url="authentication:login")
 def show_forum(request):
-    questions = ForumQuestion.objects.all().order_by("-id")
-    context = {"questions": questions}
-
+    topic = request.GET.get('topic', 'All Topic')
+    if topic == 'All Topic':
+        questions = ForumQuestion.objects.all().order_by("-id")
+    else:
+        questions = ForumQuestion.objects.filter(topic=topic).order_by("-id")
+    
+    context = {
+        "questions": questions,
+        "current_topic": topic
+    }
     return render(request, "main_forum.html", context)
 
 @login_required(login_url="authentication:login")
@@ -111,8 +119,8 @@ def view_forum(request, id):
 
 
 def public_forum(request):
-    topic = request.GET.get('topic', 'all')  # Get the selected topic from query parameters
-    if topic == 'all':
+    topic = request.GET.get('topic', 'All')  # Get the selected topic from query parameters
+    if topic == 'All':
         questions = ForumQuestion.objects.all().order_by("-id")  # Show all forum questions
     else:
         questions = ForumQuestion.objects.filter(topic=topic).order_by("-id")  # Filter questions by topic
@@ -120,8 +128,8 @@ def public_forum(request):
     return render(request, 'main_forum.html', {'questions': questions, 'topics': topics})
 
 def your_posts(request):
-    topic = request.GET.get('topic', 'all')  # Get the selected topic from query parameters
-    if topic == 'all':
+    topic = request.GET.get('topic', 'All')  # Get the selected topic from query parameters
+    if topic == 'All':
         questions = ForumQuestion.objects.filter(user=request.user).order_by("-id")  # Show only user's posts
     else:
         questions = ForumQuestion.objects.filter(user=request.user, topic=topic).order_by("-id")  # Filter by topic and user
