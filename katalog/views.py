@@ -21,48 +21,84 @@ from django.http import JsonResponse
 from django.db.models import Q
 import json
 from bookmark.models import Bookmark
+from django.db import transaction
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.models import User
+from django.template.loader import render_to_string
+from django.contrib.auth.decorators import user_passes_test
 
 # Create your views here.
 def show_katalog(request):
     # Get sorting order from query parameters (default is ascending)
     sort_order = request.GET.get('sort', 'asc')
 
-    # Retrieve and sort the products based on the sort_order
+    # Check if we need to reimport the dataset
+    if request.GET.get('reimport') == 'true':
+        clear_dataset_products()
+    
+    # Check if dataset products have been imported
+    if not Product.objects.filter(is_dataset_product=True).exists():
+        # If not imported, get dataset products and import them to the database
+        dataset_products = get_all_rows("DATASET PBP7")
+        import_dataset_products(dataset_products)
+
+    # Retrieve and sort all products (including imported ones) based on the sort_order
     if sort_order == 'desc':
         products = Product.objects.all().order_by('-price')
     else:
         products = Product.objects.all().order_by('price')
 
-    # Get dataset products
-    dataset_products = get_all_rows("DATASET PBP7")
     user_bookmarks = set(Bookmark.objects.filter(user=request.user).values_list('external_product_id', flat=True))
-    formatted_dataset_products = []
-    for product in dataset_products:
-        formatted_product = {
-            'picture_link': product['Link Foto'],
-            'item': product['Nama Produk'],
-            'restaurant': product['Restoran'],
-            'lokasi': product['Lokasi'],
-            'description': product['Deskripsi'],
-            'price': product['Harga'],
-            'kategori': product['Kategori'],
-            'nutrition': product['Nutrisi'],
-            'link_gofood': product['Link GoFood']
-        }
-        formatted_dataset_products.append(formatted_product)
-
-    # Combine database products and dataset products
-    all_products = list(products) + formatted_dataset_products
 
     # Add all products to context
     context = {
         'nama': request.user.username,
-        'products': all_products,
-        'sort_order': sort_order,  # Pass the sort_order to the template for dropdown state
+        'products': products,
+        'sort_order': sort_order,
         'user_bookmarks': user_bookmarks,
     }
 
     return render(request, "katalog.html", context)
+
+@transaction.atomic
+def import_dataset_products(dataset_products):
+    # Get or create a default user for dataset products
+    default_user, _ = User.objects.get_or_create(username='dataset_importer')
+    
+    for product in dataset_products:
+        Product.objects.create(
+            item=product['Nama Produk'],
+            restaurant=product['Restoran'],
+            user=default_user,
+            picture_link=product['Link Foto'],
+            lokasi=product['Lokasi'],
+            description=product['Deskripsi'],
+            price=product['Harga'],
+            kategori=product['Kategori'],
+            nutrition=product['Nutrisi'],
+            link_gofood=product['Link GoFood'],
+            is_dataset_product=True,
+        )
+
+@transaction.atomic
+def clear_dataset_products():
+    Product.objects.filter(is_dataset_product=True).delete()
+
+@require_POST
+@user_passes_test(lambda u: u.username == 'admin')
+def reimport_dataset(request):
+    try:
+        with transaction.atomic():
+            # Clear existing dataset products
+            Product.objects.filter(is_dataset_product=True).delete()
+            
+            # Import new data from Google Sheets
+            dataset_products = get_all_rows("DATASET PBP7")
+            import_dataset_products(dataset_products)
+        
+        return JsonResponse({"success": True, "message": "Dataset has been successfully reimported."})
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
 
 @csrf_exempt
 @require_POST
@@ -155,49 +191,38 @@ def edit(request):
     return redirect('https://docs.google.com/spreadsheets/d/10_JHj928fFrLtnYP9vN8PU7qrf5Y_hXX7gnLIM1BHUw/edit?gid=302655056#gid=302655056')
 
 def search_products(request):
-    query = request.GET.get('q', '').lower()
-    
-    # Get products from the database
-    db_products = Product.objects.filter(
-        Q(item__icontains=query) | Q(kategori__icontains=query) | Q(restaurant__icontains=query)
-    )
-    
-    # Serialize database products
-    db_product_list = [
-        {
-            'type': 'db',
-            'data': {
-                'id': product.id,
-                'item': product.item,
-                'picture_link': product.picture_link,
-                'restaurant': product.restaurant,
-                'kategori': product.kategori,
-                'lokasi': product.lokasi,
-                'nutrition': product.nutrition,
-                'link_gofood': product.link_gofood,
-                'price': str(product.price),
-                'description': product.description,
-            }
-        }
-        for product in db_products
-    ]
-    
-    # Get dataset products
-    dataset_products = get_all_rows("DATASET PBP7")
-    
-    # Filter dataset products
-    filtered_dataset_products = [
-        {
-            'type': 'dataset',
-            'data': product
-        }
-        for product in dataset_products
-        if query in product['Nama Produk'].lower() or 
-           query in product['Kategori'].lower() or 
-           query in product['Restoran'].lower()
-    ]
-    
-    # Combine all products
-    all_products = db_product_list + filtered_dataset_products
-    
-    return JsonResponse(all_products, safe=False)
+    query = request.GET.get('q', '')
+    if query:
+        products = Product.objects.filter(
+            Q(item__icontains=query) |
+            Q(kategori__icontains=query) |
+            Q(restaurant__icontains=query)
+        )
+    else:
+        products = Product.objects.all()
+
+    product_list = list(products.values())
+    return JsonResponse(product_list, safe=False)
+
+def get_all_products(request):
+    products = Product.objects.all()
+    product_list = []
+    for product in products:
+        product_list.append({
+            'id': product.id,
+            'item': product.item,
+            'pictureLink': product.picture_link,
+            'restaurant': product.restaurant,
+            'kategori': product.kategori,
+            'lokasi': product.lokasi,
+            'nutrition': product.nutrition,
+            'link_gofood': product.link_gofood,
+            'price': float(product.price),
+            'description': product.description,
+        })
+    return JsonResponse(product_list, safe=False)
+
+
+
+
+

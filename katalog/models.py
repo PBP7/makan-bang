@@ -3,7 +3,7 @@ import uuid
 from django.contrib.auth.models import User
 
 class Product(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False) 
     item = models.CharField(max_length=50)
     picture_link = models.TextField()
@@ -14,6 +14,7 @@ class Product(models.Model):
     nutrition = models.CharField(max_length=150)
     description = models.CharField(max_length=255)
     link_gofood = models.TextField()
+    is_dataset_product = models.BooleanField(default=False)
 
     @property
     def average_rating(self):

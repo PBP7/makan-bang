@@ -2,112 +2,59 @@
 {% load static %}
 
 {% block meta %}
-<title>John Lennon's Music Store</title>
+<title>Catalogue |MAKAN BANG</title>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dist/purify.min.js"></script>
 {% endblock meta %}
 
 {% block content %}
 {% include 'navbar.html' %}
 
-{% csrf_token %}
 
 <!-- Main Wrapper -->
 <div class="min-h-screen flex flex-col bg-white" style="padding-top: 88px;">
-    <div class="flex justify-start items-center py-2 p-7 space-x-4">
-        <input type="text" id="searchBar" placeholder="Search by category or name" 
-               class="border border-gray-300 rounded-md p-2 w-1/2 hover:border-indigo-700" 
-               oninput="debouncedFilterProducts(this.value)">
-        
-        {% if user.username == "admin" %}
-        <button onclick="showModal()"
-          class="bg-indigo-700 hover:bg-indigo-600 text-white font-bold py-1 px-3 text-sm rounded-full shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105">
-          + Add Product
-        </button>
-        {% endif %}
-
-        <div class="relative">
-            <button id="filterButton" class="bg-indigo-700 hover:bg-indigo-600 text-white font-bold py-1 px-3 text-sm rounded-full shadow-md transition duration-300 ease-in-out flex items-center space-x-2"
-                    onclick="toggleFilterDropdown()">
-                <span>Filter</span>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-            </button>
-
-            <!-- Dropdown menu (hidden by default) -->
-            <div id="filterDropdown" class="hidden absolute mt-2 w-48 bg-white border border-gray-300 rounded-lg shadow-lg z-50">
-                <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" onclick="filterByPrice('lowest')">Lowest Price</a>
-                <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" onclick="filterByPrice('highest')">Highest Price</a>
+    <div class="flex flex-col md:flex-row justify-between items-center py-2 p-7 space-y-4 md:space-y-0">
+        <!-- Search Bar and Filter Button Container -->
+        <div class="flex flex-col md:flex-row w-full justify-between items-center space-y-4 md:space-y-0 md:space-x-4">
+            <div class="flex w-full md:w-3/4 space-x-4">
+                <input type="text" id="searchBar" placeholder="Search by category or name" 
+                       class="border border-gray-300 rounded-md p-2 w-full md:w-5/6 hover:border-indigo-700" 
+                       oninput="debouncedFilterProducts(this.value)">
+            
+                <button id="filterButton" class="bg-white border text-black font-medium py-2 px-3 text-sm rounded-md shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 w-20 h-[42px] flex items-center justify-between"
+                        onclick="toggleFilterDropdown()">
+                    <span>Filter</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="flex space-x-2 md:justify-end w-full md:w-1/4">
+                {% if user.username == "Admin" or user.username == "admin" %}
+                <button onclick="showModal()"
+                    class="bg-white border text-black font-medium py-2 px-3 text-sm rounded-md shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105">
+                    + Add Product
+                </button>
+                {% endif %}
+                
+                {% if user.username != "Admin" and user.username != "admin" %}
+                <button class="bg-white border text-black font-medium py-2 px-3 text-sm rounded-md shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105">
+                    <a href="/meal-planning/create">Plan your Meal</a>
+                </button>
+                {% endif %}
             </div>
         </div>
     </div>
-
-    <!-- Product Entries -->
-    <div id="product_entry_cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
-        {% if products %}
-            {% for product in products %}
-            <div class="relative break-inside-avoid cursor-pointer group">
-                <div class="relative top-5 bg-white shadow-md mb-6 p-4 border-2 border-gray-300 rounded-lg"
-                    style="min-height: 29rem; max-height: 29rem; width: calc(100vw - 60); max-width: calc(100vw - 60vw);">
-                    
-                    <img src="{{ product.picture_link }}" alt="{{ product.item }}" class="h-48 w-full object-cover rounded-md mb-4"
-                    onclick="showProductDetail({{ forloop.counter0 }})">
-
-                    <div class="flex justify-start items-center mb-4 space-x-3">
-                    {% if user.username != "admin" %}
-                    <button class="bookmark-btn {% if product.id|stringformat:'s' in user_bookmarks %}text-yellow-500{% else %}text-gray-600{% endif %}"
-                        onclick="toggleBookmark(this, {{ product.id }})"
-                        data-product-id="{% if product.id %}{{ product.id }}{% else %}sheet_{{ forloop.counter0 }}{% endif %}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                    {% endif %}
-
-                    <div class="bg-gray-700 text-white font-semibold rounded-lg px-3 py-1 text-center">
-                        {{ product.kategori }}
-                    </div>
-                </div>
-                <h3 class="font-bold text-xl mb-2 truncate">{{ product.item }}</h3>
-                <div class="flex items-center text-gray-600 mb-2">
-                    <div class="flex-shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 2a6 6 0 016 6c0 4.118-5.02 9.636-5.356 9.975a1 1 0 01-1.288 0C9.02 17.636 4 12.118 4 8a6 6 0 016-6zm0 8a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
-                    
-                    <span class="truncate">{{ product.restaurant }}</span>
-                </div>
-                <p class="font-bold text-lg mb-2">Price: Rp{{ product.price }}</p>
-
-                {% if user.is_authenticated and user.username != "admin" %}
-                    <div class="absolute bottom-0 right-0 p-2">
-                        <a href="{% url 'rateNreview:show_rateNreview' %}" 
-                        class="text-blue-600 font-semibold border-2 border-blue-600 rounded-lg px-3 py-1 hover:bg-blue-600 hover:text-white transition duration-300">
-                        Give Review
-                        </a>
-                    </div>
-                {% endif %}
-
-                {% if user.username == "admin" %}
-                <div class="flex justify-between mt-4">
-                    <a href="/katalog/edit/{{ product.pk }}" class="border-2 border-yellow-500 text-yellow-500 rounded-l-lg w-full py-2 transition duration-300 hover:bg-yellow-500 hover:text-white shadow-md text-center">
-                        Edit
-                    </a>
-                    <a href="/katalog/delete/{{ product.pk }}" class="border-2 border-red-500 text-red-500 rounded-r-lg w-full py-2 transition duration-300 hover:bg-red-500 hover:text-white shadow-md text-center">
-                        Delete
-                    </a>
-                </div>
-                {% endif %}
-                </div>
-            </div>
-            {% endfor %}
-        {% else %}
-            <div class="col-span-full text-center py-10">
-                <p class="text-gray-500 text-lg">No products available at the moment.</p>
-            </div>
-        {% endif %}
+    <!-- Dropdown menu (hidden by default) -->
+    <div id="filterDropdown" class="hidden absolute mt-2 w-48 bg-white border border-gray-300 rounded-lg shadow-lg z-50">
+        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" onclick="filterByPrice('lowest')">Lowest Price</a>
+        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" onclick="filterByPrice('highest')">Highest Price</a>
     </div>
+    
+    <div class="flex flex-col items-center justify-center min-h-screen">
+        <div id="product_entry_cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6 mt-4 justify-center"></div>
+      </div>
+      
 
     <!-- Product Detail Modal -->
     <div id="productDetailModal" tabindex="-1" aria-hidden="true" class="hidden fixed inset-0 z-50 w-full flex items-center justify-center bg-gray-800 bg-opacity-50 overflow-x-hidden overflow-y-auto transition-opacity duration-300 ease-out">
@@ -115,7 +62,7 @@
             
             <!-- Modal header -->
             <div class="flex items-center justify-between p-4 border-b rounded-t">
-                <h3 class="text-xl font-semibold text-gray-900" id="modalProductName">Product Name</h3>
+                <h3 class="text-xl font-semibold text-gray-900 break-words" id="modalProductName">Product Name</h3>
                 <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" id="closeDetailModalBtn">
                     <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
@@ -125,14 +72,34 @@
             </div>
 
             <!-- Modal body -->
-            <div class="px-6 py-4 space-y-2">
+            <div class="px-6 py-4 space-y-1">
                 <img id="modalProductImage" src="" alt="Product Image" class="h-48 w-full object-cover rounded-md mb-4">
-                <p class="text-gray-600"><strong>Category:</strong> <span id="modalProductCategory"></span></p>
-                <p class="text-gray-600 break-words"><strong>Restaurant:</strong> <span id="modalProductRestaurant"></span></p>
-                <p class="text-gray-600 break-words"><strong>Location:</strong> <span id="modalProductLocation"></span></p>
-                <p class="text-gray-600 break-words"><strong>Nutrition Info:</strong> <span id="modalProductNutrition"></span></p>
-                <p class="text-gray-600"><strong>GoFood Link:</strong> <a id="modalProductGofoodLink" href="" target="_blank" class="text-blue-500">View</a></p>
-                <p class="font-bold text-lg"><strong>Price:</strong> Rp<span id="modalProductPrice"></span></p>
+                <span class="inline-block bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm mb-4" id = "modalProductCategory">Category</span> 
+                
+                <p class="text-gray-600 break-words">
+                    <img src="https://cdn-icons-png.flaticon.com/128/10017/10017498.png" alt="Restaurant icon" class="inline-block h-5 w-5 mr-1">
+                    <span id="modalProductRestaurant"></span>
+                </p>
+                </p>
+                <p class="text-gray-600 break-words">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="inline-block h-5 w-5 text-gray-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 10a3 3 0 100-6 3 3 0 000 6z" />
+                    </svg>
+                    <span id ="modalProductLocation"></span>
+                </p>
+                <p class="text-gray-600 break-words">
+                    <img src="https://cdn-icons-png.flaticon.com/128/2224/2224150.png" alt="Nutrition icon" class="inline-block h-5 w-5 mr-1">
+                    <span id="modalProductNutrition"></span>
+                </p>
+                <p class="text-gray-600 break-words">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="inline-block h-5 w-5 text-gray-500 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                    </svg>
+                    <a id="modalProductGofoodLink" href="#" target="_blank" rel="noopener noreferrer" class="text-blue-500" onclick="window.open(this.getAttribute('data-gofood-link'), '_blank'); return false;">View in GoFood</a>
+                </p>
+                
+                <p class="font-bold text-lg"><strong>Price:</strong> $<span id="modalProductPrice"></span></p>
                 <p id="modalProductDescription" class="text-gray-600 break-words"></p>
             </div>
 
@@ -151,7 +118,7 @@
                 <h3 class="text-xl font-semibold text-gray-900">Rate Product</h3>
                 <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" id="closeRatingModalBtn">
                     <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 1 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                     </svg>
                     <span class="sr-only">Close modal</span>
                 </button>
@@ -173,7 +140,7 @@
             <!-- Modal footer -->
             <div class="flex justify-end p-6 border-t border-gray-200 rounded-b">
                 <button type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg" id="closeRatingButton">Cancel</button>
-                <button type="submit" id="submitRatingButton" form="ratingForm" class="bg-indigo-700 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg">Submit Rating</button>
+                <button type="submit" id="submitRatingButton" form="ratingForm" class="bg-black hover:bg-[#3845AD] text-white font-bold py-2 px-4 rounded-lg">Submit Rating</button>
             </div>
         </div>
     </div>
@@ -249,18 +216,30 @@
             </div>
         </div>
     </div>
+    </div>
 
-    <div class="fixed bottom-4 right-4 z-50">
+    <div class="fixed bottom-100 right-4 z-50">
         <a href="/meal-planning/create">
-            <button class="bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg">Meal Plan</button>
+            <img src="{% static 'image/mealplan.png' %}" alt="Meal Plan" class="w-16 h-16 shadow-lg hover:scale-105 transition-transform">
         </a>
     </div>
+    
+
+    <div class="fixed bottom-100 right-4 z-50">
+        <a href="/meal-planning/create">
+            <img src="{% static 'image/mealplan.png' %}" alt="Meal Plan" class="w-16 h-16 shadow-lg hover:scale-105 transition-transform">
+        </a>
+    </div>
+    
+    
 
   
 </div>
 
 <!-- Script for handling product entries -->
 <script>
+    const isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
+
     // Improved debounce function
     function debounce(func, wait) {
         let timeout;
@@ -289,7 +268,7 @@
     function displayFilteredProducts(products) {
         const productEntryCards = document.getElementById("product_entry_cards");
         productEntryCards.innerHTML = "";
-        productEntryCards.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6";
+        productEntryCards.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6 mt-4 justify-center";
 
         if (products.length === 0) {
             productEntryCards.innerHTML = `
@@ -300,35 +279,21 @@
             return;
         }
 
-        const fragment = document.createDocumentFragment();
-
-        products.forEach((productWrapper, index) => {
-            const product = productWrapper.type === 'db' ? productWrapper.data : productWrapper.data;
-            const isDbProduct = productWrapper.type === 'db';
-
-            const productCard = createProductCard(product, isDbProduct, index);
-            fragment.appendChild(productCard);
+        products.forEach((product, index) => {
+            const productCard = createProductCard(product, index);
+            productEntryCards.appendChild(productCard);
         });
 
-        productEntryCards.appendChild(fragment);
-
         // Update the global productDetails array
-        window.productDetails = products.map(productWrapper => productWrapper.type === 'db' ? productWrapper.data : productWrapper.data);
-
-        // After displaying products, check if there's an active filter and apply it
-        const activeFilter = document.querySelector('#filterDropdown a.active');
-        if (activeFilter) {
-            filterByPrice(activeFilter.getAttribute('data-filter'));
-        }
+        window.productDetails = products;
     }
 
-    function createProductCard(product, isDbProduct, index) {
-        const sanitizedItem = DOMPurify.sanitize(product.item || product['Nama Produk']);
-        const sanitizedPictureLink = DOMPurify.sanitize(product.picture_link || product['Link Foto']);
-        const sanitizedKategori = DOMPurify.sanitize(product.kategori || product['Kategori']);
-        const sanitizedRestaurant = DOMPurify.sanitize(product.restaurant || product['Restoran']);
-        const sanitizedPrice = DOMPurify.sanitize(product.price || product['Harga']);
-
+    function createProductCard(product, index) {
+        const sanitizedItem = DOMPurify.sanitize(product.item);
+        const sanitizedPictureLink = DOMPurify.sanitize(product.picture_link);
+        const sanitizedKategori = DOMPurify.sanitize(product.kategori);
+        const sanitizedRestaurant = DOMPurify.sanitize(product.restaurant);
+        const sanitizedPrice = DOMPurify.sanitize(product.price);
         const div = document.createElement('div');
         div.className = 'relative break-inside-avoid cursor-pointer group';
         div.innerHTML = `
@@ -376,21 +341,12 @@
 
             {% if user.username == "admin" %}
             <div class="flex justify-between mt-4">
-                ${isDbProduct ? `
-                    <a href="/katalog/edit/${product.id}" class="border-2 border-yellow-500 text-yellow-500 rounded-l-lg w-full py-2 transition duration-300 hover:bg-yellow-500 hover:text-white shadow-md text-center">
-                        Edit
-                    </a>
-                    <a href="/katalog/delete/${product.id}" class="border-2 border-red-500 text-red-500 rounded-r-lg w-full py-2 transition duration-300 hover:bg-red-500 hover:text-white shadow-md text-center">
-                        Delete
-                    </a>
-                ` : `
-                     <a href="/katalog/edit/" class="border-2 border-yellow-500 text-yellow-500 rounded-l-lg w-full py-2 transition duration-300 hover:bg-yellow-500 hover:text-white shadow-md text-center">
-                        Edit
-                    </a>
-                    <a href="/katalog/delete/" class="border-2 border-red-500 text-red-500 rounded-r-lg w-full py-2 transition duration-300 hover:bg-red-500 hover:text-white shadow-md text-center">
-                        Delete
-                    </a>
-                `}
+                <a href="/katalog/edit/${product.id}" class="border-2 border-yellow-500 text-yellow-500 rounded-l-lg w-full py-2 transition duration-300 hover:bg-yellow-500 hover:text-white shadow-md text-center">
+                    Edit
+                </a>
+                <a href="/katalog/delete/${product.id}" class="border-2 border-red-500 text-red-500 rounded-r-lg w-full py-2 transition duration-300 hover:bg-red-500 hover:text-white shadow-md text-center">
+                    Delete
+                </a>
             </div>
             {% endif %}
             </div>
@@ -403,13 +359,12 @@
     document.getElementById('searchBar').addEventListener('input', function(e) {
         const searchTerm = e.target.value.trim();
         if (searchTerm.length > 0) {
-            debouncedFilterProducts(searchTerm);
+            searchProducts(searchTerm);
         } else {
             refreshProductEntries();
         }
     });
 
-    // Keep your existing functions
     function addProductEntry(event) {
         event.preventDefault();
     
@@ -434,18 +389,14 @@
             body: new FormData(form),
         })
         .then(response => {
-            if (response.ok) {
-                refreshProductEntries();
-                form.reset();
-                hideModal();
-            } else {
-                throw new Error('Network response was not ok');
-            }
+            refreshProductEntries();
+            form.reset(); // Clear the form after successful submission
+            hideModal(); // Close the modal
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred while adding the product. Please try again.');
         });
+        
         return false;
     }
     
@@ -457,56 +408,59 @@
         document.getElementById("product_entry_cards").innerHTML = "";
         document.getElementById("product_entry_cards").className = "";
         const productEntries = await getProductEntries();
-        const databaseProducts = {{ products|safe }};
-        const allProducts = [...productEntries, ...databaseProducts];  // Changed order here
         let htmlString = "";
         let classNameString = "";
     
-        if (allProducts.length === 0) {
+        if (productEntries.length === 0) {
             classNameString = "flex flex-col items-center justify-center min-h-[24rem] p-6";
             htmlString = `
                 <div class="flex flex-col items-center justify-center min-h-[24rem] p-6">
-                    <p class="text-center text-gray-600 mt-4">No products found in the database or product entries.</p>
+                    <img src="{% static 'images/raster/sad-image.png' %}" alt="Sad face" class="w-32 h-32 mb-4"/>
+                    <p class="text-center text-gray-600 mt-4">No product entries found.</p>
                 </div>
             `;
         } else {
             classNameString = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6";
-            allProducts.forEach((product, index) => {
-                const sanitizedItem = DOMPurify.sanitize(product.fields ? product.fields.item : product.item);
-                const sanitizedDescription = DOMPurify.sanitize(product.fields ? product.fields.description : product.description);
-                const sanitizedRestaurant = DOMPurify.sanitize(product.fields ? product.fields.restaurant : product.restaurant);
-                const sanitizedKategori = DOMPurify.sanitize(product.fields ? product.fields.kategori : product.kategori);
-                const sanitizedLokasi = DOMPurify.sanitize(product.fields ? product.fields.lokasi : product.lokasi);
-                const sanitizedNutrition = DOMPurify.sanitize(product.fields ? product.fields.nutrition : product.nutrition);
-                const sanitizedLinkGofood = DOMPurify.sanitize(product.fields ? product.fields.link_gofood : product.link_gofood);
-                const sanitizedPrice = DOMPurify.sanitize(product.fields ? product.fields.price : product.price);
-                const sanitizedPictureLink = DOMPurify.sanitize(product.fields ? product.fields.picture_link : product.picture_link);
+            productEntries.forEach((product, index) => {
+                const sanitizedItem = DOMPurify.sanitize(product.fields.item);
+                const sanitizedDescription = DOMPurify.sanitize(product.fields.description);
+                const sanitizedRestaurant = DOMPurify.sanitize(product.fields.restaurant);
+                const sanitizedKategori = DOMPurify.sanitize(product.fields.kategori);
+                const sanitizedLokasi = DOMPurify.sanitize(product.fields.lokasi);
+                const sanitizedNutrition = DOMPurify.sanitize(product.fields.nutrition);
+                const sanitizedLinkGofood = DOMPurify.sanitize(product.fields.link_gofood);
+                const sanitizedPrice = DOMPurify.sanitize(product.fields.price);
+                const sanitizedPictureLink = DOMPurify.sanitize(product.fields.picture_link);
     
                 htmlString += `
-                  <div class="relative break-inside-avoid cursor-pointer group">
-                        <div class="relative top-5 bg-white shadow-md mb-6 p-4 border-2 border-gray-300 rounded-lg"
-                            style="min-height: 29rem; max-height: 29rem; width: calc(100vw - 60); max-width: calc(100vw - 60vw);">
-                            
-                            <img src="${sanitizedPictureLink}" alt="${sanitizedItem}" class="h-48 w-full object-cover rounded-md mb-4"
-                            onclick="showProductDetail(${index})">
+                  <div class="relative break-inside-avoid cursor-pointer group" >
+                    <div class="relative top-5 bg-white shadow-md mb-6 p-4 border-2 border-gray-300 rounded-lg"
+                      style="min-height: 25rem; max-height: 29rem; width: calc(100vw - 60); max-width: calc(100vw - 60vw);">
+                
+                      
+                        <div class="relative">
+                            <!-- Product Image -->
+                            <img src="${sanitizedPictureLink}" alt="${sanitizedItem}" class="h-48 w-full object-cover rounded-md mb-4" onclick="showProductDetail(${index})">
 
-                            <div class="flex justify-start items-center mb-4 space-x-3">
-                            {% if user.username != "admin" %}
-                            <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
-                                onclick="toggleBookmark(this, '${sanitizedItem}', '${sanitizedRestaurant}')"
-                                data-product-id="${product.pk}">
+                            <!-- Bookmark Button in the top-right corner -->
+                            {% if user.username != "Admin" and user.username != "admin" %}
+                            <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow transition-colors absolute top-2 right-2"
+                                onclick="toggleBookmark('${ product.pk }',this)">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
+                                    <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
                                 </svg>
                             </button>
                             {% endif %}
+                        </div>
 
-                            <!-- Category text inside a box -->
-                            <div class="bg-gray-700 text-white font-semibold rounded-lg px-3 py-1 text-center">
+                        <!-- Category and other details below the image -->
+                        <div class="flex justify-start items-center mb-2">
+                            <div class="inline-block bg-gray-200 text-gray-700 px-3 py-0 rounded-md text-sm">
                                 ${sanitizedKategori}
                             </div>
                         </div>
-                      <h3 class="font-bold text-xl mb-2 truncate">${sanitizedItem}</h3>
+
+                      <h3 class="font-bold text-xl truncate">${sanitizedItem}</h3>
                        <div class="flex items-center text-gray-600 mb-2">
                             <!-- Location Icon with a fixed width -->
                             <div class="flex-shrink-0">
@@ -518,20 +472,16 @@
                             <!-- Location text with truncate -->
                             <span class="truncate">${sanitizedRestaurant}</span>
                         </div>
-                      <p class="font-bold text-lg mb-2">Price: Rp${sanitizedPrice}</p>
+                      <p class="font-bold text-lg mb-2">Price: $${sanitizedPrice}</p>
 
-                        {% if user.is_authenticated and user.username != "admin" %}
-                            <!-- "Give Review" Button -->
-                            <div class="absolute bottom-0 right-0 p-2">
-                                <a href="{% url 'rateNreview:show_rateNreview' %}" 
-                                class="text-blue-600 font-semibold border-2 border-blue-600 rounded-lg px-3 py-1 hover:bg-blue-600 hover:text-white transition duration-300">
-                                Give Review
-                                </a>
+                        {% if user.username != "Admin" and user.username != "admin" %}
+                            <div class="mt-4 text-center bg-white text-black border p-2 rounded-lg shadow transition hover:bg-gray-200">
+                                <a href="/rate_review/product_detail/${ product.pk }">Review</a>
                             </div>
                         {% endif %}
 
                       
-                      {% if user.username == "admin" %}
+                      {% if user.username == "Admin" or user.username == "admin" %}
                         <div class="flex justify-between mt-4">
                             <a href="/katalog/edit/${ product.pk }" class="border-2 border-yellow-500 text-yellow-500 rounded-l-lg w-full py-2 transition duration-300 hover:bg-yellow-500 hover:text-white shadow-md text-center">
                             Edit
@@ -544,24 +494,24 @@
                     </div>
                   </div>
                 `;
+    
+                // Store product details in a global array for later reference
+                window.productDetails = productEntries.map((product) => ({
+                    item: DOMPurify.sanitize(product.fields.item),
+                    pictureLink: DOMPurify.sanitize(product.fields.picture_link),
+                    restaurant: DOMPurify.sanitize(product.fields.restaurant),
+                    kategori: DOMPurify.sanitize(product.fields.kategori),
+                    lokasi: DOMPurify.sanitize(product.fields.lokasi),
+                    nutrition: DOMPurify.sanitize(product.fields.nutrition),
+                    linkGofood: DOMPurify.sanitize(product.fields.link_gofood),
+                    price: DOMPurify.sanitize(product.fields.price),
+                    description: DOMPurify.sanitize(product.fields.description)
+                }));
             });
         }
     
         document.getElementById("product_entry_cards").className = classNameString;
         document.getElementById("product_entry_cards").innerHTML = htmlString;
-
-        // Store product details in a global array for later reference
-        window.productDetails = allProducts.map((product) => ({
-            item: DOMPurify.sanitize(product.fields ? product.fields.item : product.item),
-            pictureLink: DOMPurify.sanitize(product.fields ? product.fields.picture_link : product.picture_link),
-            restaurant: DOMPurify.sanitize(product.fields ? product.fields.restaurant : product.restaurant),
-            kategori: DOMPurify.sanitize(product.fields ? product.fields.kategori : product.kategori),
-            lokasi: DOMPurify.sanitize(product.fields ? product.fields.lokasi : product.lokasi),
-            nutrition: DOMPurify.sanitize(product.fields ? product.fields.nutrition : product.nutrition),
-            linkGofood: DOMPurify.sanitize(product.fields ? product.fields.link_gofood : product.link_gofood),
-            price: DOMPurify.sanitize(product.fields ? product.fields.price : product.price),
-            description: DOMPurify.sanitize(product.fields ? product.fields.description : product.description)
-        }));
     }
     
     
@@ -612,6 +562,10 @@
         }, 150);
     }
     function showProductDetail(index) {
+        if (!isAuthenticated) {
+            window.location.href = '/auth/login';
+            return;
+        }
         const product = window.productDetails[index];
     
         document.getElementById('modalProductName').innerText = product.item;
@@ -642,31 +596,100 @@
         document.getElementById('price').value = product.price;
         document.getElementById('description').value = product.description;
     }
-    function toggleBookmark(button, productId) {
-        fetch(`/bookmark/toggle_bookmark/${productId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-                'Content-Type': 'application/json',
-            },
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.is_bookmarked) {
-                button.classList.add('text-yellow-500');
-                button.classList.remove('text-gray-600');
-            } else {
-                button.classList.remove('text-yellow-500');
-                button.classList.add('text-gray-600');
-            }
-        })
-        .catch(error => console.error('Error:', error));
+
+    function searchProducts(event) {
+        if (event.key === 'Enter') {
+            const searchTerm = event.target.value.trim().toLowerCase();
+            filterProducts(searchTerm);
+        }
     }
+
+    function filterProducts(searchTerm) {
+        // Fetch all product entries
+        getProductEntries().then((products) => {
+            const filteredProducts = products.filter(product => {
+                const productName = product.fields.item.toLowerCase();
+                const productCategory = product.fields.kategori.toLowerCase();
+                return productName.includes(searchTerm) || productCategory ===(searchTerm);
+            });
+            displayFilteredProducts(filteredProducts);
+        });
+    }
+
+    function displayFilteredProducts(filteredProducts) {
+        document.getElementById("product_entry_cards").innerHTML = "";
+        let htmlString = "";
+    
+        if (filteredProducts.length === 0) {
+            htmlString = `
+                <div class="flex flex-col items-center justify-center min-h-[24rem] p-6">
+                    <img src="{% static 'images/raster/sad-image.png' %}" alt="Sad face" class="w-32 h-32 mb-4"/>
+                    <p class="text-center text-gray-600 mt-4">No product entries found.</p>
+                </div>
+            `;
+        } else {
+            filteredProducts.forEach((product, index) => {
+                const sanitizedItem = DOMPurify.sanitize(product.fields.item);
+                const sanitizedPictureLink = DOMPurify.sanitize(product.fields.picture_link);
+                const sanitizedKategori = DOMPurify.sanitize(product.fields.kategori);
+                const sanitizedLokasi = DOMPurify.sanitize(product.fields.lokasi);
+                const sanitizedPrice = DOMPurify.sanitize(product.fields.price);
+    
+                htmlString += `
+                  <div class="relative break-inside-avoid cursor-pointer group">
+                    <div class="relative top-5 bg-white shadow-md mb-6 p-4 border-2 border-gray-300 rounded-lg"
+                      style="min-height: 29rem; max-height: 29rem;">
+                      
+                      <img src="${sanitizedPictureLink}" alt="${sanitizedItem}" class="h-48 w-full object-cover rounded-md mb-4" onclick="showProductDetail(${index})">
+                      
+                      <!-- Bookmark Button -->
+                      <div class="flex justify-start items-center mb-4">
+                        <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
+                            onclick="addBookmark('{{ product.id }}, this')" class="bookmark-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+
+                            <!-- Category text inside a box -->
+                            <div class="inline-block bg-gray-200 text-gray-800 px-3 py-0 rounded-full text-sm mb-2">
+                                ${sanitizedKategori}
+                            </div>
+                        </div>
+                      <h3 class="font-bold text-xl mb-2 truncate">${sanitizedItem}</h3>
+                       <div class="flex items-center text-gray-600 mb-2">
+                            <!-- Location Icon with a fixed width -->
+                            <div class="flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 2a6 6 0 016 6c0 4.118-5.02 9.636-5.356 9.975a1 1 0 01-1.288 0C9.02 17.636 4 12.118 4 8a6 6 0 016-6zm0 8a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            
+                            <!-- Location text with truncate -->
+                            <span class="truncate">${sanitizedRestaurant}</span>
+                        </div>
+                      <p class="font-bold text-lg mb-2">Price: $${sanitizedPrice}</p>
+                      
+                      {% if user.username == "admin" or user.username == "Admin"%}
+                        <div class="flex justify-between mt-4">
+                            <a href="/katalog/edit/${ product.pk }" class="border-2 border-yellow-500 text-yellow-500 rounded-l-lg w-full py-2 transition duration-300 hover:bg-yellow-500 hover:text-white shadow-md text-center">
+                            Edit
+                            </a>
+                            <a href="/katalog/delete/${ product.pk }" class="border-2 border-red-500 text-red-500 rounded-r-lg w-full py-2 transition duration-300 hover:bg-red-500 hover:text-white shadow-md text-center">
+                            Delete
+                            </a>
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                `;
+            });
+        }
+    
+        document.getElementById("product_entry_cards").innerHTML = htmlString;
+    }
+    
+    
     function toggleStar(button) {
         const star = button.querySelector('svg');
         star.classList.toggle('text-yellow-500'); // Toggles between grey and yellow color
@@ -763,96 +786,35 @@ function showRatingModal(productId) {
 
     refreshProductEntries();
 
-    function toggleFilterDropdown() {
-        const dropdown = document.getElementById('filterDropdown');
-        dropdown.classList.toggle('hidden');
-    }
-
-    function filterByPrice(order) {
-        const productEntryCards = document.getElementById("product_entry_cards");
-        const products = Array.from(productEntryCards.children);
-
-        products.sort((a, b) => {
-            const priceA = parseFloat(a.querySelector('.font-bold.text-lg').textContent.replace('Price: Rp', ''));
-            const priceB = parseFloat(b.querySelector('.font-bold.text-lg').textContent.replace('Price: Rp', ''));
-            return order === 'lowest' ? priceA - priceB : priceB - priceA;
-        });
-
-        productEntryCards.innerHTML = '';
-        products.forEach(product => productEntryCards.appendChild(product));
-
-        toggleFilterDropdown();
-    }
-
-    // Close the dropdown when clicking outside
-    document.addEventListener('click', function(event) {
-        const filterButton = document.getElementById('filterButton');
-        const filterDropdown = document.getElementById('filterDropdown');
-        if (!filterButton.contains(event.target) && !filterDropdown.contains(event.target)) {
-            filterDropdown.classList.add('hidden');
+    function toggleBookmark(productId, btn) {
+    fetch(`/bookmark/toggle_bookmark/${productId}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}"
         }
-    });
-
-    // Initialize products on page load
-    refreshProductEntries();
-
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
+    })
+    .then(response => response.json())
+    .then(data => {
+        toggleBtn(btn) 
+        const button = document.querySelector(`#bookmark-button-${productId}`);
+        if (data.bookmarked) {
+            button.classList.add("bookmarked");
+            button.classList.remove("not-bookmarkfed");
+        } else {
+            button.classList.add("not-bookmarked");
+            button.classList.remove("bookmarked");
         }
-        return cookieValue;
+    })
+    .catch(error => console.error("Error:", error));
     }
 
-    function toggleBookmark(button, productId) {
-        fetch(`/bookmark/toggle_bookmark/${productId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-                'Content-Type': 'application/json',
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.is_bookmarked) {
-                button.classList.add('text-yellow-500');
-                button.classList.remove('text-gray-600');
-            } else {
-                button.classList.remove('text-yellow-500');
-                button.classList.add('text-gray-600');
-            }
-        })
-        .catch(error => console.error('Error:', error));
+    function toggleBtn(btn) {
+        btn.classList.toggle('bg-black');  // Dark green when bookmarked
+        btn.classList.toggle('bg-white');  // White when not bookmarked
+        btn.classList.toggle('text-white');  // Make icon white on green background
     }
-
-    // Initialize bookmark buttons
-    document.addEventListener('DOMContentLoaded', function() {
-        const bookmarkButtons = document.querySelectorAll('.bookmark-btn');
-        bookmarkButtons.forEach(button => {
-            const productId = button.getAttribute('data-product-id');
-            fetch(`/bookmark/is_bookmarked/${productId}/`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.is_bookmarked) {
-                        button.classList.add('text-yellow-500');
-                        button.classList.remove('text-gray-600');
-                    }
-                });
-        });
-    });
 </script>
 
 {% endblock content %}
-
-
-
-
 
 
