@@ -39,8 +39,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main',
     'authentication',
+    'rateNreview',
+    'preference',
+    'forum',
+    'widget_tweaks',
+    'meal_planning',
     'katalog',
-    'forum'
+    'bookmark',
 ]
 
 MIDDLEWARE = [
