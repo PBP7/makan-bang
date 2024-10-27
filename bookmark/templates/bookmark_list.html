@@ -21,7 +21,7 @@
                     <div id="note-container-{{ product.id }}">
                         {% if product.note %}
                         <button class="text-blue-600 font-semibold border-2 border-blue-600 rounded-lg px-14 py-1 mt-2 hover:bg-blue-600 hover:text-white transition duration-300" onclick="editNote('{{ product.id }}')">Edit Note</button>
-                        <p class="text-gray-700 mt-2 truncate overflow-hidden" id="note-content-{{ product.id }}" style="max-height: 80px; overflow-y: auto; word-wrap: break-word; white-space: pre-wrap;">{{ product.note }}</p>
+                        <p class="text-gray-700 mt-2 text-left truncate overflow-hidden" id="note-content-{{ product.id }}" style="max-height: 80px; overflow-y: auto; word-wrap: break-word; white-space: pre-wrap; text-align: left;">{{ product.note }}</p>
                         {% else %}
                         <button class="text-blue-600 font-semibold border-2 border-blue-600 rounded-lg px-14 py-1 mt-2 hover:bg-blue-600 hover:text-white transition duration-300" onclick="addNote('{{ product.id }}')">+ Add Note</button>
                         {% endif %}
@@ -70,32 +70,58 @@ function saveNote() {
     const noteInput = document.getElementById('note-input');
     const note = noteInput.value;
     document.getElementById('popup-note').classList.add('hidden');
-    const noteContainer = document.getElementById(`note-container-${currentProductId}`);
-    noteContainer.innerHTML = '';
 
-    if (note.trim() !== '') {
-        const editButton = document.createElement('button');
-        editButton.className = 'text-blue-600 font-semibold border-2 border-blue-600 rounded-lg px-14 py-1 mt-2 hover:bg-blue-600 hover:text-white transition duration-300';
-        editButton.textContent = 'Edit Note';
-        editButton.onclick = function() { editNote(currentProductId); };
-        noteContainer.appendChild(editButton);
+    fetch(`/bookmark/save_note/${currentProductId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}' 
+        },
+        body: new URLSearchParams({
+            'note': note
+        })
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            const noteContainer = document.getElementById(`note-container-${currentProductId}`);
+            noteContainer.innerHTML = '';
 
-        const noteElement = document.createElement('p');
-        noteElement.className = 'text-gray-700 mt-2 truncate overflow-hidden';
-        noteElement.style.maxHeight = '80px';
-        noteElement.style.overflowY = 'auto';
-        noteElement.style.wordWrap = 'break-word';
-        noteElement.style.whiteSpace = 'pre-wrap';
-        noteElement.textContent = note;
-        noteElement.id = `note-content-${currentProductId}`;
-        noteContainer.appendChild(noteElement);
-    } else {
-        const addButton = document.createElement('button');
-        addButton.className = 'text-blue-600 font-semibold border-2 border-blue-600 rounded-lg px-14 py-1 mt-2 hover:bg-blue-600 hover:text-white transition duration-300';
-        addButton.textContent = '+ Add Note';
-        addButton.onclick = function() { addNote(currentProductId); };
-        noteContainer.appendChild(addButton);
-    }
+            if (note.trim() !== '') {
+                const editButton = document.createElement('button');
+                editButton.className = 'text-blue-600 font-semibold border-2 border-blue-600 rounded-lg px-14 py-1 mt-2 hover:bg-blue-600 hover:text-white transition duration-300';
+                editButton.textContent = 'Edit Note';
+                editButton.onclick = function() { editNote(currentProductId); };
+                noteContainer.appendChild(editButton);
+
+                const noteElement = document.createElement('p');
+                noteElement.className = 'text-gray-700 mt-2 truncate overflow-hidden text-left';
+                noteElement.style.maxHeight = '80px';
+                noteElement.style.overflowY = 'auto';
+                noteElement.style.wordWrap = 'break-word';
+                noteElement.style.whiteSpace = 'pre-wrap';
+                noteElement.style.textAlign = 'left';
+                noteElement.textContent = note;
+                noteElement.id = `note-content-${currentProductId}`;
+                noteContainer.appendChild(noteElement);
+            } else {
+                const addButton = document.createElement('button');
+                addButton.className = 'text-blue-600 font-semibold border-2 border-blue-600 rounded-lg px-14 py-1 mt-2 hover:bg-blue-600 hover:text-white transition duration-300';
+                addButton.textContent = '+ Add Note';
+                addButton.onclick = function() { addNote(currentProductId); };
+                noteContainer.appendChild(addButton);
+            }
+        } else {
+            alert('Failed to save note');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while saving the note');
+    });
 }
 
 function cancelNote() {
