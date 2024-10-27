@@ -1,4 +1,3 @@
-
 {% extends 'base.html' %}
 {% load static %}
 
@@ -16,30 +15,34 @@
         <!-- Search Bar and Filter Button Container -->
         <div class="flex flex-col md:flex-row w-full justify-between items-center space-y-4 md:space-y-0 md:space-x-4">
             <div class="flex w-full md:w-3/4 space-x-4">
+                <input type="text" id="searchBar" placeholder="Search by category or name" 
+                       class="border border-gray-300 rounded-md p-2 w-full md:w-5/6 hover:border-indigo-700" 
+                       oninput="debouncedFilterProducts(this.value)">
             
-                       <div class="flex space-x-2 md:justify-end w-full md:w-1/4">
-                        <div class="relative">
-                            <button id="filterButton" class="bg-white border text-black font-medium py-2 px-3 text-sm rounded-md shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 w-20 h-[42px] flex items-center ">
-                                <span>Filter</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </button>
-                        
-                            <!-- Dropdown menu (hidden by default) -->
-                            <div id="filterDropdown" class="hidden absolute left-0 mt-2 w-48 bg-white border border-gray-300 rounded-lg shadow-lg z-50 ">
-                                <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" onclick="filterByPrice('lowest')">Lowest Price</a>
-                                <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" onclick="filterByPrice('highest')">Highest Price</a>
-                            </div>
-                        </div>
-                        
-                        {% if user.username == "Admin" or user.username == "admin" %}
-                        <button onclick="showModal()"
-                            class="bg-white border text-black font-medium py-2 px-3 text-sm rounded-md shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105">
-                            + Add Product
+                       <div class="relative">
+                        <button id="filterButton" class="bg-white border text-black font-medium py-2 px-3 text-sm rounded-md shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 w-20 h-[42px] flex items-center justify-between">
+                            <span>Filter</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
                         </button>
-                        {% endif %}
+                    
+                        <!-- Dropdown menu (hidden by default) -->
+                        <div id="filterDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded-lg shadow-lg z-50">
+                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" onclick="filterByPrice('lowest')">Lowest Price</a>
+                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" onclick="filterByPrice('highest')">Highest Price</a>
+                        </div>
                     </div>
+                    
+            </div>
+            
+            <div class="flex space-x-2 md:justify-end w-full md:w-1/4">
+                {% if user.username == "Admin" or user.username == "admin" %}
+                <button onclick="showModal()"
+                    class="bg-white border text-black font-medium py-2 px-3 text-sm rounded-md shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105">
+                    + Add Product
+                </button>
+                {% endif %}
                 
                 {% if user.username != "Admin" and user.username != "admin" and user.is_authenticated %}
                 <button class="bg-white border text-black font-medium py-2 px-3 text-sm rounded-md shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105">
@@ -355,6 +358,15 @@
         return div;
     }
 
+    // Add this event listener to the search input
+    document.getElementById('searchBar').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.trim();
+        if (searchTerm.length > 0) {
+            searchProducts(searchTerm);
+        } else {
+            refreshProductEntries();
+        }
+    });
 
     function addProductEntry(event) {
         event.preventDefault();
