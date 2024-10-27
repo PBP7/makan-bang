@@ -1,5 +1,5 @@
-<!DOCTYPE html>
 {% load static %}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -10,9 +10,16 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     
     <style>
+        /* Apply the background image */
         body {
-            background-color: #FFFFFF;
+            background-image: url("{% static 'image/bgmp.jpeg' %}");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: center;
+            color: #FFFFFF;
         }
+
         .flex-container {
             display: flex;
             justify-content: flex-start;
@@ -20,20 +27,21 @@
             margin-top: 20px;
             gap: 10px;
         }
-        .card {
-            background-color: #FCFAF7;
+        
+        .card, .card_food {
+            background-color: rgba(252, 250, 247, 0.9);
             border-radius: 0.375rem;
             padding: 1rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card {
             flex: 1;
             min-width: 340px;
             height: 570px;
         }
+        
         .card_food {
-            background-color: #FCFAF7;
-            border-radius: 0.375rem;
-            padding: 1rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
             min-width: 700px;
@@ -49,24 +57,22 @@
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
         }
-        .bg-white.shadow-lg.rounded-lg.overflow-hidden {
-            width: 150px;
-            height: 220px;
-            flex-shrink: 0;
+
+        .btn-shadow {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 0.375rem; 
         }
 
-        .bg-white .w-full .h-full {
-            overflow: hidden;
-            object-fit: cover;
-        }
-
-        
-        .add-button-container {
+        .button-container {
+            position: fixed;
+            top: 50%;
+            right: 2%;
+            transform: translateY(-50%);
             display: flex;
-            justify-content: center;
-            padding-top: 1rem;
+            flex-direction: column;
+            gap: 10px;
         }
-        
+
         .btn {
             background-color: #3845AD;
             color: white;
@@ -75,74 +81,39 @@
             transition: background-color 0.2s;
             text-align: center;
         }
+        
         .btn:hover {
             background-color: #212a73;
-        }
-        .save-btn {
-            background-color: #38a169;
-        }
-        .save-btn:hover {
-            background-color: #2f855a;
-        }
-        .cancel-btn {
-            background-color: #e53e3e;
-        }
-        .cancel-btn:hover {
-            background-color: #c53030;
-        }
-        .header-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-        .date-picker {
-            flex: 1;
-            text-align: right;
-        }
-        .add-other-food-btn {
-            display: block;
-            width: 100%;
-            margin-top: 10px;
-        }
-        .food-item-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-top: 1rem;
         }
     </style>
 </head>
 
-<body class="bg-gray-100">
-
+<body>
+    <!-- Main Form for Meal Plan -->
     <form action="{% url 'finish_meal_plan' %}" method="POST" autocomplete="off">
         {% csrf_token %}
-        <div class="container mx-auto mt-10 flex-container">
-
-            <div class="card">
-                <h2 class="text-2xl font-bold text-blue-600 mb-0">Create your</h2>
-                <h2 class="text-2xl font-bold text-blue-600 mb-4">Meal Plan</h2>
-
-                <div class="mb-6">
-                    <input type="hidden" id="selected_date" name="selected_date" value="">
-                    <div id="datepicker" class="mt-2 p-2 border border-gray-300 rounded"></div>
-                </div>
-
-                <div class="mb-6">
-                    <label for="time" class="block text-gray-700 mb-2">Select Time</label>
-                    <input id="time" name="time" type="time" class="w-full mt-2 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-                </div>
-            </div>
-
-            <div class="card_food relative overflow-hidden h-[500px] p-4 bg-[#FCFAF7] rounded-lg shadow-lg"> 
-                <h2 class="text-2xl font-bold text-blue-600 mb-4">Food added</h2>
+        
+        <div class="button-container">
+            <!-- Save Button -->
+            <button type="submit" class="flex items-center justify-center">
+                <img src="{% static 'image/saveButton.png' %}" alt="Save" class="w-22 h-12 object-cover">
+            </button>
             
-                <div class="overflow-y-auto max-h-[350px] grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-4 px-2">
+            <!-- Cancel Button (Clears selection and redirects) -->
+            <a href="{% url 'cancel_selection' %}" class="flex items-center justify-center">
+                <img src="{% static 'image/cancelButton.png' %}" alt="Cancel" class="w-22 h-12 object-cover">
+            </a>
+        </div>
+
+        <div class="container mx-auto mt-10 flex-container">
+            <!-- Left Column - Food Added Section -->
+            <div class="card_food relative overflow-hidden p-4 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-bold text-blue-600 mb-4">Food added</h2>
+                
+                <div class="scrollable-content">
                     {% if food_items %}
                         {% for food_item in food_items %}
                             <div class="bg-white shadow-lg rounded-lg overflow-hidden w-[220px] h-[240px] flex flex-col items-center justify-between mx-auto">
-                
                                 <div class="w-[100px] h-[100px] flex items-center justify-center">
                                     {% if food_item.picture_link %}
                                         <img src="{{ food_item.picture_link }}" alt="{{ food_item.item }}" class="w-full h-full object-cover rounded-md">
@@ -152,27 +123,41 @@
                                         </div>
                                     {% endif %}
                                 </div>
-                
                                 <div class="text-center mt-2 h-[40px] flex items-center justify-center">
                                     <p class="text-lg font-semibold">{{ food_item.item }}</p>
                                 </div>
-                
                             </div>                        
                         {% endfor %}
                     {% else %}
-                        <p>No food items added to your meal plan.</p>
+                        <p class="text-center text-gray-500 mt-4">No food items added to your meal plan.</p>
                     {% endif %}
                 </div>
                 
-                <div class="absolute bottom-4 left-0 right-0 flex justify-center px-4">
-                    <a href="choices/" class="btn bg-blue-500 text-white py-2 px-4 rounded-lg w-full">+ add meal</a>
+                <!-- Add Meal Button -->
+                <div class="absolute bottom-4 right-4 flex justify-end px-4">
+                    <a href="{% url 'choices_page' %}" class="flex">
+                        <img src="{% static 'image/plusButton.png' %}" alt="Add Meal" class="w-16 h-16 object-cover">
+                    </a>                    
                 </div>
             </div>
-        </div>
 
-        <div class="flex justify-center gap-4 mt-6">
-            <button type="submit" class="btn save-btn">Save</button>
-            <button type="button" onclick="window.location.href='{% url 'create_plan' %}'" class="btn cancel-btn">Cancel</button>
+            <!-- Right Column - Date & Time Picker Section -->
+            <div class="card">
+                <h2 class="text-2xl font-bold text-[#7FBFA2] mb-0">Create your</h2>
+                <h2 class="text-2xl font-bold text-[#7FBFA2] mb-4">Meal Plan</h2>
+
+                <!-- Date Picker -->
+                <div class="mb-6">
+                    <input type="hidden" id="selected_date" name="selected_date">
+                    <div id="datepicker" class="mt-2 p-2 border border-gray-300 rounded"></div>
+                </div>
+
+                <!-- Time Picker -->
+                <div class="mb-6">
+                    <label for="time" class="block text-gray-700 mb-2">Select Time</label>
+                    <input id="time" name="time" type="time" class="w-full mt-2 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                </div>
+            </div>
         </div>
     </form>
 

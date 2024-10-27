@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Food Choices</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <input type="hidden" id="selected_date">
+    <input type="hidden" id="selected_time">
+
 </head>
 <body>
     
@@ -18,17 +21,15 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 px-4 py-6">
                 {% for product_entry in product_entries %}
                     <div class="relative bg-[#f7f7f7] shadow-md mb-6 flex flex-col border-2 border-black-500 rounded-2xl w-full min-w-[150px] max-w-[200px] h-auto">
-                        <!-- Checkbox to select food item -->
+                        
                         <input type="checkbox" name="selected_foods" value="{{ product_entry.id }}" class="absolute top-2 right-2 z-10 w-6 h-6 border-gray-400 rounded-full">
             
-                        <!-- Display the image if picture_link is provided -->
                         {% if product_entry.picture_link %}
                             <div class="w-full aspect-square overflow-hidden rounded-lg">
                                 <img src="{{ product_entry.picture_link }}" alt="{{ product_entry.item }}" class="h-full w-full object-cover">
                             </div>
                         {% endif %}
             
-                        <!-- Food Name -->
                         <div class="p-2 text-center">
                             <h3 class="font-bold text-lg text-black">{{ product_entry.item }}</h3>
                         </div>
@@ -58,5 +59,20 @@
             card.classList.add('border-black-500');
         }
     }
+
+   ]
+    // Retrieve date and time from URL and populate the fields
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const date = urlParams.get('date');
+        const time = urlParams.get('time');
+
+        if (date) {
+            document.getElementById('selected_date').value = date;
+        }
+        if (time) {
+            document.getElementById('selected_time').value = time;
+        }
+    });
 </script>
 </html>

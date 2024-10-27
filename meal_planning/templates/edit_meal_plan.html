@@ -4,71 +4,75 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Rencana Makan</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    {% load static %}
+    <link href="{% static 'css/tailwind.min.css' %}" rel="stylesheet">
     <style>
         body {
-            background-color: #FFFFFF; /* Main background color */
+            background-color: #f3f4f6; /* Light background color */
+            font-family: Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
         }
         .container {
-            max-width: 600px;
-            margin: 50px auto;
-            background-color: #FCFAF7; /* Cream background */
-            padding: 2rem;
+            display: flex;
+            max-width: 1100px; /* Increased width for a larger card */
+            width: 100%;
+            background-color: white;
             border-radius: 0.375rem; /* Rounded corners */
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Shadow effect */
+            overflow: hidden;
+        }
+        .image-section {
+            width: 50%;
+            background-image: url('{% static "image/editbg.jpeg" %}');
+            background-size: cover;
+            background-position: center;
+        }
+        .form-section {
+            width: 50%;
+            padding: 3rem; /* Increased padding for a larger form area */
+            text-align: left;
         }
         h1 {
             font-size: 2rem;
-            color: #3845AD; /* Blue color for title */
-            margin-bottom: 1rem;
+            color: #7FBFA2; /* Updated color for title */
+            margin-bottom: 1.5rem;
             font-weight: bold;
-            text-align: center;
         }
         .btn-primary {
-            background-color: #3845AD; /* Blue background */
+            background-color: #7FBFA2; /* Updated button color */
             color: white;
-            padding: 0.5rem 1rem;
+            padding: 0.75rem 1.5rem;
             border-radius: 0.375rem; /* Rounded corners */
             width: 100%; /* Full-width button */
             text-align: center;
             transition: background-color 0.3s;
-            margin-top: 1rem;
+            margin-top: 2rem;
         }
         .btn-primary:hover {
-            background-color: #212a73; /* Darker blue on hover */
-        }
-        .btn-secondary {
-            background-color: transparent;
-            color: #3845AD; /* Blue text */
-            border: 2px solid #3845AD; /* Blue border */
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem; /* Rounded corners */
-            width: 100%; /* Full-width button */
-            text-align: center;
-            transition: background-color 0.3s, color 0.3s;
-            margin-top: 1rem;
-        }
-        .btn-secondary:hover {
-            background-color: #3845AD; /* Blue background on hover */
-            color: white; /* White text on hover */
+            background-color: #6aa88a; /* Slightly darker green on hover */
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Edit Rencana Makan</h1>
+        <!-- Left Side - Image Section -->
+        <div class="image-section"></div>
         
-        <!-- Form to Save Changes -->
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn-primary">Simpan Perubahan</button>
-        </form>
-
-        <!-- Form to Edit Food Choices -->
-        <form action="{% url 'choices_page' %}" method="get">
-            <button type="submit" class="btn-secondary">Edit Pilihan Makanan</button>
-        </form>
+        <!-- Right Side - Form Section -->
+        <div class="form-section">
+            <h1>Edit Rencana Makan</h1>
+            
+            <!-- Form to Save Changes -->
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn-primary">Simpan Perubahan</button>
+            </form>
+        </div>
     </div>
 </body>
 </html>

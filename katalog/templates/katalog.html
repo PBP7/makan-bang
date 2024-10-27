@@ -172,7 +172,7 @@
         </div>
     </div>
 
-    <div class="fixed bottom-4 right-4 z-50">
+    <div class="fixed bottom-100 right-4 z-50">
         <a href="/meal-planning/create">
             <img src="{% static 'image/mealplan.png' %}" alt="Meal Plan" class="w-16 h-16 shadow-lg hover:scale-105 transition-transform">
         </a>
@@ -561,6 +561,7 @@ function showRatingModal(productId) {
     document.getElementById("submitProductEntry").onclick = addProductEntry
 
     refreshProductEntries();
+
 </script>
 
 {% endblock content %}

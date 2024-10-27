@@ -1,26 +1,46 @@
-<!DOCTYPE html>
+{% extends 'base.html' %}
 {% load static %}
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Meal Plan</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+{% block meta %}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Meal Plan</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+{% endblock meta %}
+
+{% block content %}
     <style>
+        .header-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+        }
         .see-more-text {
-            position: absolute;
-            bottom: 1rem;
-            right: 1rem;
             color: #FFA500;
             cursor: pointer;
+            font-size: 0.8rem;
+            position: absolute;
+            bottom: 0.5rem;
+            right: 0.5rem;
+            text-align: right;
         }
-
-        .card {
-            position: relative;
-            padding-bottom: 2rem;
+        .meal-card {
+            padding: 0.5rem;
+            border-radius: 0.5rem;
             background-color: #FCFAF7;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 0.85rem;
+            text-align: left;
+            position: relative;
+            min-height: 10rem;
         }
-
+        .meal-image {
+            width: 3rem;
+            height: 3rem;
+            margin: 0 auto;
+            display: block;
+        }
         .floating-button {
             position: fixed;
             bottom: 2rem;
@@ -33,85 +53,233 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 2rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             cursor: pointer;
             transition: background-color 0.3s ease;
             z-index: 50;
         }
-
         .floating-button:hover {
             background-color: #2c3e88;
         }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            width: 80%;
+            max-width: 400px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #333;
+        }
+
     </style>
-</head>
 
-<body class="flex flex-col items-center justify-center min-h-screen bg-white">
+<body class="bg-white">
     {% include 'navbar.html' %}
-    <h1 class="text-4xl font-bold text-blue-600 mb-8">Your Meal Plans</h1>
+    <div class="w-full">
+        <img src="{% static 'image/headbg.jpeg' %}" alt="Header Image" class="header-image">
+    </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for meal_plan in meal_plans %}
-            <div id="card-{{ meal_plan.id }}" class="card bg-[#FCFAF7] p-4 shadow-lg rounded-lg transition-all duration-300">
-                <div id="default-view-{{ meal_plan.id }}">
-                    <h2 class="text-2xl font-bold text-blue-600 mb-4">{{ meal_plan.meal_type|capfirst }} on {{ meal_plan.date }}</h2>
-                    <p class="text-gray-700">Time: {{ meal_plan.time }}</p>
-                    
-                    <h3 class="text-lg font-bold mt-2">Foods:</h3>
-                    <ul class="list-disc ml-5">
+    <div class="container mx-auto my-10 px-6">
+
+        <h2 class="text-2xl font-bold text-[#F65035] mb-0"> Today's Meal Plans</h2>
+        <br>
+        
+        <!-- 5 cards per row on large screens -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-8">
+
+            {% if has_today_plan %}
+                <div class="reminder">
+                    <img src="{% static 'image/reminder.png' %}">
+                </div>
+            {% else %}
+                <div class="reminder">
+                    <p class="text-gray-500 mb-8">No meal plans today</p>
+                </div>
+            {% endif %}
+            
+            {% for meal_plan in today_meal_plans %}
+                <div id="meal-card-{{ meal_plan.id }}" class="meal-card text-left p-4 bg-[#ffddca] rounded-lg shadow-lg border border-[#F65035] relative h-64 flex flex-col items-center">
+                    <img src="{% static 'image/food.jpeg' %}" alt="Food Image" class="w-20 h-20 rounded-full mb-4 shadow-md object-cover">
+                    <p class="text-xs text-gray-600 font-semibold">date: {{ meal_plan.date }}</p>
+                    <p class="text-xs text-gray-600 font-semibold">time: {{ meal_plan.time }}</p>
+                    <p class="text-xs text-gray-600 font-semibold mt-2">meal:</p>
+                    <ul class="text-xs text-gray-600 list-disc list-inside mb-2">
                         {% for food in meal_plan.food_items.all|slice:":3" %}
                             <li>{{ food.item }}</li>
                         {% endfor %}
-                        
                         {% if meal_plan.food_items.count > 3 %}
                             <li class="text-gray-500">+ more...</li>
                         {% endif %}
                     </ul>
-                   
-                    <span onclick="expandCard({{ meal_plan.id }})" class="see-more-text">See more →</span>
+                    <span onclick="expandCard({{ meal_plan.id }})" class="see-more-text text-xs text-orange-500 absolute bottom-2 right-2 cursor-pointer">see more →</span>
                 </div>
+            {% endfor %}
 
-                <div id="expanded-view-{{ meal_plan.id }}" class="hidden bg-white shadow-lg rounded-lg p-4">
-                    <div class="flex justify-end">
-                        <button onclick="collapseCard({{ meal_plan.id }})" class="text-gray-500 text-sm">Back &gt;&gt;</button>
+        </div>
+
+        <br>
+        <h2 class="text-2xl font text-black mb-0">Future Meal Plans</h2>
+        <br>
+
+        {% if other_meal_plans %}
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8">
+                {% for meal_plan in other_meal_plans %}
+                    <div id="meal-card-{{ meal_plan.id }}" class="meal-card text-left p-4 bg-[#FFF4E6] rounded-lg shadow-lg relative h-64 flex flex-col items-center">
+                        <img src="{% static 'image/food.jpeg' %}" alt="Food Image" class="w-20 h-20 rounded-full mb-4 shadow-md object-cover">
+                        <p class="text-xs text-gray-600 font-semibold">date: {{ meal_plan.date }}</p>
+                        <p class="text-xs text-gray-600 font-semibold">time: {{ meal_plan.time }}</p>
+                        <p class="text-xs text-gray-600 font-semibold mt-2">meal:</p>
+                        <ul class="text-xs text-gray-600 list-disc list-inside mb-2">
+                            {% for food in meal_plan.food_items.all|slice:":3" %}
+                                <li>{{ food.item }}</li>
+                            {% endfor %}
+                            {% if meal_plan.food_items.count > 3 %}
+                                <li class="text-gray-500">+ more...</li>
+                            {% endif %}
+                        </ul>
+                        <span onclick="expandCard({{ meal_plan.id }})" class="see-more-text text-xs text-orange-500 absolute bottom-2 right-2 cursor-pointer">see more →</span>
                     </div>
-
-                    <h2 class="text-2xl font-bold text-blue-600 mb-4">{{ meal_plan.meal_type|capfirst }} on {{ meal_plan.date }}</h2>
-                    <p class="text-gray-700">Time: {{ meal_plan.time }}</p>
-
-                    <h3 class="text-lg font-bold mt-2">Foods:</h3>
-                    <ul class="list-disc ml-5">
-                        {% for food in meal_plan.food_items.all %}
-                            <li>{{ food.item }}</li>
-                        {% endfor %}
-                    </ul>
-
-                    <div class="mt-4 flex justify-between">
-                        <a href="{% url 'edit_meal_plan' meal_plan.id %}" class="bg-yellow-500 text-white py-2 px-4 rounded-lg">Edit</a>
-                        <form action="{% url 'delete_meal_plan' meal_plan.id %}" method="POST" class="inline-block">
-                            {% csrf_token %}
-                            <button type="submit" class="bg-red-500 text-white py-2 px-4 rounded-lg" aria-label="Delete meal plan">Delete</button>
-                        </form>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
-        {% endfor %}
+        {% else %}
+            <p class="text-gray-500 mb-8">No future meal plans</p>
+        {% endif %}
+        
+        <br>
+        <br>
+            <h2 class="text-2xl font text-black mb-0"> Past Meal Plans</h2>
+        <br>    
+            
+        {% if past_meal_plans %}
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8">
+                {% for meal_plan in past_meal_plans %}
+                    <div id="meal-card-{{ meal_plan.id }}" class="meal-card text-left p-4 bg-[#EEEDED] rounded-lg shadow-lg border border-[#black] relative h-64 flex flex-col items-center">
+                        <img src="{% static 'image/food.jpeg' %}" alt="Food Image" class="w-20 h-20 rounded-full mb-4 shadow-md object-cover">
+                        <p class="text-xs text-gray-600 font-semibold">date: {{ meal_plan.date }}</p>
+                        <p class="text-xs text-gray-600 font-semibold">time: {{ meal_plan.time }}</p>
+                        <p class="text-xs text-gray-600 font-semibold mt-2">meal:</p>
+                        <ul class="text-xs text-gray-600 list-disc list-inside mb-2">
+                            {% for food in meal_plan.food_items.all|slice:":3" %}
+                                <li>{{ food.item }}</li>
+                            {% endfor %}
+                            {% if meal_plan.food_items.count > 3 %}
+                                <li class="text-gray-500">+ more...</li>
+                            {% endif %}
+                        </ul>
+                        <span onclick="expandCard({{ meal_plan.id }})" class="see-more-text text-xs text-orange-500 absolute bottom-2 right-2 cursor-pointer">see more →</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-500 mb-8">No past meal plans</p>
+        {% endif %}
+
     </div>
 
-    <a href="{% url 'meal_planning' %}" class="floating-button">
-        +
-    </a>
+    <a href="{% url 'meal_planning' %}" class="floating-button">+</a>
+
+    <!-- Modal Overlay -->
+    <div id="modal-overlay" class="modal-overlay flex">
+        <div id="modal-content" class="modal-content">
+            <span class="modal-close" onclick="collapseCard()">×</span>
+            <div id="modal-details"></div>
+        </div>
+    </div>
+
 
     <script>
+        const mealPlansData = JSON.parse('{{ meal_plans_json|safe }}');
+    
         function expandCard(id) {
-            document.getElementById(`default-view-${id}`).classList.add("hidden");
-            document.getElementById(`expanded-view-${id}`).classList.remove("hidden");
+            const mealPlan = mealPlansData.find(plan => plan.id === id);
+            const modalOverlay = document.getElementById("modal-overlay");
+            const modalDetails = document.getElementById("modal-details");
+    
+            if (mealPlan) {
+                const foodList = mealPlan.food_items.map(item => `<li>${item.item}</li>`).join("");
+                
+                modalDetails.innerHTML = `
+                <div class="relative text-left p-4 bg-white">
+                    <img src="{% static 'image/food.jpeg' %}" alt="Food Image" class="rounded-full w-16 h-16 mx-auto mb-4">
+                    <p class="text-base text-gray-700 mb-2"><strong>Date:</strong> ${mealPlan.date}</p>
+                    <p class="text-base text-gray-700 mb-2"><strong>Time:</strong> ${mealPlan.time}</p>
+                    <p class="text-base text-gray-700 mb-2"><strong>Meal:</strong></p>
+                    <ul class="text-base text-gray-700 list-disc list-inside mb-4">
+                        ${foodList}
+                    </ul>
+                    
+                    <!-- Edit and Delete Buttons -->
+                    <div class="absolute bottom-4 right-4 space-x-3 flex">
+                        <!-- Edit Icon Button -->
+                        <a href="/meal-planning/meal-plan/${mealPlan.id}/edit/" class="bg-blue-500 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg">
+                            <i class="fas fa-pencil-alt"></i>
+                        </a>
+                    
+                                                
+                        <!-- Delete Icon Button -->
+                        <button onclick="confirmDelete(${mealPlan.id})" class="bg-red-500 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                `;
+                modalOverlay.style.display = "flex";    
+            }
+        }
+    
+        function collapseCard() {
+            document.getElementById("modal-overlay").style.display = "none";
+        }
+    
+        function confirmDelete(id) {
+            const deleteConfirmed = confirm("Are you sure you want to delete this meal plan?");
+            if (deleteConfirmed) {
+                fetch(`{% url 'delete_meal_plan' 0 %}`.replace('0', id), {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',  // CSRF token for POST requests
+                        'Content-Type': 'application/json'
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert(data.message);
+                        document.getElementById(`meal-card-${id}`).remove();  // Remove card from UI
+                        collapseCard();
+                    } else {
+                        alert('Failed to delete meal plan.');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
         }
 
-        function collapseCard(id) {
-            document.getElementById(`expanded-view-${id}`).classList.add("hidden");
-            document.getElementById(`default-view-${id}`).classList.remove("hidden");
-        }
+        
+
+
     </script>
 </body>
+{% endblock content%}
 </html>
