@@ -14,7 +14,7 @@
                 <p class="text-gray-700 mb-1">{{ product.kategori }}</p>
                 
                 <div class="flex justify-center mt-2">
-                    <a href="{% url 'bookmark:remove_bookmark' product.id %}" class="text-white font-semibold bg-red-500 border-2 border-red-500 rounded-lg px-7 py-1 hover:bg-red-700 hover:text-white transition duration-300">Remove Product</a>
+                    <a href="{% url 'bookmark:remove_bookmark' product.id %}" class="text-white font-semibold bg-red-500 border-2 border-red-500 rounded-lg px-10 py-1 hover:bg-red-700 hover:text-white transition duration-300">Remove Product</a>
                 </div>
                 
                 <div class="flex flex-col items-center mt-2" id="note-{{ product.id }}" style="text-align: center;">
