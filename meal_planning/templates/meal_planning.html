@@ -37,11 +37,11 @@
 
     .flex-container {
         display: flex;
-        justify-content: flex-start;
-        align-items: stretch;
-        margin-top: 55px; /* Adjusted for the new navbar height */
-        margin-left: 110px;
-        gap: 10px;
+        justify-content: center;
+        align-items: flex-start;
+        margin-top: 75px;
+        gap: 20px;
+        padding: 0 20px;
     }
     
     .card, .card_food {
@@ -52,26 +52,25 @@
     }
     
     .card {
-        flex: 1;
-        min-width: 340px;
+        width: 340px;
         height: 550px;
     }
     
     .card_food {
         display: flex;
         flex-direction: column;
-        min-width: 700px;
+        width: 700px;
         height: 550px;
-        align-self: flex-start;
     }
     
     .scrollable-content {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
         overflow-y: auto;
         max-height: 400px;
         margin-bottom: 1rem;
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 10px;
+        padding-right: 10px;
     }
 
     .btn {
@@ -113,29 +112,26 @@
         </div>
     </div>
 
-    <br>
-
     <form id="mealPlanForm" action="{% url 'finish_meal_plan' %}" method="POST" autocomplete="off">
         {% csrf_token %}
-        <div class="container mx-auto mt-10 flex-container">
+        <div class="flex-container">
             <div class="card_food relative overflow-hidden p-4 rounded-lg shadow-lg">
-                <h2 class="text-2xl font-bold text-[#F65035 ] mb-4">Food added</h2>
+                <h2 class="text-2xl font-bold text-[#F65035] mb-4">Food added</h2>
                 
                 <div class="scrollable-content">
                     {% if food_items %}
                         {% for food_item in food_items %}
-                            <div class="bg-white shadow-lg rounded-lg overflow-hidden w-[220px] h-[280px] flex flex-col items-center justify-between mx-auto border border-[#F65035]">
+                            <div class="bg-white shadow-lg rounded-lg overflow-hidden w-[200px] h-[250px] flex flex-col items-center justify-between mx-auto border border-[#F65035]">
                                 <div class="w-full h-[140px] flex items-center justify-center overflow-hidden">
                                     {% if food_item.picture_link %}
                                         <img src="{{ food_item.picture_link }}" alt="{{ food_item.item }}" class="w-full h-full object-cover">
                                     {% else %}
-                                        <!-- Placeholder if image is missing -->
                                         <div class="flex items-center justify-center h-full w-full bg-gray-200 text-gray-500 text-center">
                                             <span>No Image</span>
                                         </div>
                                     {% endif %}
                                 </div>
-                                <div class="text-center mt-2 flex flex-col items-center justify-center">
+                                <div class="text-center mt-2 flex flex-col items-center justify-center p-2">
                                     <p class="text-sm font-medium text-dark">{{ food_item.item }}</p>
                                 </div>
                             </div>
