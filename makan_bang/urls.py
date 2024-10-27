@@ -28,9 +28,6 @@ urlpatterns = [
     path('forum/', include('forum.urls')),
     path('rateNreview/', include('rateNreview.urls')),
     path('meal-planning/', include('meal_planning.urls')),
-    path('bookmark/', include('bookmark.urls')),
-
 
 ]
-
 
