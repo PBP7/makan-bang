@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'preference',
     'bookmark',
     'forum',
-    'widget_tweaks',
     'meal_planning',
 ]
 

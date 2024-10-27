@@ -60,7 +60,6 @@ def cancel_selection(request):
     
     # Redirect to the create_plan page
     return redirect('create_plan')
-
 # Process Choices from the Selection Page and Store in Session
 @login_required
 def process_choices(request):
@@ -96,8 +95,12 @@ def finish_meal_plan(request):
         return redirect(reverse('create_plan'))
     
     return HttpResponse('Invalid request', status=400)
+import json
+from django.shortcuts import render
+from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from .models import MealPlan
 
-# List All Meal Plans
 @login_required
 def create_plan(request):
     meal_plans = MealPlan.objects.filter(user=request.user)
@@ -131,6 +134,7 @@ def create_plan(request):
     }
     
     return render(request, 'create_plan.html', context)
+
 
 @login_required
 
