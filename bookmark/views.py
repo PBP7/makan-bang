@@ -45,3 +45,15 @@ def toggle_bookmark(request, product_id):
         product.bookmarked.add(request.user)
         bookmarked = True
     return JsonResponse({"bookmarked": bookmarked})
+def add_or_edit_note(request):
+    product_id = request.POST.get('product_id')
+    product = Product.objects.get(id = product_id)
+    note = request.POST.get('note')
+    bookmark = get_object_or_404(Bookmark, product = product, user = request.user)
+
+    # Save note to the bookmark
+    bookmark.note = note
+    bookmark.save()
+    
+    return JsonResponse({'status': 'success', 'note': bookmark.note})
+
