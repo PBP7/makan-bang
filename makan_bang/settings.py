@@ -43,10 +43,10 @@ INSTALLED_APPS = [
     'rate_review',
     'rateNreview',
     'preference',
+    'bookmark',
     'forum',
     'widget_tweaks',
     'meal_planning',
-    'bookmark',
 ]
 
 MIDDLEWARE = [
