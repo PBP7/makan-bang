@@ -49,13 +49,32 @@
             </div>
 
             <!-- Modal body -->
-            <div class="px-6 py-4 space-y-2">
+            <div class="px-6 py-4 space-y-1">
                 <img id="modalProductImage" src="" alt="Product Image" class="h-48 w-full object-cover rounded-md mb-4">
-                <p class="text-gray-600"><strong>Category:</strong> <span id="modalProductCategory"></span></p>
-                <p class="text-gray-600 break-words"><strong>Restaurant:</strong> <span id="modalProductRestaurant"></span></p>
-                <p class="text-gray-600 break-words"><strong>Location:</strong> <span id="modalProductLocation"></span></p>
-                <p class="text-gray-600 break-words"><strong>Nutrition Info:</strong> <span id="modalProductNutrition"></span></p>
-                <p class="text-gray-600"><strong>GoFood Link:</strong> <a id="modalProductGofoodLink" href="" target="_blank" class="text-blue-500">View</a></p>
+                <span class="inline-block bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm mb-4" id = "modalProductCategory">Category</span> 
+                
+                <p class="text-gray-600 break-words">
+                    <!-- Reduced the size of the restaurant icon to match the location icon -->
+                    <img src="/static/image/iconRestoran.png" alt="Restaurant" class="w-5 h-5 inline-block object-cover mr-1">
+                    <span id="modalProductRestaurant"></span>
+                </p>
+                <p class="text-gray-600 break-words">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="inline-block h-5 w-5 text-gray-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 10a3 3 0 100-6 3 3 0 000 6z" />
+                    </svg>
+                    <span id ="modalProductLocation"></span>
+                </p>
+                <p class="text-gray-600 break-words">
+                    <!-- Reduced the size of the restaurant icon to match the location icon -->
+                    <img src="/static/image/iconNutrition.png" alt="Nutrition" class="w-5 h-5 inline-block object-cover mr-1">
+                    <span id="modalProductNutrition"></span>
+                </p>
+                <p class="text-gray-600 break-words">
+                    <!-- Reduced the size of the restaurant icon to match the location icon -->
+                    <img src="/static/image/iconLink.png" alt="GofoodLink" class="w-5 h-5 inline-block object-cover mr-1">
+                    <a id="modalProductGofoodLink" href="" target="_blank" class="text-blue-500">View</a>
+                </p>
+                
                 <p class="font-bold text-lg"><strong>Price:</strong> $<span id="modalProductPrice"></span></p>
                 <p id="modalProductDescription" class="text-gray-600 break-words"></p>
             </div>
@@ -174,17 +193,20 @@
         </div>
     </div>
 
-    <div class="fixed bottom-4 right-4 z-50">
+    <div class="fixed bottom-100 right-4 z-50">
         <a href="/meal-planning/create">
-            <button class="bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg">Meal Plan</button>
+            <img src="{% static 'image/mealplan.png' %}" alt="Meal Plan" class="w-16 h-16 shadow-lg hover:scale-105 transition-transform">
         </a>
     </div>
+    
+    
 
   
 </div>
 
 <!-- Script for handling product entries -->
 <script>
+    const isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
     function addProductEntry(event) {
         event.preventDefault();
     
@@ -220,10 +242,6 @@
         return false;
     }
     
-    
-    
-    
-    
     async function getProductEntries(){
         return fetch("{% url 'katalog:show_json' %}").then((res) => res.json());
     }
@@ -257,17 +275,23 @@
                 const sanitizedPictureLink = DOMPurify.sanitize(product.fields.picture_link);
     
                 htmlString += `
-                  <div class="relative break-inside-avoid cursor-pointer group">
-                        <div class="relative top-5 bg-white shadow-md mb-6 p-4 border-2 border-gray-300 rounded-lg"
-                            style="min-height: 29rem; max-height: 29rem; width: calc(100vw - 60); max-width: calc(100vw - 60vw);">
-                            
-                            <img src="${sanitizedPictureLink}" alt="${sanitizedItem}" class="h-48 w-full object-cover rounded-md mb-4"
-                            onclick="showProductDetail(${index})">
-
-                            <div class="flex justify-start items-center mb-4 space-x-3">
+                  <div class="relative break-inside-avoid cursor-pointer group" >
+                    <div class="relative top-5 bg-white shadow-md mb-6 p-4 border-2 border-gray-300 rounded-lg"
+                      style="min-height: 29rem; max-height: 29rem; width: calc(100vw - 60); max-width: calc(100vw - 60vw);">
+                       {% if user.username != "admin" %}
+                       <!-- Tombol Review -->
+                       <div class="absolute top-2 right-2 bg-yellow-500 text-white p-2 rounded-lg shadow transition hover:bg-yellow-600">
+                            <a href="/rate_review/product_detail/${ product.pk }">Review</a>
+                        </div>
+                        {% endif%}
+                
+                      
+                      <img src="${sanitizedPictureLink}" alt="${sanitizedItem}" class="h-48 w-full object-cover rounded-md mb-4" onclick="showProductDetail(${index})">
+                       <div class="flex justify-start items-center mb-4">
+                            <!-- Bookmark Button aligned to the left -->
                             {% if user.username != "admin" %}
                             <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
-                                onclick="toggleBookmark(this)">
+                                onclick="addBookmark('{{ product.id }}',this)" class="bookmark-btn">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
                                 </svg>
@@ -293,17 +317,7 @@
                         </div>
                       <p class="font-bold text-lg mb-2">Price: $${sanitizedPrice}</p>
 
-                        {% if user.is_authenticated and user.username != "admin" %}
-                            <!-- "Give Review" Button -->
-                            <div class="absolute bottom-0 right-0 p-2">
-                                <a href="{% url 'rateNreview:show_rateNreview' %}" 
-                                class="text-blue-600 font-semibold border-2 border-blue-600 rounded-lg px-3 py-1 hover:bg-blue-600 hover:text-white transition duration-300">
-                                Give Review
-                                </a>
-                            </div>
-                        {% endif %}
-
-                      
+                    
                       {% if user.username == "admin" %}
                         <div class="flex justify-between mt-4">
                             <a href="/katalog/edit/${ product.pk }" class="border-2 border-yellow-500 text-yellow-500 rounded-l-lg w-full py-2 transition duration-300 hover:bg-yellow-500 hover:text-white shadow-md text-center">
@@ -460,24 +474,25 @@
     
                 htmlString += `
                   <div class="relative break-inside-avoid cursor-pointer group">
-                    <div class="relative top-5 bg-white shadow-md mb-6 p-4 border-2 border-gray-300 rounded-lg"
-                      style="min-height: 29rem; max-height: 29rem;">
-                      
-                      <img src="${sanitizedPictureLink}" alt="${sanitizedItem}" class="h-48 w-full object-cover rounded-md mb-4" onclick="showProductDetail(${index})">
-                      
-                      <!-- Bookmark Button -->
-                      <div class="flex justify-start items-center mb-4">
-                        <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
-                            onclick="toggleBookmark(this)">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <div class="relative top-5 bg-white shadow-md mb-6 p-4 border-2 border-gray-300 rounded-lg"
+                            style="min-height: 29rem; max-height: 29rem; width: calc(100vw - 60); max-width: calc(100vw - 60vw);">
+                            
+                            <img src="${sanitizedPictureLink}" alt="${sanitizedItem}" class="h-48 w-full object-cover rounded-md mb-4"
+                            onclick="showProductDetail(${index})">
+
+                            <div class="flex justify-start items-center mb-4 space-x-3">
+                            {% if user.username != "admin" %}
+                            <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
+                                onclick="addBookmark('{{ product.id }}',this)" class="bookmark-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
-                            </svg>
-                        </button>
-                        
-                        <!-- Category Icon and Text -->
-                        <div class="flex items-center ml-2">
-                            <div class="h-10 w-10 rounded-full overflow-hidden bg-gray-200">
-                                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXGKovePeweJrzbFFuC3Xrt8cCB47Ajd8kYA&s" alt="Category Icon" class="h-full w-full object-cover">
+                                </svg>
+                            </button>
+                            {% endif %}
+
+                            <!-- Category text inside a box -->
+                            <div class="inline-block bg-gray-200 text-gray-800 px-3 py-0 rounded-full text-sm mb-2">
+                                ${sanitizedKategori}
                             </div>
                             <span class="ml-2 text-gray-800">${sanitizedKategori}</span>
                         </div>
@@ -499,17 +514,6 @@
                       <div class="absolute bottom-0 left-0 p-2">
                         <button class="bg-green-500 text-white py-1 px-3 rounded-lg">Meal Plan</button>
                       </div>
-    
-                      <!-- Star Review Button -->
-                      <!-- Star Review Button with explicit ID check -->
-                        <div class="absolute bottom-0 right-0 p-2">
-                            <button class="star-btn text-gray-400" onclick="toggleStar(this, '${product.pk || ''}')">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.433 4.426a1 1 0 00.95.69h4.668c.969 0 1.371 1.24.588 1.81l-3.768 2.733a1 1 0 00-.364 1.118l1.433 4.426c.3.921-.755 1.688-1.538 1.118L10 14.347l-3.768 2.733c-.782.57-1.837-.197-1.538-1.118l1.433-4.426a1 1 0 00-.364-1.118L2.995 9.853c-.782-.57-.38-1.81.588-1.81h4.668a1 1 0 00.95-.69l1.433-4.426z" />
-                                </svg>
-                            </button>
-                        </div>
-
                     </div>
                   </div>
                 `;
@@ -615,6 +619,26 @@ function showRatingModal(productId) {
     document.getElementById("submitProductEntry").onclick = addProductEntry
 
     refreshProductEntries();
+
+    function toggleBookmark(productId) {
+    fetch(`/toggle_bookmark/${productId}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}"
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const button = document.querySelector(`#bookmark-button-${productId}`);
+        if (data.bookmarked) {
+            button.classList.add("bookmarked");
+        } else {
+            button.classList.add("not-bookmarked");
+            button.classList.remove("bookmarked");
+        }
+    })
+    .catch(error => console.error("Error:", error));
+    }
 </script>
 
 {% endblock content %}

@@ -3,22 +3,22 @@
         <div class="flex items-center justify-between h-16">
             <!-- Left side: Logo and feature links -->
             <div class="flex items-center space-x-4">
-                <a href="{% url 'main:show_main' %}" class="text-2xl font-bold text-black">MAKAN BANG</a>
+                <a href="{% url 'main:show_main' %}" class="text-2xl font-inter font-extrabold text-black">MAKAN BANG</a>
                 <!-- Links for desktop, aligned to the left -->
                 <div class="hidden md:flex items-center space-x-4">
                     <a href="/katalog" class="text-gray-700 hover:text-[#9e3221] font-semibold">Products</a>
-                    <a href="#" class="text-gray-700 hover:text-[#212a73] font-semibold">Review</a>
-                    <a href="#" class="text-gray-700 hover:text-[#bd9440] font-semibold">Bookmark</a>
+                    <a href="/rate_review/user_rating" class="text-gray-700 hover:text-[#212a73] font-semibold">Review</a>
+                    <a href="/bookmark/" class="text-gray-700 hover:text-[#bd9440] font-semibold">Bookmark</a>
                     <a href="#" class="text-gray-700 hover:text-[#51826c] font-semibold">Preference</a>
                     <a href="/forum" class="text-gray-700 hover:text-[#bf5c5a] font-semibold">Forum</a>
-                    <a href="#" class="text-gray-700 hover:text-[#212a73] font-semibold">Meal Plan</a>
+                    <a href="/meal_planning/create" class="text-gray-700 hover:text-[#212a73] font-semibold">Meal Plan</a>
                 </div>
             </div>
 
             <!-- Right side: Login/Logout links -->
             <div class="hidden md:flex items-center space-x-4">
                 {% if user.is_authenticated %}
-                    <span class="text-gray-700 font-semibold">Hungry, {{ user.username }}?</span>
+                    <span class="text-black font-semibold">Hungry, {{ user.username }}?</span>
                     <a href="{% url 'authentication:logout' %}" class="text-center text-red-500 hover:text-red-600 font-bold py-2 px-4 transition duration-300">
                         Logout
                     </a>
@@ -47,11 +47,11 @@
     <div class="mobile-menu hidden md:hidden px-4 w-full md:max-w-full">
         <div class="pt-2 pb-3 space-y-1 mx-auto">
             <a href="/katalog" class="block text-left text-gray-700 hover:text-[#9e3221] font-semibold py-2">Products</a>
-            <a href="#" class="block text-left text-gray-700 hover:text-[#212a73] font-semibold py-2">Review</a>
-            <a href="#" class="block text-left text-gray-700 hover:text-[#bd9440] font-semibold py-2">Bookmark</a>
+            <a href="/rate_review/user_rating" class="block text-left text-gray-700 hover:text-[#212a73] font-semibold py-2">Review</a>
+            <a href="/bookmark" class="block text-left text-gray-700 hover:text-[#bd9440] font-semibold py-2">Bookmark</a>
             <a href="#" class="block text-left text-gray-700 hover:text-[#51826c] font-semibold py-2">Preference</a>
             <a href="/forum" class="block text-left text-gray-700 hover:text-[#bf5c5a] font-semibold py-2">Forum</a>
-            <a href="#" class="block text-left text-gray-700 hover:text-[#212a73] font-semibold py-2">Meal Plan</a>
+            <a href="/meal_planning/create" class="block text-left text-gray-700 hover:text-[#212a73] font-semibold py-2">Meal Plan</a>
 
             {% if user.is_authenticated %}
                 <div class="flex-1 text-center">

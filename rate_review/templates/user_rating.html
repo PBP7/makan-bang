@@ -1,0 +1,410 @@
+{% extends 'base.html' %}
+{% load custom_tags static %}
+{% block meta %}
+    <title>Review Pages</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.2.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #559f7e ;
+            --secondary-color: #FCFAF7;
+            --text-dark: #3845AD;
+            --text-light: #e79f9e  ;
+            --extra-light: #fffff0;
+        }
+
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            color: var(--text-light);
+            background-color: var(--secondary-color);
+            font-family: "Poppins", sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .star-rating input[type="radio"] {
+            display: none;
+        }
+        .star-rating label {
+            font-size: 1.5rem;
+            color: #e4e5e9;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .star-rating label:hover,
+        .star-rating label:hover ~ label,
+        .star-rating input[type="radio"]:checked ~ label {
+            color: gold;
+        }
+
+        .section__container {
+            width: 100%;    
+            max-width: 1200px;
+            margin: auto;
+            padding: 1rem;
+            text-align: center;
+            flex: 1;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+        }
+
+        .header p {
+            letter-spacing: 2px;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .header h1 {
+            font-family: 'Noto Serif', serif;
+            font-size: 2rem;
+            font-weight: 900;
+        }
+
+        .testimonials__grid {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            padding: 2rem;
+            display: grid;
+            gap: 1rem;
+            background-color: var(--extra-light);
+            border-radius: 0.5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
+
+        .card i {
+            font-size: 2.5rem;
+            font-weight: gold;
+        }
+
+        .card p {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .card hr {
+            width: 40px;
+            margin: auto;
+            color: var(--primary-color);
+        }
+        .card h3 {
+            color: rgb(63, 50, 122);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .card h2 {
+            font-family: 'Noto Serif', serif;
+            color: #e79f9e;
+            font-size: 1.3rem;  
+            font-weight: 500;          
+        }   
+
+        .card img {
+            width: 240px; /* Atur lebar sesuai kebutuhan */
+            height: 180px; /* Atur tinggi untuk 4:3 */
+            margin: auto;
+            border: 1px solid white;
+            object-fit: cover; /* Menjaga proporsi gambar */
+        }
+
+        .card .name {
+            font-family: 'Noto Serif', serif;
+            font-size: .9rem;
+            font-weight: 700;
+            color: var(--text-light);
+            transition: 0.3s ease;
+        }
+
+        .card .name:hover {
+            color: var(--primary-color);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            background-color: var(--primary-color);
+            color: var(--extra-light);
+            margin-top: auto;
+        }
+
+        .footer h4 {
+            font-family: "Noto Serif", serif;
+            font-size: 1.5rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+        }
+
+        .footer p {
+            max-width: 450px;
+            margin: auto;
+            font-size: .9rem;
+            line-height: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer button {
+            padding: 1rem 2rem;
+            outline: none;
+            border: none;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: var(--extra-light);
+            border-radius: 0.5rem;
+        }
+
+        .add-review {
+            padding: 2rem;
+            background-color: var(--extra-light);
+            border-radius: 0.5rem;
+            box-shadow: 0 0 10px rgba(115, 86, 86, 0.2);
+            text-align: left;
+        }
+
+        .add-review h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 1rem;
+            text-align: center;
+        }
+
+/* Star Rating Tengah di Card */
+        .star-rating {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .star-rating input[type="radio"] {
+            display: none;
+        }
+
+        .star-rating label {
+            font-size: 1.5rem;
+            color: lightgray;
+            cursor: pointer;
+        }
+
+        .star-rating input[type="radio"]:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: gold;
+        }
+
+        /* Bintang Terpilih akan Tetap Berwarna */
+        .star-rating input[type="radio"]:checked + label ~ label {
+            color: lightgray;
+        }
+
+        /* Styling untuk Hasil Review */
+        .selected{
+            color: gold;
+        }
+
+
+        .star-rating {
+            display: flex;
+        }
+        .star {
+            font-size: 24px;
+            color: #ddd; /* Warna abu-abu default untuk bintang kosong */
+            position: relative;
+        }
+
+        /* Untuk bintang yang terisi penuh */
+        .star.selected {
+            color: #FFD700; /* Warna kuning untuk bintang penuh */
+        }
+
+        /* Untuk bintang yang terisi sebagian */
+        .star.partial {
+            background: linear-gradient(90deg, #FFD700 var(--fill), #ddd var(--fill));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+
+
+        .card {
+            text-align: center;
+        }
+        .add-review .star-rating {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .add-review .star {
+            font-size: 1.5rem;
+            color: gold;
+            cursor: pointer;
+        }
+
+        .add-review label.star:hover,
+        .add-review label.star:hover ~ label.star {
+            color: var(--text-dark);
+        }
+
+        .add-review textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--primary-color);
+            border-radius: 0.3rem;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .add-review button {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: var(--primary-color);
+            color: var(--extra-light);
+            border: none;
+            border-radius: 0.3rem;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+
+        .review-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .action-icon {
+            font-size: 1.5rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            border: none;
+            background: none;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .action-icon.back-to-review {
+            font-family: 'Noto Serif', serif;
+            color: #e79f9e;
+            font-size: 1rem; /* Ukuran yang lebih kecil atau sesuai kebutuhan */
+        }
+
+        .action-icon.back-to-review:hover {
+            color: #b664a0; /* Warna hijau lebih gelap saat hover */
+        }
+        .edit-icon:hover {
+            color: #4CAF50; /* Hijau lebih terang untuk edit */
+        }
+
+        .delete-icon:hover {
+            color: #f44336; /* Merah lebih terang untuk delete */
+        }
+
+        .back-to-catalog {
+            position: fixed;
+            top: 100px;
+            left: 20px;
+            padding: 10px 20px;
+            background-color: var(--text-light); /* Kuning sebagai warna utama tombol */
+            color: var(--extra-light); /* Warna krem sebagai warna teks */
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-to-catalog:hover {
+            background-color: #7a4064; /* Warna kuning lebih gelap saat hover */
+        }
+
+
+
+        @media (width < 900px) {
+            .testimonials__grid {
+                grid-template-columns: repeat(2, 1fr);  
+                gap: 1rem;
+            }
+        }
+
+        @media (width < 600px) {
+            .testimonials__grid {
+                grid-template-columns: repeat(1, 1fr);  
+            }
+        }
+
+        .average-rating h1{
+            font-family: 'Noto Serif', serif;
+            font-size: 1.6rem;
+            font-weight: 900;
+        }
+    </style>
+
+    
+            
+{% endblock meta %}
+
+{% block content %}
+{% include 'navbar.html' %}
+<div class="section__container">
+    <br><br><br>
+    <div class="header">
+        <p>My Reviews</p>
+        <h1>Discover Your Flavoury Journey and Experiences!</h1>
+    </div>
+
+    <div class="testimonials__grid">
+        <a href="{% url 'katalog:show_katalog' %}" class="back-to-catalog">Back to Catalog</a>
+        {% for review in user_reviews %}
+            <div class="card">
+                <h2>{{ review.product.item }}</h2>
+                <img id="modalProductImage" src="{{ review.product.picture_link }}" alt="Product Image" class="h-96 w-full object-cover rounded-md mb-4">
+                <p>{{ review.product.price }}</p>
+                <h3>{{ review.review_text }}</h3>
+                <div class="star-rating">
+                    {% for i in 1|to:5 %}
+                        <span class="star {% if i <= review.rate %}selected{% endif %}">&#9733;</span>
+                    {% endfor %}
+                </div>
+                <p><em>{{ review.date }}</em></p>
+                <!-- Edit and Delete Buttons -->
+                <div>
+                    <a href="{% url 'rate_review:product_detail' review.product.id %}" class="action-icon back-to-review" title="Back to Product Review">Back to This Product Review</a>
+                </div>
+                <div class="review-actions">
+                    <a href="{% url 'rate_review:edit_review' review.id %}" class="action-icon edit-icon" title="Edit">&#9998;</a>
+                    <form method="POST" action="{% url 'rate_review:delete_review' review.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="action-icon delete-icon" title="Delete">&#128465;</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
