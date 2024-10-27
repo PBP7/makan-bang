@@ -19,20 +19,21 @@
                        class="border border-gray-300 rounded-md p-2 w-full md:w-5/6 hover:border-indigo-700" 
                        oninput="debouncedFilterProducts(this.value)">
             
-                <div class="relative">
-                    <button id="filterButton" class="bg-white border text-black font-medium py-2 px-3 text-sm rounded-md shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 w-20 h-[42px] flex items-center justify-between"
-                            onclick="toggleFilterDropdown()">
-                        <span>Filter</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
-                    <!-- Dropdown menu (hidden by default) -->
-                    <div id="filterDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded-lg shadow-lg z-50">
-                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" onclick="filterByPrice('lowest')">Lowest Price</a>
-                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" onclick="filterByPrice('highest')">Highest Price</a>
+                       <div class="relative">
+                        <button id="filterButton" class="bg-white border text-black font-medium py-2 px-3 text-sm rounded-md shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 w-20 h-[42px] flex items-center justify-between">
+                            <span>Filter</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                    
+                        <!-- Dropdown menu (hidden by default) -->
+                        <div id="filterDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded-lg shadow-lg z-50">
+                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" onclick="filterByPrice('lowest')">Lowest Price</a>
+                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" onclick="filterByPrice('highest')">Highest Price</a>
+                        </div>
                     </div>
-                </div>
+                    
             </div>
             
             <div class="flex space-x-2 md:justify-end w-full md:w-1/4">
@@ -253,6 +254,11 @@
     // Reduced debounce time
     const debouncedFilterProducts = debounce(searchProducts, 100);
 
+    function toggleFilterDropdown() {
+        const dropdown = document.getElementById('filterDropdown');
+        dropdown.classList.toggle('hidden');
+    }
+        
     function searchProducts(searchTerm) {
         fetch(`{% url 'katalog:search_products' %}?q=${encodeURIComponent(searchTerm)}`)
             .then(response => response.json())
@@ -290,25 +296,19 @@
     }
 
     function createProductCard(product, index) {
-        const sanitizedItem = DOMPurify.sanitize(product.item);
-        const sanitizedPictureLink = DOMPurify.sanitize(product.picture_link);
-        const sanitizedKategori = DOMPurify.sanitize(product.kategori);
-        const sanitizedRestaurant = DOMPurify.sanitize(product.restaurant);
-        const sanitizedPrice = DOMPurify.sanitize(product.price);
         const div = document.createElement('div');
         div.className = 'relative break-inside-avoid cursor-pointer group';
         div.innerHTML = `
             <div class="relative top-5 bg-white shadow-md mb-6 p-4 border-2 border-gray-300 rounded-lg"
                 style="min-height: 29rem; max-height: 29rem; width: calc(100vw - 60); max-width: calc(100vw - 60vw);">
                 
-                <img src="${sanitizedPictureLink}" alt="${sanitizedItem}" class="h-48 w-full object-cover rounded-md mb-4"
+                <img src="${product.picture_link || product.pictureLink}" alt="${product.item}" class="h-48 w-full object-cover rounded-md mb-4"
                 onclick="showProductDetail(${index})">
 
                 <div class="flex justify-start items-center mb-4 space-x-3">
-                {% if user.username != "admin" and user.is_authenticated %}
+                {% if user.username != "admin" %}
                 <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
-                    onclick="toggleBookmark(this, '${product.pk}')"
-                    data-product-id="${product.pk}">
+                    onclick="toggleBookmark(this)">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
                     </svg>
@@ -316,10 +316,10 @@
                 {% endif %}
 
                 <div class="bg-gray-700 text-white font-semibold rounded-lg px-3 py-1 text-center">
-                    ${sanitizedKategori}
+                    ${product.kategori}
                 </div>
             </div>
-            <h3 class="font-bold text-xl mb-2 truncate">${sanitizedItem}</h3>
+            <h3 class="font-bold text-xl mb-2 truncate">${product.item}</h3>
             <div class="flex items-center text-gray-600 mb-2">
                 <div class="flex-shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
@@ -327,16 +327,18 @@
                     </svg>
                 </div>
                 
-                <span class="truncate">${sanitizedRestaurant}</span>
+                <span class="truncate">${product.restaurant}</span>
             </div>
-            <p class="font-bold text-lg mb-2">Price: Rp${sanitizedPrice}</p>
+            <p class="font-bold text-lg mb-2">Price: Rp${product.price}</p>
 
             {% if user.is_authenticated and user.username != "admin" %}
                 <div class="absolute bottom-0 right-0 p-2">
-                    <a href="{% url 'rate_review:user_rating' %}" 
-                    class="text-blue-600 font-semibold border-2 border-blue-600 rounded-lg px-3 py-1 hover:bg-blue-600 hover:text-white transition duration-300">
-                    Give Review
-                    </a>
+                    {% if product.id %}
+                        <a href="{% url 'rate_review:product_detail' product.id %}" 
+                           class="text-blue-600 font-semibold border-2 border-blue-600 rounded-lg px-3 py-1 hover:bg-blue-600 hover:text-white transition duration-300">
+                           Give Review
+                        </a>
+                    {% endif %}
                 </div>
             {% endif %}
 
@@ -622,80 +624,29 @@
         });
     }
 
-    function displayFilteredProducts(filteredProducts) {
-        document.getElementById("product_entry_cards").innerHTML = "";
-        let htmlString = "";
-    
-        if (filteredProducts.length === 0) {
-            htmlString = `
-                <div class="flex flex-col items-center justify-center min-h-[24rem] p-6">
-                    <img src="{% static 'images/raster/sad-image.png' %}" alt="Sad face" class="w-32 h-32 mb-4"/>
-                    <p class="text-center text-gray-600 mt-4">No product entries found.</p>
+    function displayFilteredProducts(products) {
+        const productEntryCards = document.getElementById("product_entry_cards");
+        productEntryCards.innerHTML = "";
+        productEntryCards.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6 mt-4 justify-center";
+
+        if (products.length === 0) {
+            productEntryCards.innerHTML = `
+                <div class="col-span-full text-center py-10">
+                    <p class="text-gray-500 text-lg">No products found.</p>
                 </div>
             `;
-        } else {
-            filteredProducts.forEach((product, index) => {
-                const sanitizedItem = DOMPurify.sanitize(product.fields.item);
-                const sanitizedPictureLink = DOMPurify.sanitize(product.fields.picture_link);
-                const sanitizedKategori = DOMPurify.sanitize(product.fields.kategori);
-                const sanitizedLokasi = DOMPurify.sanitize(product.fields.lokasi);
-                const sanitizedPrice = DOMPurify.sanitize(product.fields.price);
-    
-                htmlString += `
-                  <div class="relative break-inside-avoid cursor-pointer group">
-                    <div class="relative top-5 bg-white shadow-md mb-6 p-4 border-2 border-gray-300 rounded-lg"
-                      style="min-height: 29rem; max-height: 29rem;">
-                      
-                      <img src="${sanitizedPictureLink}" alt="${sanitizedItem}" class="h-48 w-full object-cover rounded-md mb-4" onclick="showProductDetail(${index})">
-                      
-                      <!-- Bookmark Button -->
-                      <div class="flex justify-start items-center mb-4">
-                        <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
-                            onclick="addBookmark('{{ product.id }}, this')" class="bookmark-btn">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
-                                </svg>
-                            </button>
-
-                            <!-- Category text inside a box -->
-                            <div class="inline-block bg-gray-200 text-gray-800 px-3 py-0 rounded-full text-sm mb-2">
-                                ${sanitizedKategori}
-                            </div>
-                        </div>
-                      <h3 class="font-bold text-xl mb-2 truncate">${sanitizedItem}</h3>
-                       <div class="flex items-center text-gray-600 mb-2">
-                            <!-- Location Icon with a fixed width -->
-                            <div class="flex-shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10 2a6 6 0 016 6c0 4.118-5.02 9.636-5.356 9.975a1 1 0 01-1.288 0C9.02 17.636 4 12.118 4 8a6 6 0 016-6zm0 8a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                                </svg>
-                            </div>
-                            
-                            <!-- Location text with truncate -->
-                            <span class="truncate">${sanitizedRestaurant}</span>
-                        </div>
-                      <p class="font-bold text-lg mb-2">Price: $${sanitizedPrice}</p>
-                      
-                      {% if user.username == "admin" or user.username == "Admin"%}
-                        <div class="flex justify-between mt-4">
-                            <a href="/katalog/edit/${ product.pk }" class="border-2 border-yellow-500 text-yellow-500 rounded-l-lg w-full py-2 transition duration-300 hover:bg-yellow-500 hover:text-white shadow-md text-center">
-                            Edit
-                            </a>
-                            <a href="/katalog/delete/${ product.pk }" class="border-2 border-red-500 text-red-500 rounded-r-lg w-full py-2 transition duration-300 hover:bg-red-500 hover:text-white shadow-md text-center">
-                            Delete
-                            </a>
-                        </div>
-                      {% endif %}
-                    </div>
-                  </div>
-                `;
-            });
+            return;
         }
-    
-        document.getElementById("product_entry_cards").innerHTML = htmlString;
+
+        products.forEach((product, index) => {
+            const productCard = createProductCard(product, index);
+            productEntryCards.appendChild(productCard);
+        });
+
+        // Update the global productDetails array
+        window.productDetails = products;
     }
-    
-    
+
     function toggleStar(button) {
         const star = button.querySelector('svg');
         star.classList.toggle('text-yellow-500'); // Toggles between grey and yellow color
@@ -821,64 +772,41 @@ function showRatingModal(productId) {
     }
 
     // Add this function to toggle the filter dropdown
-    function toggleFilterDropdown() {
-        const dropdown = document.getElementById('filterDropdown');
-        dropdown.classList.toggle('show');
-    }
 
     // Add these functions for filtering
     function filterByPrice(order) {
-        getProductEntries().then((products) => {
-            const sortedProducts = products.sort((a, b) => {
-                const priceA = parseFloat(a.fields.price);
-                const priceB = parseFloat(b.fields.price);
-                return order === 'lowest' ? priceA - priceB : priceB - priceA;
-            });
-            displayFilteredProducts(sortedProducts);
+        const sortedProducts = [...window.productDetails].sort((a, b) => {
+            const priceA = parseFloat(a.price);
+            const priceB = parseFloat(b.price);
+            return order === 'lowest' ? priceA - priceB : priceB - priceA;
         });
-        
-    // Update the displayFilteredProducts function
-    function displayFilteredProducts(products) {
-        const productEntryCards = document.getElementById("product_entry_cards");
-        productEntryCards.innerHTML = "";
-        productEntryCards.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6 mt-4 justify-center";
-
-        if (products.length === 0) {
-            productEntryCards.innerHTML = `
-                <div class="col-span-full text-center py-10">
-                    <p class="text-gray-500 text-lg">No products found.</p>
-                </div>
-            `;
-            return;
-        }
-
-        products.forEach((product, index) => {
-            const productCard = createProductCard(product, index);
-            productEntryCards.appendChild(productCard);
-        });
-
-        // Update the global productDetails array
-        window.productDetails = products.map(product => ({
-            item: DOMPurify.sanitize(product.fields.item),
-            pictureLink: DOMPurify.sanitize(product.fields.picture_link),
-            restaurant: DOMPurify.sanitize(product.fields.restaurant),
-            kategori: DOMPurify.sanitize(product.fields.kategori),
-            lokasi: DOMPurify.sanitize(product.fields.lokasi),
-            nutrition: DOMPurify.sanitize(product.fields.nutrition),
-            linkGofood: DOMPurify.sanitize(product.fields.link_gofood),
-            price: DOMPurify.sanitize(product.fields.price),
-            description: DOMPurify.sanitize(product.fields.description)
-        }));
+        displayFilteredProducts(sortedProducts);
+        toggleFilterDropdown(); // Close the dropdown after filtering
     }
 
     // Update the existing event listeners
+    // Pastikan DOM sudah dimuat sepenuhnya sebelum menjalankan skrip
     document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('filterButton').addEventListener('click', toggleFilterDropdown);
-        document.querySelector('a[onclick="filterByPrice(\'lowest\')"]').addEventListener('click', () => filterByPrice('lowest'));
-        document.querySelector('a[onclick="filterByPrice(\'highest\')"]').addEventListener('click', () => filterByPrice('highest'));
+        // Attach event listener to Filter button
+        const filterButton = document.getElementById('filterButton');
+        const filterDropdown = document.getElementById('filterDropdown');
+    
+        filterButton.addEventListener('click', function (event) {
+            event.stopPropagation();  // Mencegah event bubbling
+            toggleFilterDropdown();   // Panggil fungsi toggle dropdown
+        });
+    
+        // Event listener untuk menutup dropdown saat klik di luar dropdown
+        document.addEventListener('click', function(event) {
+            if (!filterButton.contains(event.target) && !filterDropdown.contains(event.target)) {
+                filterDropdown.classList.add('hidden');
+            }
+        });
     });
+    
+    // Fungsi untuk toggle dropdow
+    
+
 </script>
 
 {% endblock content %}
-
-
