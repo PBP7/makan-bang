@@ -39,19 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main',
     'authentication',
-<<<<<<< HEAD
     'meal_planning',
-    'rateNreview',
-    'katalog',
     'forum',
-=======
     'katalog',
     'rate_review',
     'rateNreview',
     'preference',
-    'forum',
-    'widget_tweaks',
->>>>>>> 831ba509e8f00e101b3c30385b8b59bacf92cd75
 ]
 
 MIDDLEWARE = [

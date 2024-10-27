@@ -1,13 +1,9 @@
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Meal Plan</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<title>Create Meal Plan</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     
     <style>
         /* Apply the background image */
@@ -162,6 +158,33 @@
     </form>
 
     <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.querySelector("form");
+            
+            form.addEventListener("submit", function (event) {
+                const selectedDate = document.getElementById("selected_date").value;
+                const time = document.getElementById("time").value;
+                
+             
+                if (!selectedDate || !time) {
+                    event.preventDefault();
+    
+                    alert("Please fill out the date before saving.");
+                    return; 
+                }
+    
+                const foodItemsContainer = document.querySelector(".scrollable-content");
+                const foodItems = foodItemsContainer.querySelectorAll(".bg-white");
+                
+                if (foodItems.length === 0) {
+                    event.preventDefault();
+    
+                    alert("Please add at least one food item to your meal plan before saving.");
+                }
+            });
+        });
+    
+        // Flatpickr initialization
         flatpickr("#datepicker", {
             inline: true,
             dateFormat: "Y-m-d", 
@@ -171,5 +194,6 @@
             }
         });
     </script>
+    
 </body>
 </html>

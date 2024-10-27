@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content%}
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Rencana Makan</title>
-    {% load static %}
-    <link href="{% static 'css/tailwind.min.css' %}" rel="stylesheet">
     <style>
         body {
             background-color: #f3f4f6; /* Light background color */
@@ -75,4 +73,4 @@
         </div>
     </div>
 </body>
-</html>
+{% endblock content %}

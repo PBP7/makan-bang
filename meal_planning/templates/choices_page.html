@@ -1,53 +1,45 @@
-<!-- choices_page.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Food Choices</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <input type="hidden" id="selected_date">
-    <input type="hidden" id="selected_time">
+{% extends 'base.html' %}
 
-</head>
-<body>
-    
+{% block meta %}
+<title>Food Choices</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<input type="hidden" id="selected_date">
+<input type="hidden" id="selected_time">
+{% endblock meta %}
 
-    <div class="container mx-auto px-4 py-6">
-        <h1 class="text-2xl font-bold mb-6">Choose Your Food</h1>
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <h1 class="text-2xl font-bold mb-6">Choose Your Food</h1>
 
-        <form action="{% url 'process_choices' %}" method="POST">
-            {% csrf_token %}
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 px-4 py-6">
-                {% for product_entry in product_entries %}
-                    <div class="relative bg-[#f7f7f7] shadow-md mb-6 flex flex-col border-2 border-black-500 rounded-2xl w-full min-w-[150px] max-w-[200px] h-auto">
-                        
-                        <input type="checkbox" name="selected_foods" value="{{ product_entry.id }}" class="absolute top-2 right-2 z-10 w-6 h-6 border-gray-400 rounded-full">
-            
-                        {% if product_entry.picture_link %}
-                            <div class="w-full aspect-square overflow-hidden rounded-lg">
-                                <img src="{{ product_entry.picture_link }}" alt="{{ product_entry.item }}" class="h-full w-full object-cover">
-                            </div>
-                        {% endif %}
-            
-                        <div class="p-2 text-center">
-                            <h3 class="font-bold text-lg text-black">{{ product_entry.item }}</h3>
+    <form action="{% url 'process_choices' %}" method="POST">
+        {% csrf_token %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 px-4 py-6">
+            {% for product_entry in product_entries %}
+                <div class="relative bg-[#f7f7f7] shadow-md mb-6 flex flex-col border-2 border-black-500 rounded-2xl w-full min-w-[150px] max-w-[200px] h-auto">
+                    
+                    <input type="checkbox" name="selected_foods" value="{{ product_entry.id }}" class="absolute top-2 right-2 z-10 w-6 h-6 border-gray-400 rounded-full">
+        
+                    {% if product_entry.picture_link %}
+                        <div class="w-full aspect-square overflow-hidden rounded-lg">
+                            <img src="{{ product_entry.picture_link }}" alt="{{ product_entry.item }}" class="h-full w-full object-cover">
                         </div>
-                        
+                    {% endif %}
+        
+                    <div class="p-2 text-center">
+                        <h3 class="font-bold text-lg text-black">{{ product_entry.item }}</h3>
                     </div>
-                {% endfor %}
-            </div>
-        
-            <!-- Submit Button -->
-            <div class="mt-4">
-                <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-lg">Submit Choices</button>
-            </div>
-        </form>
-        
-    </div>
-
-</body>
-
+                    
+                </div>
+            {% endfor %}
+        </div>
+    
+        <!-- Submit Button -->
+        <div class="mt-4">
+            <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-lg">Submit Choices</button>
+        </div>
+    </form>
+    
+</div>
 <script>
     function toggleBorder(checkbox, cardId) {
         const card = document.getElementById(cardId);
@@ -75,4 +67,4 @@
         }
     });
 </script>
-</html>
+{% endblock content %}

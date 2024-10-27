@@ -173,12 +173,6 @@
             </div>
         </div>
     </div>
-
-    <div class="fixed bottom-100 right-4 z-50">
-        <a href="/meal-planning/create">
-            <img src="{% static 'image/mealplan.png' %}" alt="Meal Plan" class="w-16 h-16 shadow-lg hover:scale-105 transition-transform">
-        </a>
-    </div>
     
     
 
@@ -306,25 +300,12 @@
                             <span class="truncate">${sanitizedLokasi}</span>
                         </div>
                       <p class="font-bold text-lg mb-2">Price: $${sanitizedPrice}</p>
-<<<<<<< HEAD
 
-
-
-=======
                       {% if user.username != "admin" %}
                       <div class="absolute bottom-0 left-0 p-2">
-                        <button class="bg-green-500 text-white py-1 px-3 rounded-lg">Meal Plan</button>
                         </div>
-                        
->>>>>>> 831ba509e8f00e101b3c30385b8b59bacf92cd75
+                    
                             <!-- Star Review Button -->
-                       <div class="absolute bottom-0 right-0 p-2">
-                            <button class="star-btn text-gray-400" onclick="toggleStar(this, '{{ product.id }}')">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.433 4.426a1 1 0 00.95.69h4.668c.969 0 1.371 1.24.588 1.81l-3.768 2.733a1 1 0 00-.364 1.118l1.433 4.426c.3.921-.755 1.688-1.538 1.118L10 14.347l-3.768 2.733c-.782.57-1.837-.197-1.538-1.118l1.433-4.426a1 1 0 00-.364-1.118L2.995 9.853c-.782-.57-.38-1.81.588-1.81h4.668a1 1 0 00.95-.69l1.433-4.426z" />
-                                </svg>
-                            </button>
-                       </div>
                        {% endif %}
                       
                       {% if user.username == "admin" %}
