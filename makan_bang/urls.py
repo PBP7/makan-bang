@@ -32,4 +32,3 @@ urlpatterns = [
     path('rate_review/', include('rate_review.urls')),
 ]
 
-

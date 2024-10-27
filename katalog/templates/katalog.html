@@ -45,7 +45,7 @@
             
             <!-- Modal header -->
             <div class="flex items-center justify-between p-4 border-b rounded-t">
-                <h3 class="text-xl font-semibold text-gray-900 break-words" id="modalProductName">Product Name</h3>
+                <h3 class="text-xl font-semibold text-gray-900" id="modalProductName">Product Name</h3>
                 <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" id="closeDetailModalBtn">
                     <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
@@ -221,7 +221,6 @@
 <!-- Script for handling product entries -->
 <script>
     const isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
-
     function addProductEntry(event) {
         event.preventDefault();
     
@@ -419,10 +418,6 @@
         }, 150);
     }
     function showProductDetail(index) {
-        if (!isAuthenticated) {
-            window.location.href = '/auth/login';
-            return;
-        }
         const product = window.productDetails[index];
     
         document.getElementById('modalProductName').innerText = product.item;
@@ -453,7 +448,33 @@
         document.getElementById('price').value = product.price;
         document.getElementById('description').value = product.description;
     }
-
+    function toggleBookmark(productId, btn) {
+        fetch(`/bookmark/toggle_bookmark/${productId}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}"
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            toggleBtn(btn) 
+            const button = document.querySelector(`#bookmark-button-${productId}`);
+            if (data.bookmarked) {
+                button.classList.add("bookmarked");
+                button.classList.remove("not-bookmarkfed");
+            } else {
+                button.classList.add("not-bookmarked");
+                button.classList.remove("bookmarked");
+            }
+        })
+        .catch(error => console.error("Error:", error));
+        }
+    
+        function toggleBtn(btn) {
+            btn.classList.toggle('bg-green-700');  // Dark green when bookmarked
+            btn.classList.toggle('bg-white');  // White when not bookmarked
+            btn.classList.toggle('text-white');  // Make icon white on green background
+        }
     function searchProducts(event) {
         if (event.key === 'Enter') {
             const searchTerm = event.target.value.trim().toLowerCase();
@@ -494,24 +515,27 @@
     
                 htmlString += `
                   <div class="relative break-inside-avoid cursor-pointer group">
-                    <div class="relative top-5 bg-white shadow-md mb-6 p-4 border-2 border-gray-300 rounded-lg"
-                      style="min-height: 29rem; max-height: 29rem;">
-                      
-                      <img src="${sanitizedPictureLink}" alt="${sanitizedItem}" class="h-48 w-full object-cover rounded-md mb-4" onclick="showProductDetail(${index})">
-                      
-                      <!-- Bookmark Button -->
-                      <div class="flex justify-start items-center mb-4">
-                        <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
-                            onclick="addBookmark('{{ product.id }}, this')" class="bookmark-btn">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <div class="relative top-5 bg-white shadow-md mb-6 p-4 border-2 border-gray-300 rounded-lg"
+                            style="min-height: 29rem; max-height: 29rem; width: calc(100vw - 60); max-width: calc(100vw - 60vw);">
+                            
+                            <img src="${sanitizedPictureLink}" alt="${sanitizedItem}" class="h-48 w-full object-cover rounded-md mb-4"
+                            onclick="showProductDetail(${index})">
+
+                            <div class="flex justify-start items-center mb-4 space-x-3">
+                            {% if user.username != "admin" %}
+                            <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
+                                onclick="toggleBookmark('${ product.pk }',this)" class="bookmark-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
                                 </svg>
                             </button>
+                            {% endif %}
 
                             <!-- Category text inside a box -->
                             <div class="inline-block bg-gray-200 text-gray-800 px-3 py-0 rounded-full text-sm mb-2">
                                 ${sanitizedKategori}
                             </div>
+                            <span class="ml-2 text-gray-800">${sanitizedKategori}</span>
                         </div>
                       <h3 class="font-bold text-xl mb-2 truncate">${sanitizedItem}</h3>
                        <div class="flex items-center text-gray-600 mb-2">
@@ -547,11 +571,7 @@
     }
     
     
-    function toggleStar(button) {
-        const star = button.querySelector('svg');
-        star.classList.toggle('text-yellow-500'); // Toggles between grey and yellow color
-        star.classList.toggle('text-gray-400');
-    }
+ 
     // Show Rating Modal
 function showRatingModal(productId) {
     const modal = document.getElementById('ratingModal');
@@ -579,14 +599,6 @@ function showRatingModal(productId) {
         setTimeout(() => {
             modal.classList.add('hidden');
         }, 150);
-    }
-    function toggleStar(button, productId) {
-        const star = button.querySelector('svg');
-        star.classList.toggle('text-yellow-500'); // Toggles between grey and yellow color
-        star.classList.toggle('text-gray-400');
-    
-        // Show the rating modal when the star is clicked
-        showRatingModal(productId);
     }
     
 
