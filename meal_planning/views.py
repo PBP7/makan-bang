@@ -60,7 +60,6 @@ def cancel_selection(request):
     
     # Redirect to the create_plan page
     return redirect('create_plan')
-
 # Process Choices from the Selection Page and Store in Session
 @login_required
 def process_choices(request):
@@ -96,28 +95,28 @@ def finish_meal_plan(request):
         return redirect(reverse('create_plan'))
     
     return HttpResponse('Invalid request', status=400)
+import json
+from django.shortcuts import render
+from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from .models import MealPlan
 
-# List All Meal Plans
 @login_required
 def create_plan(request):
     meal_plans = MealPlan.objects.filter(user=request.user)
+    today = timezone.now().date()
 
-    # Preparing JSON-compatible data for use in JavaScript
+    today_meal_plans = meal_plans.filter(date=today)
+    other_meal_plans = meal_plans.exclude(date=today).order_by('date')
+    has_today_plan = today_meal_plans.exists()
+    past_meal_plans = meal_plans.filter(date__lt=today)
+
+    request.session['show_today_reminder'] = has_today_plan
+
     meal_plans_data = []
     for meal_plan in meal_plans:
         food_items = list(meal_plan.food_items.values('item'))
-        today = timezone.now().date()
         
-        today_meal_plans = meal_plans.filter(date=today)
-        other_meal_plans = MealPlan.objects.filter(user=request.user).exclude(date=timezone.now().date()).order_by('date')
-        has_today_plan = MealPlan.objects.filter(user=request.user, date=today).exists()
-        past_meal_plans = meal_plans.filter(date__lt=today)
-        
-        if has_today_plan:
-            request.session['show_today_reminder'] = True
-        else:
-            request.session['show_today_reminder'] = False
-            
         meal_plans_data.append({
             'id': meal_plan.id,
             'date': meal_plan.date.strftime('%Y-%m-%d'),
@@ -135,6 +134,7 @@ def create_plan(request):
     }
     
     return render(request, 'create_plan.html', context)
+
 
 @login_required
 

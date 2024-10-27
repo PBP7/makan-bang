@@ -1,4 +1,3 @@
-<!-- choices_page.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,20 +8,75 @@
     <input type="hidden" id="selected_date">
     <input type="hidden" id="selected_time">
 
+    <style>
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #FCFAF7;
+            border-bottom: 2px solid #d3d3d3;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 2rem;
+        }
+        
+        .navbar-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #000;
+        }
+        
+        .floating-button {
+            background-color: transparent;
+            color: #3845AD;
+            border: 3px solid #3845AD;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: bold;
+            transition: background-color 0.2s, color 0.2s;
+            text-align: center;
+        }
+        
+        .floating-button:hover {
+            background-color: #3845AD;
+            color: white;
+        }
+
+        .border-selected {
+            border: 2px solid #3845AD;
+        }
+
+        .container {
+            margin-top: 5rem;
+        }
+
+        .card {
+            min-width: 220px;
+            max-width: 250px;
+            height: 360px;
+        }
+    </style>
 </head>
 <body>
     
+    <!-- Navbar -->
+    <div class="navbar">
+        <h1 class="navbar-title">Choose Your Food</h1>
+        <button type="submit" form="foodChoicesForm" class="floating-button">Submit Choices</button>
+    </div>
 
-    <div class="container mx-auto px-4 py-6">
-        <h1 class="text-2xl font-bold mb-6">Choose Your Food</h1>
-
-        <form action="{% url 'process_choices' %}" method="POST">
+    <div class="container mx-auto px-0 py-6">
+        <form id="foodChoicesForm" action="{% url 'process_choices' %}" method="POST">
             {% csrf_token %}
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 px-4 py-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {% for product_entry in product_entries %}
-                    <div class="relative bg-[#f7f7f7] shadow-md mb-6 flex flex-col border-2 border-black-500 rounded-2xl w-full min-w-[150px] max-w-[200px] h-auto">
+                    <div id="card-{{ forloop.counter }}" class="card relative bg-[#f7f7f7] shadow-md flex flex-col border-2 border-black-500 rounded-2xl">
                         
-                        <input type="checkbox" name="selected_foods" value="{{ product_entry.id }}" class="absolute top-2 right-2 z-10 w-6 h-6 border-gray-400 rounded-full">
+                        <input type="checkbox" name="selected_foods" value="{{ product_entry.id }}" class="absolute top-2 right-2 z-10 w-6 h-6 border-gray-400 rounded-full" onclick="toggleBorder(this, 'card-{{ forloop.counter }}')">
             
                         {% if product_entry.picture_link %}
                             <div class="w-full aspect-square overflow-hidden rounded-lg">
@@ -30,18 +84,20 @@
                             </div>
                         {% endif %}
             
-                        <div class="p-2 text-center">
-                            <h3 class="font-bold text-lg text-black">{{ product_entry.item }}</h3>
+                        <div class="p-2">
+                            <h3 class="text-xl font-bold text-lg text-black text-center">{{ product_entry.item }}</h3> <!-- Centered Title -->
+                            <div class="text-left mt-2 pl-4"> <!-- Added padding-left to shift text slightly -->
+                                <p class="text-m text-gray-800 font-semibold">Category:  {{ product_entry.kategori }}</p> <!-- Left-aligned Category with padding -->
+                                <p class="text-m text-gray-800 font-semibold">Price:  {{ product_entry.price }}</p> <!-- Left-aligned Price with padding -->
+                            </div>                            
                         </div>
+                        
+                        
                         
                     </div>
                 {% endfor %}
             </div>
         
-            <!-- Submit Button -->
-            <div class="mt-4">
-                <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-lg">Submit Choices</button>
-            </div>
         </form>
         
     </div>
@@ -52,16 +108,12 @@
     function toggleBorder(checkbox, cardId) {
         const card = document.getElementById(cardId);
         if (checkbox.checked) {
-            card.classList.remove('border-black-500');
-            card.classList.add('border-blue-500');
+            card.classList.add('border-selected');
         } else {
-            card.classList.remove('border-blue-500');
-            card.classList.add('border-black-500');
+            card.classList.remove('border-selected');
         }
     }
 
-   ]
-    // Retrieve date and time from URL and populate the fields
     document.addEventListener('DOMContentLoaded', () => {
         const urlParams = new URLSearchParams(window.location.search);
         const date = urlParams.get('date');
