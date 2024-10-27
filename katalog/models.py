@@ -1,6 +1,7 @@
 from django.db import models
 import uuid
 from django.contrib.auth.models import User
+from django.db.models import Avg
 
 class Product(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -17,7 +18,4 @@ class Product(models.Model):
 
     @property
     def average_rating(self):
-        ratings = self.ratings.all()  # using related_name="ratings"
-        if ratings.exists():
-            return ratings.aggregate(models.Avg('rating'))['rating__avg']
-        return 0
+        return self.reviews.aggregate(Avg('rating'))['rating__avg'] or 0

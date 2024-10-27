@@ -255,7 +255,11 @@
                     <div class="relative top-5 bg-white shadow-md mb-6 p-4 border-2 border-gray-300 rounded-lg"
                       style="min-height: 29rem; max-height: 29rem; width: calc(100vw - 60); max-width: calc(100vw - 60vw);">
                       
-                      
+                       <!-- Tombol Review -->
+                       <div class="absolute top-2 right-2 bg-yellow-500 text-white p-2 rounded-lg shadow transition hover:bg-yellow-600">
+                            <a href="/rate_review/product_detail/${ product.pk }">Review</a>
+                        </div>
+                
                       
                       <img src="${sanitizedPictureLink}" alt="${sanitizedItem}" class="h-48 w-full object-cover rounded-md mb-4" onclick="showProductDetail(${index})">
                        <div class="flex justify-start items-center mb-4">

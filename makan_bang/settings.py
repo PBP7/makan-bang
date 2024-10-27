@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'main',
     'authentication',
     'katalog',
+    'rate_review',
     'rateNreview',
     'preference',
     'forum',

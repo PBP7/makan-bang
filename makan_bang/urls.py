@@ -26,5 +26,6 @@ urlpatterns = [
     path('katalog/', include('katalog.urls')),
     path('preferences/', include('preference.urls')),
     path('forum/', include('forum.urls')),
+    path('rate_review/', include('rate_review.urls')),
 ]
 

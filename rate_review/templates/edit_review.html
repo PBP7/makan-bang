@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% load custom_tags static %}
+
+{% block meta %}
+<title>Edit Review</title>
+<link href="https://cdn.jsdelivr.net/npm/remixicon@3.2.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --primary-color: #559f7e ;
+        --secondary-color: #FCFAF7;
+        --text-dark: #3845AD;
+        --text-light: #e79f9e  ;
+        --extra-light: #fffff0;
+    }
+
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f8f9fa;
+        color: #1a2368;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        padding: 20px;
+    }
+    .form-container {
+        max-width: 600px;
+        width: 100%;
+        padding: 30px;
+        border-radius: 10px;
+        background-color: #ffffff;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+    h1 {
+        font-family: 'Noto Serif', serif;
+        color: #e79f9e;
+        margin-bottom: 20px;
+        font-size: 3rem;
+    }
+
+    .review-textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        resize: vertical;
+        margin-bottom: 20px;
+        font-size: 1rem;
+    }
+    button {
+        background-color: #559f7e;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        padding: 10px 20px;
+        transition: background-color 0.3s;
+        width: 100%;
+        font-size: 1.1rem;
+    }
+    button:hover {
+        background-color: #3d7a5e;
+    }
+    .action-icon {
+        text-decoration: none;
+        color: #559f7e;
+        margin-top: 10px;
+        display: inline-block;
+        font-size: 0.9rem;
+    }
+
+
+/* Star Rating Tengah di Card */
+    .star-rating {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .star-rating input[type="radio"] {
+        display: none;
+    }
+
+    .star-rating label {
+        font-size: 1.5rem;
+        color: lightgray;
+        cursor: pointer;
+    }
+
+    .star-rating input[type="radio"]:checked ~ label,
+    .star-rating label:hover,
+    .star-rating label:hover ~ label {
+        color: gold;
+    }
+
+    /* Bintang Terpilih akan Tetap Berwarna */
+    .star-rating input[type="radio"]:checked + label ~ label {
+        color: lightgray;
+    }
+
+    /* Styling untuk Hasil Review */
+    .selected{
+        color: gold;
+    }
+
+
+    .star-rating {
+        display: flex;
+    }
+    .star {
+        font-size: 24px;
+        color: #ddd; /* Warna abu-abu default untuk bintang kosong */
+        position: relative;
+    }
+
+    /* Untuk bintang yang terisi penuh */
+    .star.selected {
+        color: #FFD700; /* Warna kuning untuk bintang penuh */
+    }
+</style>
+{% endblock meta %}
+
+{% block content %}
+{% include 'navbar.html' %}
+{% load widget_tweaks %}
+
+
+<!-- Main Wrapper with Gradient Background -->
+<div class="flex justify-center md:justify-start items-center min-h-screen">
+    <div class="bg-white shadow-md rounded-lg p-6 border-2 border-pink-500 w-80 max-h-200 overflow-hidden"> <!-- Membuat kotak dengan w-80 dan h-96 -->
+      <h1 class="text-2xl font-bold text-center mb-4">Edit Review</h1>
+  
+      <form method="POST" class="space-y-4">
+        {% csrf_token %}
+  
+        <!-- Star Rating Field -->
+        <div class="flex flex-col items-center">
+            <div class="star-rating">
+                {% for rate in 1|to:5 %}
+                    <input type="radio" id="id_rate_{{ rate }}" name="rate" value="{{ rate }}" hidden>
+                    <label for="id_rate_{{ rate }}" class="star">&#9733;</label>
+                {% endfor %}
+            </div>
+        </div>
+  
+        <!-- Review Text Field -->
+        <div class="flex flex-col">
+            <label for="review_text" style="color: #e79f9e; font-weight: bold;">Your Review:</label>
+            <textarea id="review_text" name="review_text" rows="5" class="border border-gray-300 rounded-md p-2 w-full" placeholder="Write your review...">{{ review.review_text }}</textarea>
+        </div>
+  
+        <!-- Submit Button -->
+        <button type="submit" class="bg-[#559f7e] text-white font-semibold px-4 py-2 rounded-lg hover:bg-[#3d7a5e] transition duration-300 ease-in-out w-full">
+          Save Review | Product Review
+        </button>
+      </form>
+  
+      <!-- Back Button -->
+      <div class="flex justify-center mt-4">
+        <a href="{% url 'rate_review:user_rating' %}" class="bg-[#e79f9e] text-white font-semibold px-4 py-2 rounded-lg hover:bg-gray-600 transition duration-300 ease-in-out w-full text-center">
+          Cancel | Back to Your Reviews
+        </a>
+      </div>
+    </div>
+  </div>
+  <script>
+    // JavaScript untuk membuat bintang interaktif di formulir review
+    const starLabels = document.querySelectorAll('#star-rating-form label');
+    starLabels.forEach(label => {
+        label.addEventListener('click', function () {
+            // Menghapus seleksi dari bintang lain
+            starLabels.forEach(star => star.classList.remove('selected'));
+            // Menambahkan seleksi ke bintang yang dipilih dan yang sebelumnya
+            this.classList.add('selected');
+            let previousStar = this.previousElementSibling;
+            while (previousStar) {
+                if (previousStar.tagName === "LABEL") {
+                    previousStar.classList.add('selected');
+                }
+                previousStar = previousStar.previousElementSibling;
+            }
+        });
+    });
+</script>
+
+  {% endblock content %}
