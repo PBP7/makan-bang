@@ -56,13 +56,13 @@ let currentProductId = null;
 function addNote(productId) {
     currentProductId = productId;
     document.getElementById('popup-note').classList.remove('hidden');
-    document.getElementById('note-input').value = '';  // Clear input field when adding a new note
+    document.getElementById('note-input').value = ''; 
 }
 
 function editNote(productId) {
     currentProductId = productId;
     const currentNote = document.getElementById(`note-content-${productId}`);
-    document.getElementById('note-input').value = currentNote ? currentNote.textContent : '';  // Load existing note into input
+    document.getElementById('note-input').value = currentNote ? currentNote.textContent : ''; 
     document.getElementById('popup-note').classList.remove('hidden');
 }
 
@@ -74,7 +74,6 @@ function saveNote() {
     noteContainer.innerHTML = '';
 
     if (note.trim() !== '') {
-        // Add note and edit button
         const editButton = document.createElement('button');
         editButton.className = 'text-blue-600 font-semibold border-2 border-blue-600 rounded-lg px-14 py-1 mt-2 hover:bg-blue-600 hover:text-white transition duration-300';
         editButton.textContent = 'Edit Note';
@@ -91,7 +90,6 @@ function saveNote() {
         noteElement.id = `note-content-${currentProductId}`;
         noteContainer.appendChild(noteElement);
     } else {
-        // If note is empty, revert to "Add Note" button
         const addButton = document.createElement('button');
         addButton.className = 'text-blue-600 font-semibold border-2 border-blue-600 rounded-lg px-14 py-1 mt-2 hover:bg-blue-600 hover:text-white transition duration-300';
         addButton.textContent = '+ Add Note';
