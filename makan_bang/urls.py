@@ -29,8 +29,7 @@ urlpatterns = [
     path('rateNreview/', include('rateNreview.urls')),
     path('meal-planning/', include('meal_planning.urls')),
     path('bookmark/', include('bookmark.urls')),
-
-
+    path('rate_review/', include('rate_review.urls')),
 ]
 
 

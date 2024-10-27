@@ -5,7 +5,7 @@ import uuid
 
 
 class Review(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="reviews")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="review_views")
     user = models.ForeignKey(User, on_delete=models.CASCADE)  
     review_text = models.TextField()
 
