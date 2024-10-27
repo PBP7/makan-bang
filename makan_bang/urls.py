@@ -24,9 +24,15 @@ urlpatterns = [
     path('auth/', include('authentication.urls')),
     path('', include('main.urls')),
     path('katalog/', include('katalog.urls')),
+<<<<<<< HEAD
     path('forum/', include('forum.urls')),
     path('rateNreview/', include('rateNreview.urls')),
     path('meal-planning/', include('meal_planning.urls')),
 
+=======
+    path('preferences/', include('preference.urls')),
+    path('forum/', include('forum.urls')),
+    path('rate_review/', include('rate_review.urls')),
+>>>>>>> 831ba509e8f00e101b3c30385b8b59bacf92cd75
 ]
 

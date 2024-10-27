@@ -13,5 +13,6 @@ urlpatterns = [
     path('json/<str:id>/', show_json_by_id, name='show_json_by_id'),
     path('delete/<uuid:id>', delete_product_entry, name='delete_product_entry'),
     path('edit/<uuid:id>', edit_product_entry, name='edit_product_entry'),
-
+    path('preference/', include ('preference.urls')),
+    path('rate_review/', include ('rate_review.urls')),
 ]
