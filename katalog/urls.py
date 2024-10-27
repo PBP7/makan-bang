@@ -20,4 +20,5 @@ urlpatterns = [
     path('search/', search_products, name='search_products'),
     path('reimport/', reimport_dataset, name='reimport_dataset'),
     path('get_all_products/', get_all_products, name='get_all_products'),
+    path('rate_review/', include ('rate_review.urls')),
 ]

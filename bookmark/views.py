@@ -1,48 +1,23 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Bookmark
+from bookmark.models import Bookmark
 from katalog.models import Product
 from django.http import JsonResponse
-from django.db.utils import OperationalError
-from django.views.decorators.http import require_POST
-from katalog.services import get_all_rows
-import json
-from django.views.decorators.csrf import csrf_exempt
-import urllib.parse
 
-@login_required
+@login_required(login_url="authentication:login")
 def bookmark_list(request):
-    bookmarks = Bookmark.objects.filter(user=request.user)
-    bookmark_data = []
-
-    for bookmark in bookmarks:
-        if bookmark.product:
-            # It's a database product
-            product_data = {
-                'id': bookmark.product.id,
-                'name': bookmark.product.item,
-                'price': bookmark.product.price,
-                'image_url': bookmark.product.picture_link,
-            }
-        else:
-            # It's a dataset product
-            product_data = {
-                'id': bookmark.product_id,
-                'name': bookmark.product_data['Nama Produk'],
-                'price': bookmark.product_data['Harga'],
-                'image_url': bookmark.product_data['Link Foto'],
-            }
-        bookmark_data.append(product_data)
-
-    return render(request, 'bookmark_list.html', {'bookmarks': bookmark_data})
+    # Ambil produk yang dibookmark oleh pengguna saat ini
+    bookmarks = request.user.bookmarked_products.all()  # Menggunakan related_name dari ManyToManyField
+    return render(request, 'bookmark_list.html', {'bookmarks': bookmarks})
 
 
-@login_required
+@login_required(login_url="authentication:login")
 def remove_bookmark(request, product_id):
     product = get_object_or_404(Product, pk=product_id)
     product.bookmarked.remove(request.user)
     return redirect('bookmark:bookmark_list')
 
+@login_required(login_url="authentication:login")
 @login_required
 def add_bookmark(request, product_id):
     if request.method == "POST":
@@ -59,35 +34,29 @@ def add_bookmark(request, product_id):
         return JsonResponse({"success": True, "bookmarked": bookmarked})
     return JsonResponse({"success": False}, status=400)
 
-@login_required
-def is_bookmarked(request, product_id):
-    is_bookmarked = Bookmark.objects.filter(user=request.user, product_id=product_id).exists()
-    return JsonResponse({'is_bookmarked': is_bookmarked})
-
-@login_required
-@csrf_exempt
-@require_POST
+@login_required(login_url="authentication:login")
 def toggle_bookmark(request, product_id):
-    try:
-        sheet_products = get_all_rows("DATASET PBP7")
-        
-        if product_id < 0 or product_id >= len(sheet_products):
-            return JsonResponse({'error': 'Invalid product ID'}, status=400)
-        
-        product_data = sheet_products[product_id]
-        
-        bookmark, created = Bookmark.objects.get_or_create(
-            user=request.user,
-            external_product_id=str(product_id),
-            defaults={'product_data': product_data}
-        )
+    product = get_object_or_404(Product, id=product_id)
+    if request.user in product.bookmarked.all():
+        # Jika produk sudah dibookmark oleh user, maka hapus bookmark
+        product.bookmarked.remove(request.user)
+        bookmarked = False
+    else:
+        # Jika belum dibookmark, tambahkan bookmark
+        product.bookmarked.add(request.user)
+        bookmarked = True
+    return JsonResponse({"bookmarked": bookmarked})
 
-        if not created:
-            bookmark.delete()
-            is_bookmarked = False
-        else:
-            is_bookmarked = True
+@login_required(login_url="authentication:login")
+def add_or_edit_note(request):
+    product_id = request.POST.get('product_id')
+    product = Product.objects.get(id = product_id)
+    note = request.POST.get('note')
+    bookmark = get_object_or_404(Bookmark, product = product, user = request.user)
 
-        return JsonResponse({'is_bookmarked': is_bookmarked})
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+    # Save note to the bookmark
+    bookmark.note = note
+    bookmark.save()
+    
+    return JsonResponse({'status': 'success', 'note': bookmark.note})
+

@@ -11,9 +11,16 @@ from forum.forms import NewForumForm, ForumReplyForm
 
 @login_required(login_url="authentication:login")
 def show_forum(request):
-    questions = ForumQuestion.objects.all().order_by("-id")
-    context = {"questions": questions}
-
+    topic = request.GET.get('topic', 'All Topic')
+    if topic == 'All Topic':
+        questions = ForumQuestion.objects.all().order_by("-id")
+    else:
+        questions = ForumQuestion.objects.filter(topic=topic).order_by("-id")
+    
+    context = {
+        "questions": questions,
+        "current_topic": topic
+    }
     return render(request, "main_forum.html", context)
 
 @login_required(login_url="authentication:login")
@@ -37,23 +44,30 @@ def create_new_forum(request):
 @csrf_exempt
 @require_POST
 def new_forum_ajax(request):
-    question_form = NewForumForm(request.POST)
-    
-    if question_form.is_valid():
-        question = question_form.save(commit=False)
-        question.user = request.user
-        question.save()
+    title = strip_tags(request.POST.get("title"))
+    question = strip_tags(request.POST.get("question"))
+    topic = request.POST.get("topic")
+    user = request.user
 
-        return JsonResponse({
-            "message": "Forum created successfully",
-            "forum_id": question.id,
-            "forum_title": question.title,
-        }, status=201)
-    else:
-        return JsonResponse({
-            "errors": question_form.errors,
-            "message": "Form is invalid"
-        }, status=400)
+    errors = {}
+    if not title:
+        errors['title'] = ["Title cannot be empty."]
+    if not question:
+        errors['question'] = ["Discussion cannot be empty."]
+
+    if errors:
+        return JsonResponse({"errors": errors}, status=400)
+
+    new_question = ForumQuestion(
+        title=title, question=question, topic=topic, user=user
+    )
+    new_question.save()
+
+    return JsonResponse({
+        "message": "Forum created successfully",
+        "forum_id": new_question.id,
+        "forum_title": new_question.title,
+    }, status=201)
 
 def edit_forum(request, id):
     forum = ForumQuestion.objects.get(pk = id)
@@ -104,8 +118,8 @@ def view_forum(request, id):
 
 
 def public_forum(request):
-    topic = request.GET.get('topic', 'all')  # Get the selected topic from query parameters
-    if topic == 'all':
+    topic = request.GET.get('topic', 'All')  # Get the selected topic from query parameters
+    if topic == 'All':
         questions = ForumQuestion.objects.all().order_by("-id")  # Show all forum questions
     else:
         questions = ForumQuestion.objects.filter(topic=topic).order_by("-id")  # Filter questions by topic
@@ -113,8 +127,8 @@ def public_forum(request):
     return render(request, 'main_forum.html', {'questions': questions, 'topics': topics})
 
 def your_posts(request):
-    topic = request.GET.get('topic', 'all')  # Get the selected topic from query parameters
-    if topic == 'all':
+    topic = request.GET.get('topic', 'All')  # Get the selected topic from query parameters
+    if topic == 'All':
         questions = ForumQuestion.objects.filter(user=request.user).order_by("-id")  # Show only user's posts
     else:
         questions = ForumQuestion.objects.filter(user=request.user, topic=topic).order_by("-id")  # Filter by topic and user
@@ -124,9 +138,6 @@ def your_posts(request):
 @login_required
 def delete_comment(request, comment_id):
     comment = get_object_or_404(ForumReply, pk=comment_id)
-
-    if comment.user != request.user:
-        return HttpResponseForbidden("You are not allowed to delete this reply.")
     
     forum_question = comment.question
     comment.delete()

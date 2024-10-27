@@ -15,6 +15,7 @@ class Product(models.Model):
     description = models.CharField(max_length=255)
     link_gofood = models.TextField()
     is_dataset_product = models.BooleanField(default=False)
+    bookmarked = models.ManyToManyField(User, related_name="bookmarked_products", blank=True)
 
     @property
     def average_rating(self):

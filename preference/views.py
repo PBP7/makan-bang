@@ -18,7 +18,7 @@ import re
 
 
 # Create your views here.
-@login_required
+@login_required(login_url="authentication:login")
 def show_preference(request):
     preference_entries = Preference.objects.filter(user=request.user)  
     form = PreferenceForm()
@@ -29,7 +29,7 @@ def show_preference(request):
     }
     return render(request, "add_preference.html", context)
 
-@login_required
+@login_required(login_url="authentication:login")
 def preference_page(request):
     preferences = Preference.objects.filter(user=request.user)
     context = {
@@ -37,7 +37,7 @@ def preference_page(request):
     }
     return render(request, 'preference.html', context)
 
-@login_required
+@login_required(login_url="authentication:login")
 @csrf_exempt
 @require_POST
 def add_preference_ajax(request):
@@ -57,7 +57,7 @@ def add_preference_ajax(request):
     return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)
 
 
-@login_required
+@login_required(login_url="authentication:login")
 @require_POST
 def delete_preference_ajax(request, preference_id):
     try:
@@ -67,13 +67,14 @@ def delete_preference_ajax(request, preference_id):
     except Preference.DoesNotExist:
         return JsonResponse({"status": "error", "message": "Preference not found"}, status=404)
 
-@login_required
+@login_required(login_url="authentication:login")
 def get_preferences(request):
     """Return the updated preferences list as HTML for AJAX requests."""
     preferences = Preference.objects.filter(user=request.user)
     html = render_to_string('preference_list.html', {'preference_entries': preferences}, request=request)
     return JsonResponse({'html': html})
 
+@login_required(login_url="authentication:login")
 def get_products(request):
     preferences = Preference.objects.filter(user=request.user).values_list('preference', flat=True)
     products = Product.objects.filter(item__in=preferences)
@@ -81,7 +82,7 @@ def get_products(request):
     html = render_to_string('preference.html', {'product_entries': products}, request=request)
     return JsonResponse({'html': html})
 
-@login_required
+@login_required(login_url="authentication:login")
 def add_preference(request):
     if request.method == 'POST':
         preference = request.POST.get('preference_name')
@@ -94,6 +95,7 @@ def add_preference(request):
             })
     return JsonResponse({'status': 'error'})
 
+@login_required(login_url="authentication:login")
 @require_http_methods(["DELETE"])
 def delete_preference(request, preference_id):
     try:
@@ -103,7 +105,7 @@ def delete_preference(request, preference_id):
     except Preference.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Preference not found'}, status=404)
 
-@login_required
+@login_required(login_url="authentication:login")
 def show_preferences(request):
     preferences = Preference.objects.filter(user=request.user)
     context = {
@@ -111,7 +113,7 @@ def show_preferences(request):
     }
     return render(request, 'preference.html', context)
 
-@login_required
+@login_required(login_url="authentication:login")
 def get_filtered_products(request):
     preferences = Preference.objects.filter(user=request.user).values_list('preference', flat=True)
     
@@ -139,7 +141,7 @@ def get_filtered_products(request):
     
     return JsonResponse(products_data, safe=False)
 
-@login_required
+@login_required(login_url="authentication:login")
 def get_matching_products(request):
     try:
         user_preferences = Preference.objects.filter(user=request.user).values_list('preference', flat=True)

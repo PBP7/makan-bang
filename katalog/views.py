@@ -48,14 +48,13 @@ def show_katalog(request):
     else:
         products = Product.objects.all().order_by('price')
 
-    user_bookmarks = set(Bookmark.objects.filter(user=request.user).values_list('external_product_id', flat=True))
+    # user_bookmarks = set(Bookmark.objects.filter(user=request.user).values_list('external_product_id', flat=True))
 
     # Add all products to context
     context = {
         'nama': request.user.username,
         'products': products,
         'sort_order': sort_order,
-        'user_bookmarks': user_bookmarks,
     }
 
     return render(request, "katalog.html", context)
