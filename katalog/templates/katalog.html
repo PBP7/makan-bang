@@ -823,7 +823,7 @@ function showRatingModal(productId) {
     // Add this function to toggle the filter dropdown
     function toggleFilterDropdown() {
         const dropdown = document.getElementById('filterDropdown');
-        dropdown.classList.toggle('hidden');
+        dropdown.classList.toggle('show');
     }
 
     // Add these functions for filtering
@@ -836,9 +836,7 @@ function showRatingModal(productId) {
             });
             displayFilteredProducts(sortedProducts);
         });
-        toggleFilterDropdown(); // Close the dropdown after filtering
-    }
-
+        
     // Update the displayFilteredProducts function
     function displayFilteredProducts(products) {
         const productEntryCards = document.getElementById("product_entry_cards");
