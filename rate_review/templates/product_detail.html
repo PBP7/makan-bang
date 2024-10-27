@@ -10,10 +10,10 @@
     <style>
         :root {
             --primary-color: #559f7e ;
-            --secondary-color: #FCFAF7;
+            --secondary-color: #ffffff;
             --text-dark: #3845AD;
             --text-light: #e79f9e  ;
-            --extra-light: #fffff0;
+            --extra-light: #ffffff;
         }
 
         * {
@@ -389,15 +389,15 @@
         <!-- Header Section -->
         <div class="header">
             <p>OUR REVIEW PAGES</p>
-            <h1>Why People Love Us</h1>
-            <h2>{{ product.item }}</h2>
-            <img id="modalProductImage" src="{{ product.picture_link }}" alt="Product Image" class="h-96 w-full object-cover rounded-md mb-4">
+            <h1>{{ product.item }}</h1><br>
+            <!-- <h2>{{ product.item }}</h2> -->
+            <img id="modalProductImage" src="{{ product.picture_link }}" alt="Product Image" class="h-96 w-full object-cover rounded-md mx-auto"><br>
             <p>{{ product.description }}</p>
         </div>
         
         <div class="average-rating">
             <h1>Current Rating</h1>
-            <h1> ★ {{ average_rate|floatformat:1 }}/5</h1>
+            <h1> ★ {{ average_rate|floatformat:1 }}</h1>
             <br><br>
         </div>
         

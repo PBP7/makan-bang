@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block meta %}
-<title>John Lennon's Music Store</title>
+<title>Catalogue | MAKAN BANG</title>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dist/purify.min.js"></script>
 {% endblock meta %}
 
@@ -12,25 +12,31 @@
 
 <!-- Main Wrapper -->
 <div class="min-h-screen flex flex-col bg-white" style="padding-top: 88px;">
-    <div class="flex justify-start py-2 p-7">
+    <div class="flex flex-col md:flex-row justify-between items-center py-2 p-7 space-y-4 md:space-y-0">
+        <!-- Search Bar -->
         <input type="text" id="searchBar" placeholder="Search by category or name" 
-               class="border border-gray-300 rounded-md p-2 w-1/2 hover:border-indigo-700" 
+               class="border border-gray-300 rounded-md p-2 w-full md:w-1/2 hover:border-[#F9CDCC]" 
                onkeypress="searchProducts(event)">
+    
+        <!-- Button Add Product (for Admin only) -->
+        {% if user.username == "Admin" or user.username == "admin" %}
+            <button onclick="showModal()"
+              class="bg-white border text-black font-medium py-1 px-3 text-md rounded-md shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 ml-0 md:ml-4 w-full md:w-auto">
+              + Add Product
+            </button>
+        {% endif %}
+    
+        <!-- Button Plan your Meal (for non-Admin users) -->
+        {% if user.username != "Admin" and user.username != "admin" %}
+            <button class="bg-white border text-black font-medium py-1 px-3 text-md rounded-md shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 ml-0 md:ml-4 w-full md:w-auto">
+                <a href="/meal-planning/create">Plan your Meal</a>
+            </button>
+        {% endif %}
     </div>
-    {%if user.username == "Admin"%}
-    <div class="flex justify-start py-2 p-7">
-        <button onclick="showModal()"
-          class="bg-indigo-700 hover:bg-indigo-600 text-white font-bold py-1 px-3 text-sm rounded-full shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105">
-          + Add Product
-        </button>
-    </div>
-    {% endif %}
-
-  
-
+    
   <!-- Product Entries -->
 <!-- Product Entries -->
-    <div id="product_entry_cards" class = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6"></div>
+    <div id="product_entry_cards" class = "grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6"></div>
 
 
     <!-- Product Detail Modal -->
@@ -116,7 +122,7 @@
             <!-- Modal footer -->
             <div class="flex justify-end p-6 border-t border-gray-200 rounded-b">
                 <button type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg" id="closeRatingButton">Cancel</button>
-                <button type="submit" id="submitRatingButton" form="ratingForm" class="bg-indigo-700 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg">Submit Rating</button>
+                <button type="submit" id="submitRatingButton" form="ratingForm" class="bg-black hover:bg-[#3845AD] text-white font-bold py-2 px-4 rounded-lg">Submit Rating</button>
             </div>
         </div>
     </div>
@@ -188,10 +194,18 @@
             <!-- Modal footer -->
             <div class="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2 p-6 border-t border-gray-200 rounded-b justify-center md:justify-end">
                 <button type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg" id="cancelButton">Cancel</button>
-                <button type="submit" id="submitProductEntry" form="productEntryForm" class="bg-indigo-700 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg">Create Product Entry</button>
+                <button type="submit" id="submitProductEntry" form="productEntryForm" class="bg-black hover:bg-[#3845AD] text-white font-bold py-2 px-4 rounded-lg">Create Product Entry</button>
             </div>
         </div>
     </div>
+    </div>
+
+    <div class="fixed bottom-100 right-4 z-50">
+        <a href="/meal-planning/create">
+            <img src="{% static 'image/mealplan.png' %}" alt="Meal Plan" class="w-16 h-16 shadow-lg hover:scale-105 transition-transform">
+        </a>
+    </div>
+    
 
     <div class="fixed bottom-100 right-4 z-50">
         <a href="/meal-planning/create">
@@ -278,32 +292,32 @@
                 htmlString += `
                   <div class="relative break-inside-avoid cursor-pointer group" >
                     <div class="relative top-5 bg-white shadow-md mb-6 p-4 border-2 border-gray-300 rounded-lg"
-                      style="min-height: 29rem; max-height: 29rem; width: calc(100vw - 60); max-width: calc(100vw - 60vw);">
-                      
-                       <!-- Tombol Review -->
-                       <div class="absolute top-2 right-2 bg-yellow-500 text-white p-2 rounded-lg shadow transition hover:bg-yellow-600">
-                            <a href="/rate_review/product_detail/${ product.pk }">Review</a>
-                        </div>
+                      style="min-height: 25rem; max-height: 29rem; width: calc(100vw - 60); max-width: calc(100vw - 60vw);">
                 
                       
-                      <img src="${sanitizedPictureLink}" alt="${sanitizedItem}" class="h-48 w-full object-cover rounded-md mb-4" onclick="showProductDetail(${index})">
-                       <div class="flex justify-start items-center mb-4">
-                            <!-- Bookmark Button aligned to the left -->
-                            {% if user.username != "Admin" %}
-                            <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
-                                onclick="toggleBookmark('${ product.pk }',this)" class="bookmark-btn">
+                        <div class="relative">
+                            <!-- Product Image -->
+                            <img src="${sanitizedPictureLink}" alt="${sanitizedItem}" class="h-48 w-full object-cover rounded-md mb-4" onclick="showProductDetail(${index})">
+
+                            <!-- Bookmark Button in the top-right corner -->
+                            {% if user.username != "Admin" and user.username != "admin" %}
+                            <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow transition-colors absolute top-2 right-2"
+                                onclick="toggleBookmark('${ product.pk }',this)">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
+                                    <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
                                 </svg>
                             </button>
                             {% endif %}
+                        </div>
 
-                            <!-- Category text inside a box -->
-                            <div class="inline-block bg-gray-200 text-gray-800 px-3 py-0 rounded-full text-sm mb-2">
+                        <!-- Category and other details below the image -->
+                        <div class="flex justify-start items-center mb-2">
+                            <div class="inline-block bg-gray-200 text-gray-700 px-3 py-0 rounded-md text-sm">
                                 ${sanitizedKategori}
                             </div>
                         </div>
-                      <h3 class="font-bold text-xl mb-2 truncate">${sanitizedItem}</h3>
+
+                      <h3 class="font-bold text-xl truncate">${sanitizedItem}</h3>
                        <div class="flex items-center text-gray-600 mb-2">
                             <!-- Location Icon with a fixed width -->
                             <div class="flex-shrink-0">
@@ -317,18 +331,14 @@
                         </div>
                       <p class="font-bold text-lg mb-2">Price: $${sanitizedPrice}</p>
 
-                        {% if user.is_authenticated and user.username != "Admin" %}
-                            <!-- "Give Review" Button -->
-                            <div class="absolute bottom-0 right-0 p-2">
-                                <a href="{% url 'rateNreview:show_rateNreview' %}" 
-                                class="text-blue-600 font-semibold border-2 border-blue-600 rounded-lg px-3 py-1 hover:bg-blue-600 hover:text-white transition duration-300">
-                                Give Review
-                                </a>
+                        {% if user.username != "Admin" and user.username != "admin" %}
+                            <div class="mt-4 text-center bg-white text-black border p-2 rounded-lg shadow transition hover:bg-gray-200">
+                                <a href="/rate_review/product_detail/${ product.pk }">Review</a>
                             </div>
                         {% endif %}
 
                       
-                      {% if user.username == "Admin" %}
+                      {% if user.username == "Admin" or user.username == "admin" %}
                         <div class="flex justify-between mt-4">
                             <a href="/katalog/edit/${ product.pk }" class="border-2 border-yellow-500 text-yellow-500 rounded-l-lg w-full py-2 transition duration-300 hover:bg-yellow-500 hover:text-white shadow-md text-center">
                             Edit
@@ -515,20 +525,9 @@
                             <!-- Location text with truncate -->
                             <span class="truncate">${sanitizedRestaurant}</span>
                         </div>
-                      <p class="font-bold text-lg mb-2">Price: $${sanitizedPrice}</p>
-
-                        {% if user.is_authenticated and user.username != "admin" %}
-                            <!-- "Give Review" Button -->
-                            <div class="absolute bottom-0 right-0 p-2">
-                                <a href="{% url 'rateNreview:show_rateNreview' %}" 
-                                class="text-blue-600 font-semibold border-2 border-blue-600 rounded-lg px-3 py-1 hover:bg-blue-600 hover:text-white transition duration-300">
-                                Give Review
-                                </a>
-                            </div>
-                        {% endif %}
-
+                      <p class="font-bold text-lg mb-2">Price: Rp${sanitizedPrice}</p>
                       
-                      {% if user.username == "admin" %}
+                      {% if user.username == "admin" or user.username == "Admin"%}
                         <div class="flex justify-between mt-4">
                             <a href="/katalog/edit/${ product.pk }" class="border-2 border-yellow-500 text-yellow-500 rounded-l-lg w-full py-2 transition duration-300 hover:bg-yellow-500 hover:text-white shadow-md text-center">
                             Edit
@@ -667,7 +666,7 @@ function showRatingModal(productId) {
     }
 
     function toggleBtn(btn) {
-        btn.classList.toggle('bg-green-700');  // Dark green when bookmarked
+        btn.classList.toggle('bg-black');  // Dark green when bookmarked
         btn.classList.toggle('bg-white');  // White when not bookmarked
         btn.classList.toggle('text-white');  // Make icon white on green background
     }

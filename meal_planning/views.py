@@ -101,23 +101,19 @@ def finish_meal_plan(request):
 @login_required
 def create_plan(request):
     meal_plans = MealPlan.objects.filter(user=request.user)
+    today = timezone.now().date()
 
-    # Preparing JSON-compatible data for use in JavaScript
+    today_meal_plans = meal_plans.filter(date=today)
+    other_meal_plans = meal_plans.exclude(date=today).order_by('date')
+    has_today_plan = today_meal_plans.exists()
+    past_meal_plans = meal_plans.filter(date__lt=today)
+
+    request.session['show_today_reminder'] = has_today_plan
+
     meal_plans_data = []
     for meal_plan in meal_plans:
         food_items = list(meal_plan.food_items.values('item'))
-        today = timezone.now().date()
         
-        today_meal_plans = meal_plans.filter(date=today)
-        other_meal_plans = MealPlan.objects.filter(user=request.user).exclude(date=timezone.now().date()).order_by('date')
-        has_today_plan = MealPlan.objects.filter(user=request.user, date=today).exists()
-        past_meal_plans = meal_plans.filter(date__lt=today)
-        
-        if has_today_plan:
-            request.session['show_today_reminder'] = True
-        else:
-            request.session['show_today_reminder'] = False
-            
         meal_plans_data.append({
             'id': meal_plan.id,
             'date': meal_plan.date.strftime('%Y-%m-%d'),
