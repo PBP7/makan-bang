@@ -45,3 +45,4 @@ def toggle_bookmark(request, product_id):
         product.bookmarked.add(request.user)
         bookmarked = True
     return JsonResponse({"bookmarked": bookmarked})
+
