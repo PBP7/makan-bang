@@ -8,10 +8,7 @@ def show_main(request):
     
     # Pass the preferences along with other context data
     context = {
-        'nama_aplikasi': 'karesu',
         'nama': request.user.username,
-        'npm': '2306219575',
-        'class': 'PBP B',
     }
 
     return render(request, "main.html", context)
