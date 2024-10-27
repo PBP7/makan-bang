@@ -36,7 +36,8 @@ def add_bookmark(request, product_id):
 @login_required
 def toggle_bookmark(request, product_id):
     product = get_object_or_404(Product, id=product_id)
-    if request.user in product.bookmarked.all():
+    is_bookmarked = request.user in product.bookmarked.all()
+    if is_bookmarked:
         # Jika produk sudah dibookmark oleh user, maka hapus bookmark
         product.bookmarked.remove(request.user)
         bookmarked = False

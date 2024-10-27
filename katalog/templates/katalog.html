@@ -245,7 +245,7 @@
     async function getProductEntries(){
         return fetch("{% url 'katalog:show_json' %}").then((res) => res.json());
     }
-
+    let clickCount = 0;
     async function refreshProductEntries() {
         document.getElementById("product_entry_cards").innerHTML = "";
         document.getElementById("product_entry_cards").className = "";
@@ -290,12 +290,29 @@
                        <div class="flex justify-start items-center mb-4">
                             <!-- Bookmark Button aligned to the left -->
                             {% if user.username != "admin" %}
-                            <button class="bookmark-btn bg-white p-2 border border-gray-300 text-gray-600 rounded-full shadow mb-2 transition-colors"
-                                onclick="toggleBookmark('${product.pk}',this)" class="bookmark-btn">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
-                                </svg>
-                            </button>
+                                {% if clickCount == 1%}
+                                    <!-- Display the bookmarked button -->
+                                    <button 
+                                        class="bookmark-btn bg-green-500 text-white p-2 border rounded-full shadow mb-2 transition-colors"
+                                        onclick="toggleBookmark('${ product.pk }', this)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                {% else %}
+                                    <!-- Display the default bookmark button -->
+                                    <button 
+                                        class="bookmark-btn bg-white text-gray-600 border-gray-300 p-2 border rounded-full shadow mb-2 transition-colors"
+                                        onclick="toggleBookmark('${ product.pk }', this)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V3z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                {% endif %}
+
+
+
+
                             {% endif %}
 
                             <!-- Category text inside a box -->
@@ -430,6 +447,7 @@
         document.getElementById('description').value = product.description;
     }
     function toggleBookmark(productId, btn) {
+        
         fetch(`/bookmark/toggle_bookmark/${productId}/`, {
             method: "POST",
             headers: {
@@ -438,18 +456,21 @@
         })
         .then(response => response.json())
         .then(data => {
-            toggleBtn(btn) 
-            const button = document.querySelector(`#bookmark-button-${productId}`);
             if (data.bookmarked) {
-                button.classList.add("bookmarked");
-                button.classList.remove("not-bookmarkfed");
+                // Tambahkan kelas hijau jika bookmarked
+                clickCount = 1;
+                btn.classList.add("bg-green-500", "text-white");
+                btn.classList.remove("bg-white", "text-gray-600", "border-gray-300");
             } else {
-                button.classList.add("not-bookmarked");
-                button.classList.remove("bookmarked");
+                clickCount = 0;
+                // Kembalikan ke warna awal jika tidak bookmarked
+                btn.classList.add("bg-white", "text-gray-600", "border-gray-300");
+                btn.classList.remove("bg-green-500", "text-white");
             }
         })
         .catch(error => console.error("Error:", error));
-        }
+    }
+    
     
         function toggleBtn(btn) {
             btn.classList.toggle('bg-green-700');  // Dark green when bookmarked
