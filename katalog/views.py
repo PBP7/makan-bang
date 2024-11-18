@@ -221,7 +221,45 @@ def get_all_products(request):
         })
     return JsonResponse(product_list, safe=False)
 
+from django.views.decorators.csrf import csrf_exempt
+import json
+from django.http import JsonResponse
 
+@csrf_exempt
+def create_product_flutter(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            new_product = Product.objects.create(
+                user=request.user,
+                item=data["item"],
+                description=data["description"],
+                picture_link=data["picture_link"],
+                restaurant=data["restaurant"],
+                price=float(data["price"]),
+                kategori=data["kategori"],
+                lokasi=data["lokasi"],
+                nutrition=data["nutrition"],
+                link_gofood=data["link_gofood"]
+            )
+
+            new_product.save()
+
+            return JsonResponse({
+                "status": "success",
+                "message": "Product successfully created!"
+            }, status=200)
+        except Exception as e:
+            return JsonResponse({
+                "status": "error",
+                "message": str(e)
+            }, status=400)
+    else:
+        return JsonResponse({
+            "status": "error",
+            "message": "Invalid request method"
+        }, status=401)
 
 
 

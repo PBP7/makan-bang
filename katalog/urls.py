@@ -21,4 +21,5 @@ urlpatterns = [
     path('reimport/', reimport_dataset, name='reimport_dataset'),
     path('get_all_products/', get_all_products, name='get_all_products'),
     path('rate_review/', include ('rate_review.urls')),
+    path('create-flutter/', create_product_flutter, name='create_product_flutter'),
 ]

@@ -7,3 +7,4 @@ urllib3
 python-dotenv
 gspread
 django-widget-tweaks
+django-cors-headers
