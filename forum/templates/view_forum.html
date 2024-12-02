@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>{{ forum.title }} | MAKAN BANG</title>
+{% endblock meta %}
+
+{% block content %}
+{% include 'navbar.html' %}
+
+<div class="flex justify-center min-h-screen">
+    
+    <!-- forum -->
+    <div class="max-w-4xl w-full p-6 mx-auto">
+        <br><br><br>
+
+        <div class="flex items-center mb-4">
+            <a href="{% url 'forum:public_forum' %}" class="text-gray-500 font-semibold mr-4 hover:text-gray-800">
+                &larr;
+            </a>
+            <h1 class="text-2xl font-bold">{{ forum.title }}</h1>
+        </div>
+
+        <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
+            <div class="mb-4">
+                <span class="
+                    inline-block text-sm font-medium uppercase tracking-wide px-3 py-1 mb-4
+                    {% if forum.topic == 'Information' %}
+                        bg-[#3845AD] text-white
+                    {% elif forum.topic == 'Recommendation' %}
+                        bg-[#FFCD64] text-gray-600
+                    {% elif forum.topic == 'Restaurants' %}
+                        bg-[#F9CDCC] text-gray-600
+                    {% elif forum.topic == 'Foods' %}
+                        bg-[#7FBFA2] text-white
+                    {% elif forum.topic == 'Experience' %}
+                        bg-[#F65035] text-white
+                    {% else %}
+                        bg-gray-200 text-gray-600
+                    {% endif %}
+                    ">
+                    {{ forum.topic }}
+                </span>
+
+            </div>
+            <div class="mb-4">
+                <p class="text-gray-700">by <span class="font-bold">{{ forum.user.username }}</span> — <span>{{ forum.created_at|date:"d/m/Y" }}</span></p>
+            </div>
+            <div class="mb-4">
+                <p class="text-gray-600">{{ forum.question }}</p>
+            </div>
+
+            {% if forum.user == request.user or request.user.username == 'admin' %}
+            <div class="flex justify-end p-2 space-x-6 rounded-lg">
+                <a href="{% url 'forum:edit_forum' forum.pk %}" class="text-sm text-[#474645] hover:text-[#A29086]">
+                    <img src="{% static 'image/pencil.png' %}" alt="Edit" class="h-6 w-6">
+                </a>
+                <a href="{% url 'forum:delete_forum' forum.pk %}" class="text-sm text-[#666463] hover:text-red-700" onclick="return confirm('Are you sure you want to delete this post?');">
+                    <img src="{% static 'image/trash.png' %}" alt="Delete" class="h-6 w-6">
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- add reply -->
+        <div class="mt-6">
+            <h2 class="text-xl font-bold mb-4">Share your thoughts!</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <!-- Textarea for reply -->
+                <textarea name="reply" id="reply" class="w-full border border-gray-300 rounded-lg p-4" rows="3" placeholder="Write here...">{{ form.reply.value|default_if_none:'' }}</textarea>
+                
+                <!-- Error message for reply -->
+                {% if comment_form.reply.errors %}
+                    <p class="text-red-500 text-sm">{{ comment_form.reply.errors.0 }}</p>
+                {% endif %}
+
+                <div class="flex justify-end">
+                    <button type="submit" class="bg-black hover:bg-[#212a73] text-white font-bold py-2 px-6 rounded-md mt-4">
+                        Post Reply
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- display replies -->
+        <div class="mt-6">
+            <h2 class="text-xl font-bold mb-4">Replies</h2>
+
+            {% if not comments %}
+                <p>No reply available, be the first to reply!</p><br>
+            {% else %}
+                <div class="space-y-4">
+                    {% for comment in comments %}
+                        <div class="bg-white shadow-md rounded-lg p-4">
+                            <p class="text-gray-800">{{ comment.reply }}</p>
+                            <p class="font-medium text-gray-700">by <span class="font-semibold">{{ comment.user.username }}</span> — <span>{{ comment.created_at|date:"d/m/Y" }}</span></p>
+
+                            {% if comment.user == request.user or request.user.username == 'admin' %}
+                                <div class="flex justify-end">
+                                    <form action="{% url 'forum:delete_comment' comment.id %}" method="POST" class="self-end" onclick="return confirm('Are you sure you want to delete this reply?');">
+                                        {% csrf_token %}
+                                        <button type="submit">
+                                            <img src="{% static 'image/trash.png' %}" alt="Delete" class="h-6 w-6">
+                                        </button>
+                                    </form>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+{% endblock content %}

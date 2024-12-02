@@ -1,0 +1,482 @@
+{% extends 'base.html' %}
+
+{% load custom_tags static %}
+{% block meta %}
+    <title>Review Pages</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.2.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #559f7e ;
+            --secondary-color: #ffffff;
+            --text-dark: #3845AD;
+            --text-light: #e79f9e  ;
+            --extra-light: #ffffff;
+        }
+
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            color: var(--text-light);
+            background-color: var(--secondary-color);
+            font-family: "Poppins", sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .star-rating input[type="radio"] {
+            display: none;
+        }
+        .star-rating label {
+            font-size: 1.5rem;
+            color: #e4e5e9;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .star-rating label:hover,
+        .star-rating label:hover ~ label,
+        .star-rating input[type="radio"]:checked ~ label {
+            color: gold;
+        }
+
+        .section__container {
+            width: 100%;    
+            max-width: 1200px;
+            margin: auto;
+            padding: 1rem;
+            text-align: center;
+            flex: 1;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+        }
+
+        .header p {
+            letter-spacing: 2px;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .header h1 {
+            font-family: 'Noto Serif', serif;
+            font-size: 2rem;
+            font-weight: 900;
+        }
+
+        .testimonials__grid {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            padding: 2rem;
+            display: grid;
+            gap: 1rem;
+            background-color: var(--extra-light);
+            border-radius: 0.5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
+
+        .card i {
+            font-size: 2.5rem;
+            font-weight: gold;
+        }
+
+        .card p {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .card hr {
+            width: 40px;
+            margin: auto;
+            color: var(--primary-color);
+        }
+        .card h3 {
+            color: rgb(63, 50, 122);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .card img {
+            width: 60px;
+            height: 60px;
+            margin: auto;
+            border-radius: 100%;
+            border: 1px solid var(--primary-color);
+        }
+
+        .card .name {
+            font-size: .9rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            transition: 0.3s ease;
+        }
+
+        .card .name:hover {
+            color: var(--primary-color);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            background-color: var(--primary-color);
+            color: var(--extra-light);
+            margin: 0; /* Menghapus margin */
+            width: 100%; /* Mengatur lebar 100% */
+            position: relative; /* Pastikan ini diatur jika footer tidak terlihat */
+        }
+
+        .footer h4 {
+            font-family: "Noto Serif", serif;
+            font-size: 1.5rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+        }
+
+        .footer p {
+            max-width: 450px;
+            margin: auto;
+            font-size: .9rem;
+            line-height: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer button {
+            padding: 1rem 2rem;
+            outline: none;
+            border: none;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: var(--extra-light);
+            border-radius: 0.5rem;
+        }
+
+        .add-review {
+            padding: 2rem;
+            background-color: var(--extra-light);
+            border-radius: 0.5rem;
+            box-shadow: 0 0 10px rgba(115, 86, 86, 0.2);
+            text-align: left;
+        }
+
+        .add-review h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 1rem;
+            text-align: center;
+        }
+
+/* Star Rating Tengah di Card */
+        .star-rating {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .star-rating input[type="radio"] {
+            display: none;
+        }
+
+        .star-rating label {
+            font-size: 1.5rem;
+            color: lightgray;
+            cursor: pointer;
+        }
+
+        .star-rating input[type="radio"]:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: gold;
+        }
+
+        /* Bintang Terpilih akan Tetap Berwarna */
+        .star-rating input[type="radio"]:checked + label ~ label {
+            color: lightgray;
+        }
+
+        /* Styling untuk Hasil Review */
+        .selected{
+            color: gold;
+        }
+
+
+        .star-rating {
+            display: flex;
+        }
+        .star {
+            font-size: 24px;
+            color: #ddd; /* Warna abu-abu default untuk bintang kosong */
+            position: relative;
+        }
+
+        /* Untuk bintang yang terisi penuh */
+        .star.selected {
+            color: #FFD700; /* Warna kuning untuk bintang penuh */
+        }
+
+        .card {
+            text-align: center;
+        }
+        .add-review .star-rating {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .add-review .star {
+            font-size: 1.5rem;
+            color: gold;
+            cursor: pointer;
+        }
+
+        .add-review label.star:hover,
+        .add-review label.star:hover ~ label.star {
+            color: var(--text-dark);
+        }
+
+        .add-review textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--primary-color);
+            border-radius: 0.3rem;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .add-review button {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: var(--primary-color);
+            color: var(--extra-light);
+            border: none;
+            border-radius: 0.3rem;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+
+        .review-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .action-icon {
+            font-size: 1.2rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            border: none;
+            background: none;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .edit-icon:hover {
+            color: #4CAF50; /* Hijau lebih terang untuk edit */
+        }
+
+        .delete-icon:hover {
+            color: #f44336; /* Merah lebih terang untuk delete */
+        }
+
+        .back-to-catalog {
+            position: fixed;
+            top: 100px;
+            left: 20px;
+            padding: 10px 20px;
+            background-color: var(--text-light); /* Kuning sebagai warna utama tombol */
+            color: var(--extra-light); /* Warna krem sebagai warna teks */
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-to-catalog:hover {
+            background-color: #7a4064; /* Warna kuning lebih gelap saat hover */
+        }
+
+
+
+        @media (width < 900px) {
+            .testimonials__grid {
+                grid-template-columns: repeat(2, 1fr);  
+                gap: 1rem;
+            }
+        }
+
+        @media (width < 600px) {
+            .testimonials__grid {
+                grid-template-columns: repeat(1, 1fr);  
+            }
+        }
+
+        .average-rating h1{
+            font-family: 'Noto Serif', serif;
+            font-size: 1.6rem;
+            font-weight: 900;
+        }
+
+           
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+
+    
+            
+{% endblock meta %}
+
+{% block content %}
+{% include 'navbar.html' %}
+
+    <br><br><br>
+  
+
+    <div class="section__container">
+        <!-- Header Section -->
+        <div class="header">
+            <p>OUR REVIEW PAGES</p>
+            <h1>{{ product.item }}</h1><br>
+            <!-- <h2>{{ product.item }}</h2> -->
+            <img id="modalProductImage" src="{{ product.picture_link }}" alt="Product Image" class="h-96 w-full object-cover rounded-md mx-auto"><br>
+            <p>{{ product.description }}</p>
+        </div>
+        
+        <div class="average-rating">
+            <h1>Current Rating</h1>
+            <h1> ★ {{ average_rate|floatformat:1 }}</h1>
+            <br><br>
+        </div>
+        
+          
+        <a href="{% url 'katalog:show_katalog' %}" class="back-to-catalog">Back to Catalog</a>
+    
+        <!-- Review Cards and Add Review Form -->
+        <div class="testimonials__grid">
+            <!-- Review Cards -->
+            {% for review in reviews %}
+            <div class="card">
+                <span><i class="ri-double-quotes-l"></i></span>
+                <h3>{{ review.review_text }}</h3>
+                <hr>
+                <p class="name">{{ review.user.username }}</p>
+                <div class="star-rating">
+                    {% for i in 1|to:5 %}
+                        <span class="star {% if i <= review.rate %}selected{% endif %}">&#9733;</span>
+                    {% endfor %}
+                </div>
+                <p><em>{{ review.date }}</em></p>
+
+                <!-- Edit and Delete Buttons -->
+       
+                <div class="review-actions">
+                    
+                    {% if request.user == review.user or request.user.is_superuser%}
+                        
+                        <a href="{% url 'rate_review:edit_review' review.id %}" class="action-icon edit-icon" title="Edit">&#9998;</a>
+                        <form method="POST" action="{% url 'rate_review:delete_review' review.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="action-icon delete-icon" title="Delete">&#128465;</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+
+    
+            <!-- Add Review Form -->
+            {% if user.is_authenticated and not user_has_reviewed %}
+                <div class="add-review card">
+                    <h3>Add Your Review</h3>
+                    <form method="POST" action="{% url 'rate_review:submit_review' product.id %}">
+                        {% csrf_token %}
+                        <div class="star-rating">
+                            {% for rate in 1|to:5 %}
+                                <input type="radio" id="id_rate_{{ rate }}" name="rate" value="{{ rate }}" hidden>
+                                <label for="id_rate_{{ rate }}" class="star">&#9733;</label>
+                            {% endfor %}
+                        </div>
+                        <div>
+                            <label for="review">Your Review:</label>
+                            <textarea id="review" name="review_text" rows="4" placeholder="Write your review..."></textarea>
+                        </div>
+                        <button type="submit">Submit Review</button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+    </div> 
+
+    <script>
+        // JavaScript untuk membuat bintang interaktif di formulir review
+        const starLabels = document.querySelectorAll('#star-rating-form label');
+        starLabels.forEach(label => {
+            label.addEventListener('click', function () {
+                // Menghapus seleksi dari bintang lain
+                starLabels.forEach(star => star.classList.remove('selected'));
+                // Menambahkan seleksi ke bintang yang dipilih dan yang sebelumnya
+                this.classList.add('selected');
+                let previousStar = this.previousElementSibling;
+                while (previousStar) {
+                    if (previousStar.tagName === "LABEL") {
+                        previousStar.classList.add('selected');
+                    }
+                    previousStar = previousStar.previousElementSibling;
+                }
+            });
+        });
+    </script>
+{% endblock content %}

@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block meta %}
+<title>Edit Forum | MAKAN BANG</title>
+{% endblock meta %}
+
+{% block content %}
+{% include 'navbar.html' %}
+
+<div class="flex justify-center min-h-screen">
+    
+    <div class="max-w-4xl w-full p-6 mx-auto">
+        <br><br><br><br>
+
+        <div class="flex items-center mb-4">
+            <a href="{% url 'forum:public_forum' %}" class="text-gray-500 font-semibold mr-4 hover:text-gray-800">
+                &larr;
+            </a>
+            <h1 class="text-2xl font-bold">Edit Forum</h1>
+        </div>
+
+        <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
+            <form method="POST">
+                {% csrf_token %}
+                
+                <!-- title -->
+                <div class="py-2">
+                    <label for="title" class="font-semibold text-gray-700 w-1/4">Title</label>
+                    <div class="w-full">
+                        <input type="text" name="title" id="title" class="border border-gray-300 rounded-lg p-3 w-full" value="{{ form.title.value }}">
+                        {% if form.title.errors %}
+                            <p class="text-red-500 text-sm">{{ form.title.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- discussion -->
+                <div class="py-2">
+                    <label for="question" class="font-semibold text-gray-700 w-1/4">Discussion</label>
+                    <div class="w-full">
+                        <textarea name="question" id="question" rows="6" class="border border-gray-300 rounded-lg p-3 w-full">{{ form.question.value }}</textarea>
+                        {% if form.question.errors %}
+                            <p class="text-red-500 text-sm">{{ form.question.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- select topic -->
+                <div class="py-2">
+                    <label for="topic" class="font-semibold text-gray-700 w-1/4">
+                        Topic
+                    </label>
+                    <div class="w-full">
+                        <select name="topic" id="topic" class="border border-gray-300 rounded-lg p-3 w-full">
+                            <option value="Information" {% if form.topic.value == 'Information' %}selected{% endif %}>Information</option>
+                            <option value="Recommendation" {% if form.topic.value == 'Recommendation' %}selected{% endif %}>Recommendation</option>
+                            <option value="Restaurants" {% if form.topic.value == 'Restaurant' %}selected{% endif %}>Restaurant</option>
+                            <option value="Foods" {% if form.topic.value == 'Foods' %}selected{% endif %}>Foods</option>
+                            <option value="Experience" {% if form.topic.value == 'Experience' %}selected{% endif %}>Experience</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- edit button -->
+                <div class="flex justify-end mt-4">
+                    <input type="submit" value="Save Changes" class="bg-black hover:bg-[#3845AD] text-white font-bold py-2 px-6 rounded-md">
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+</div>
+
+{% endblock content %}

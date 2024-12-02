@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>Forum | MAKAN BANG</title>
+{% endblock meta %}
+
+{% block content %}
+{% include 'navbar.html' %}
+
+<div class="flex w-full min-h-screen">
+
+    <!-- sidebar -->
+    <div class="w-2/5 bg-white p-6 h-screen sticky top-0"> 
+        <br><br><br>
+        <button id="openModalButton" class="bg-white shadow-lg font-bold text-gray-500 py-4 px-6 rounded-lg border border-gray-200 w-full flex items-center justify-center space-x-2 hover:shadow-xl hover:text-gray-700">
+            <span class="text-2xl font-bold">+</span>
+            <span>Add New Forum</span>
+        </button>
+
+        <div class="mt-6">
+            <div class="overflow-hidden rounded-md shadow-lg">
+                <img src="{% static 'image/forumpic.jpg' %}" alt="Forum Image" class="w-full h-auto max-h-110">
+            </div>
+        </div>
+    </div>
+
+    <!-- display forums -->
+    <div class="w-3/5 p-6 overflow-y-auto">
+        <br><br><br>
+
+        <h1 class="text-2xl font-bold mb-4">Forum Discussions</h1>
+        
+        <!-- public/your posts -->
+        <div class="mb-4 flex items-center justify-between pb-2">
+            <div class="flex items-center space-x-4">
+                <a href="{% url 'forum:public_forum' %}" 
+                   class="text-lg font-semibold pb-2 {% if current_tab == 'public' %}text-black border-b-2 border-black{% else %}text-gray-500 hover:text-black{% endif %}">
+                    All
+                </a>
+                
+                <span class="text-gray-500 font-bold">|</span>
+                
+                <a href="{% url 'forum:your_posts' %}" 
+                   class="text-lg font-semibold pb-2 {% if current_tab == 'your_posts' %}text-black border-b-2 border-black{% else %}text-gray-500 hover:text-black{% endif %}">
+                    Your Posts
+                </a>
+            </div>
+        
+            <!-- Dropdown Menu positioned to the right -->
+            <div class="relative inline-block text-left">
+                <button
+                    id="dropdownButton"
+                    class="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none"
+                    type="button"
+                    aria-haspopup="true"
+                    aria-expanded="true"
+                >
+                    {{ current_topic|default:"All Topic" }}
+                    <svg class="-mr-1 ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            
+                <div
+                    id="dropdownMenu"
+                    class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 hidden z-50"
+                    role="menu"
+                    aria-orientation="vertical"
+                    aria-labelledby="dropdownButton"
+                >
+                    <div class="py-1" role="none">
+                        <a href="{% url 'forum:show_forum' %}" class="text-gray-700 block px-4 py-2 text-sm {% if current_topic == 'All Topic' %}font-bold{% endif %}" role="menuitem">All Topic</a>
+                        <a href="{% url 'forum:show_forum' %}?topic=Information" class="text-gray-700 block px-4 py-2 text-sm {% if current_topic == 'Information' %}font-bold{% endif %}" role="menuitem">Information</a>
+                        <a href="{% url 'forum:show_forum' %}?topic=Experience" class="text-gray-700 block px-4 py-2 text-sm {% if current_topic == 'Experience' %}font-bold{% endif %}" role="menuitem">Experience</a>
+                        <a href="{% url 'forum:show_forum' %}?topic=Recommendation" class="text-gray-700 block px-4 py-2 text-sm {% if current_topic == 'Recommendation' %}font-bold{% endif %}" role="menuitem">Recommendation</a>
+                        <a href="{% url 'forum:show_forum' %}?topic=Restaurants" class="text-gray-700 block px-4 py-2 text-sm {% if current_topic == 'Restaurants' %}font-bold{% endif %}" role="menuitem">Restaurants</a>
+                        <a href="{% url 'forum:show_forum' %}?topic=Foods" class="text-gray-700 block px-4 py-2 text-sm {% if current_topic == 'Foods' %}font-bold{% endif %}" role="menuitem">Foods</a>
+                    </div>
+                </div>
+            </div>            
+        </div>        
+        
+
+
+        {% if not questions %}
+        <p>No forum available!</p>
+        {% else %}
+        <div class="space-y-6 w-full" id="forum-content">
+            {% for question in questions %}
+                {% include 'card_forum.html' with question=question %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <br />
+    </div>
+</div>
+
+<!-- add forum modal AJAX -->
+<div id="forumModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden justify-center items-center">
+    <div class="bg-white w-full max-w-2xl p-6 rounded-lg shadow-lg relative">
+        <button type="button" id="closeModalButton" class="absolute top-7 right-7 text-gray-500 hover:text-gray-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+
+        <h2 class="text-xl font-bold mb-4">New Forum Discussion</h2>
+        <form id="modalForumForm">
+            {% csrf_token %}
+
+            <!-- title -->
+            <div class="py-2">
+                <label for="title" class="font-semibold text-gray-700">Title</label>
+                <input type="text" name="title" id="title" class="border border-gray-300 rounded-lg p-3 w-full">
+                <p class="text-red-500 text-sm mt-2 hidden" id="titleError"></p>
+            </div>
+
+            <!-- discussion-->
+            <div class="py-2">
+                <label for="question" class="font-semibold text-gray-700">Discussion</label>
+                <textarea name="question" id="question" rows="4" class="border border-gray-300 rounded-lg p-3 w-full"></textarea>
+                <p class="text-red-500 text-sm mt-2 hidden" id="questionError"></p>
+            </div>
+
+            <!-- select topic -->
+            <div class="py-2">
+                <label for="topic" class="font-semibold text-gray-700">Topic</label>
+                <select name="topic" id="topic" class="border border-gray-300 rounded-lg p-3 w-full">
+                    <option value="Information">Information</option>
+                    <option value="Recommendation">Recommendation</option>
+                    <option value="Restaurants">Restaurants</option>
+                    <option value="Foods">Foods</option>
+                    <option value="Experience">Experience</option>
+                </select>
+            </div>
+
+            <div class="flex justify-end mt-4">
+                <button type="submit" class="bg-black hover:bg-[#212a73] text-white font-bold py-2 px-4 rounded-md">
+                    Post Forum
+                </button>
+            </div>
+        </form>
+        <div id="errorMessages" class="text-red-500 mt-4"></div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const publicForumBtn = document.getElementById('public-forum-btn');
+    const yourPostsBtn = document.getElementById('your-posts-btn');
+
+    const modal = document.getElementById('forumModal');
+    const openModalButton = document.getElementById('openModalButton');
+    const closeModalButton = document.getElementById('closeModalButton');
+    const form = document.getElementById('modalForumForm');
+    const errorMessages = document.getElementById('errorMessages');
+
+    const dropdownButton = document.getElementById("dropdownButton");
+    const dropdownMenu = document.getElementById("dropdownMenu");
+
+    dropdownButton.addEventListener("click", function() {
+        dropdownMenu.classList.toggle("hidden");
+    });
+
+    // Close the dropdown if clicked outside
+    window.addEventListener("click", function(event) {
+        if (!dropdownButton.contains(event.target)) {
+            dropdownMenu.classList.add("hidden");
+        }
+    });
+
+    openModalButton.addEventListener('click', function () {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    });
+
+    closeModalButton.addEventListener('click', function () {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    });
+
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const title = form.querySelector('#title').value.trim();
+        const question = form.querySelector('#question').value.trim();
+        const topic = form.querySelector('#topic').value;
+
+        // Clear previous error messages
+        errorMessages.textContent = '';
+        titleError.textContent = '';
+        questionError.textContent = '';
+        titleError.classList.add('hidden');
+        questionError.classList.add('hidden');
+
+        let isValid = true;
+
+        // Client-side validation
+        if (!title) {
+            titleError.textContent = 'Title cannot be empty.';
+            titleError.classList.remove('hidden');
+            isValid = false;
+        }
+        if (!question) {
+            questionError.textContent = 'Discussion cannot be empty.';
+            questionError.classList.remove('hidden');
+            isValid = false;
+        }
+
+        if (!isValid) return;
+
+        // CSRF token handling
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const formData = new FormData(form);
+
+        fetch("{% url 'forum:new_forum_ajax' %}", {
+            method: "POST",
+            body: formData,
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                // close and clear modal
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                form.reset();
+                location.reload();
+            } else if (data.errors) {
+                // errorMessages.innerHTML = '';
+                // for (const [field, messages] of Object.entries(data.errors)) {
+                //     messages.forEach(message => {
+                //         const errorItem = document.createElement('div');
+                //         errorItem.textContent = message;
+                //         errorMessages.appendChild(errorItem);
+                //     });
+                // }
+                if (data.errors.title) {
+                titleError.textContent = data.errors.title[0];
+                titleError.classList.remove('hidden');
+                }
+                if (data.errors.question) {
+                    questionError.textContent = data.errors.question[0];
+                    questionError.classList.remove('hidden');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+});
+</script>
+    
+
+{% endblock content %}

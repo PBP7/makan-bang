@@ -1,0 +1,59 @@
+{% load static %}
+<div class="relative break-inside-avoid w-full">
+    <div class="block bg-white shadow-lg rounded-md hover:shadow-xl flex flex-col border border-gray-200 no-underline">
+    
+        <a href="{% url 'forum:view_forum' question.pk %}" class="p-6 text-left flex-grow">
+            <!-- topic -->
+            <span class="
+                inline-block text-sm font-medium uppercase tracking-wide px-3 py-1 mb-4
+                {% if question.topic == 'Information' %}
+                    bg-[#3845AD] text-white
+                {% elif question.topic == 'Recommendation' %}
+                    bg-[#FFCD64] text-gray-600
+                {% elif question.topic == 'Restaurants' %}
+                    bg-[#F9CDCC] text-gray-600
+                {% elif question.topic == 'Foods' %}
+                    bg-[#7FBFA2] text-white
+                {% elif question.topic == 'Experience' %}
+                    bg-[#F65035] text-white
+                {% else %}
+                    bg-gray-200 text-gray-600
+                {% endif %}
+            ">
+                {{ question.topic }}
+            </span>
+
+            <!-- title -->
+            <h3 class="font-bold text-2xl text-gray-800 mb-1">{{ question.title }}</h3>
+            
+            <!-- by -->
+            <div class="text-sm text-gray-500 mb-6">
+                <span>by </span><span class="font-bold">{{ question.user }}</span> — <span>{{ question.created_at|date:"d/m/Y" }}</span>
+            </div>
+            
+            <!-- discussion max 130 letters -->
+            <div class="mb-4">
+                <p class="text-gray-600">
+                    {{ question.question|slice:":130" }}{% if question.question|length > 100 %}...{% endif %}
+                </p>
+            </div>
+
+            <!-- reply count -->
+            <div class="text-sm text-gray-500">
+                <span class="font-semibold text-gray-700">Replies:</span> 
+                <span>{{ question.replycount }}</span>
+            </div>
+        </a>
+
+        {% if question.user == request.user or request.user.username == 'admin' %}
+            <div class="flex justify-end p-4 space-x-4 bg-[#FCFAF7] rounded-b-lg">
+                <a href="{% url 'forum:edit_forum' question.pk %}" class="text-sm text-[#474645] hover:text-[#A29086]">
+                    <img src="{% static 'image/pencil.png' %}" alt="Edit" class="h-6 w-6">
+                </a>
+                <a href="{% url 'forum:delete_forum' question.pk %}" class="text-sm text-[#666463] hover:text-red-700" onclick="return confirm('Are you sure you want to delete this post?');">
+                    <img src="{% static 'image/trash.png' %}" alt="Delete" class="h-6 w-6">
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>

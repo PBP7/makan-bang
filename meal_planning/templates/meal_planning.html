@@ -1,0 +1,202 @@
+{% load static %}
+
+<title>Create Meal Plan</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<style>
+    body {
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-position: center;
+        color: #000000;
+    }
+
+    .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: #FCFAF7;
+        border-bottom: 2px solid #d3d3d3;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        z-index: 50;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 2rem;
+    }
+
+    .navbar-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #000;
+    }
+
+    .flex-container {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        margin-top: 75px;
+        gap: 20px;
+        padding: 0 20px;
+    }
+    
+    .card, .card_food {
+        background-color: #FCFAF7; 
+        border-radius: 0.375rem;
+        padding: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card {
+        width: 340px;
+        height: 550px;
+    }
+    
+    .card_food {
+        display: flex;
+        flex-direction: column;
+        width: 700px;
+        height: 550px;
+    }
+    
+    .scrollable-content {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        overflow-y: auto;
+        max-height: 400px;
+        margin-bottom: 1rem;
+        padding-right: 10px;
+    }
+
+    .btn {
+        background-color: transparent;
+        color: #3845AD;
+        border: 2px solid #3845AD;
+        padding: 0.25rem 0.75rem;
+        border-radius: 0.375rem;
+        transition: background-color 0.2s, color 0.2s;
+        font-weight: bold;
+    }
+    
+    .btn:hover {
+        background-color: #3845AD;
+        color: white;
+    }
+
+    .btn-cancel {
+        background-color: transparent;
+        color: #ff4d4d;
+        border: 2px solid #ff4d4d;
+    }
+
+    .btn-cancel:hover {
+        background-color: #ff4d4d;
+        color: white;
+    }
+</style>
+
+</head>
+
+<body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <h1 class="navbar-title">Create Your Meal Plan</h1>
+        <div class="flex gap-2">
+            <button type="submit" form="mealPlanForm" class="btn">Save</button>
+            <a href="{% url 'cancel_selection' %}" class="btn btn-cancel">Cancel</a>
+        </div>
+    </div>
+
+    <form id="mealPlanForm" action="{% url 'finish_meal_plan' %}" method="POST" autocomplete="off">
+        {% csrf_token %}
+        <div class="flex-container">
+            <div class="card_food relative overflow-hidden p-4 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-bold text-[#F65035] mb-4">Food added</h2>
+                
+                <div class="scrollable-content">
+                    {% if food_items %}
+                        {% for food_item in food_items %}
+                            <div class="bg-white shadow-lg rounded-lg overflow-hidden w-[200px] h-[250px] flex flex-col items-center justify-between mx-auto border border-[#F65035]">
+                                <div class="w-full h-[140px] flex items-center justify-center overflow-hidden">
+                                    {% if food_item.picture_link %}
+                                        <img src="{{ food_item.picture_link }}" alt="{{ food_item.item }}" class="w-full h-full object-cover">
+                                    {% else %}
+                                        <div class="flex items-center justify-center h-full w-full bg-gray-200 text-gray-500 text-center">
+                                            <span>No Image</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="text-center mt-2 flex flex-col items-center justify-center p-2">
+                                    <p class="text-sm font-medium text-dark">{{ food_item.item }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-center text-gray-500 mt-4">No food items added to your meal plan.</p>
+                    {% endif %}
+                </div>
+                
+                <div class="absolute bottom-4 right-4 flex justify-end px-4">
+                    <a href="{% url 'choices_page' %}" class="flex">
+                        <img src="{% static 'image/plusButton.png' %}" alt="Add Meal" class="w-16 h-16 object-cover">
+                    </a>                    
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="text-2xl font-bold text-[#F65035] mb-0 text-dark">Select Your</h2>
+                <h2 class="text-2xl font-bold text-[#F65035] mb-4 text-dark">Right Time</h2>
+
+                <div class="mb-6">
+                    <input type="hidden" id="selected_date" name="selected_date">
+                    <div id="datepicker" class="mt-2 p-2 border border-gray-300 rounded"></div>
+                </div>
+
+                <div class="mb-6">
+                    <label for="time" class="block text-dark mb-2">Select Time</label>
+                    <input id="time" name="time" type="time" class="w-full mt-2 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("mealPlanForm");
+            
+            form.addEventListener("submit", function (event) {
+                const selectedDate = document.getElementById("selected_date").value;
+                const time = document.getElementById("time").value;
+                
+                if (!selectedDate || !time) {
+                    event.preventDefault();
+                    alert("Please fill out the date before saving.");
+                    return; 
+                }
+
+                const foodItemsContainer = document.querySelector(".scrollable-content");
+                const foodItems = foodItemsContainer.querySelectorAll(".bg-white");
+                
+                if (foodItems.length === 0) {
+                    event.preventDefault();
+                    alert("Please add at least one food item to your meal plan before saving.");
+                }
+            });
+        });
+
+        flatpickr("#datepicker", {
+            inline: true,
+            dateFormat: "Y-m-d", 
+            minDate: "today",
+            onChange: function(selectedDates, dateStr, instance) {
+                document.getElementById('selected_date').value = dateStr;
+            }
+        });
+    </script>
+</body>
+</html>
