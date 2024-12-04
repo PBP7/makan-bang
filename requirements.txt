@@ -4,3 +4,7 @@ whitenoise
 psycopg2-binary
 requests
 urllib3
+python-dotenv
+gspread
+django-widget-tweaks
+django-cors-headers

@@ -9,7 +9,12 @@ from django.contrib.auth import logout
 import datetime
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-
+from django.contrib.auth import authenticate, login as auth_login
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import User
+import json
+from django.contrib.auth import logout as auth_logout
 
 def register(request):
     form = UserCreationForm()
@@ -44,5 +49,3 @@ def logout_user(request):
     response = HttpResponseRedirect(reverse('authentication:login'))
     response.delete_cookie('last_login')
     return response
-
-# Create your views here.

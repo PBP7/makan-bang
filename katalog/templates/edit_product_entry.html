@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-{% load static %}
 
 {% block meta %}
 <title>Edit Product Entry</title>
@@ -7,49 +6,130 @@
 
 {% block content %}
 {% include 'navbar.html' %}
-{% load widget_tweaks %}
 
-<!-- Main Wrapper with Gradient Background -->
-<div class="flex flex-col min-h-screen" style="background: linear-gradient(to bottom, #87CEEB, #B0E0E6);">
-  <div class="container mx-auto px-4 py-8 mt-16 max-w-md">
-    <h1 class="text-3xl font-bold text-center mb-8 text-black">Edit Product Entry</h1>
-  
-    <div class="bg-white shadow-md rounded-lg p-6 form-style border-2 border-yellow-500">
-      <form method="POST" class="space-y-6 overflow-auto max-h-[400px]">
-        {% csrf_token %}
-        {% for field in form %}
-          <div class="flex flex-col">
-            <label for="{{ field.id_for_label }}" class="mb-2 font-semibold text-gray-700">
-              {{ field.label }}
-            </label>
-            <div class="w-full">
-                {{ field|attr:"class:border border-black rounded-md p-2" }}            
-            </div>
-            {% if field.help_text %}
-              <p class="mt-1 text-sm text-gray-500">{{ field.help_text }}</p>
-            {% endif %}
-            {% for error in field.errors %}
-              <p class="mt-1 text-sm text-red-600">{{ error }}</p>
-            {% endfor %}
-          </div>
-        {% endfor %}
-        
-        <div class="flex justify-center mt-6 space-x-4">
-          <button type="submit" class="bg-indigo-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-indigo-700 transition duration-300 ease-in-out w-full">
-            Edit Product Entry
-          </button>
+<div class="flex justify-center min-h-screen">
+    <div class="max-w-4xl w-full p-6 mx-auto">
+        <br><br><br><br>
+
+        <div class="flex items-center mb-4">
+            <a href="/katalog" class="text-gray-500 font-semibold mr-4 hover:text-gray-800">
+                &larr;
+            </a>
+            <h1 class="text-2xl font-bold">Edit Product Entry</h1>
         </div>
-      </form>
-      
-      <!-- Kembali Button -->
-      <div class="flex justify-center mt-4">
-        <a href="/katalog" class="bg-gray-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-gray-600 transition duration-300 ease-in-out w-full text-center">
-          Kembali
-        </a>
-      </div>
-      
+
+        <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
+            <form method="POST">
+                {% csrf_token %}
+                
+                <!-- Item Field -->
+                <div class="py-2">
+                    <label for="item" class="font-semibold text-gray-700 w-1/4">Item</label>
+                    <div class="w-full">
+                        <input type="text" name="item" id="item" class="border border-gray-300 rounded-lg p-3 w-full" value="{{ form.item.value }}">
+                        {% if form.item.errors %}
+                            <p class="text-red-500 text-sm">{{ form.item.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Picture Link Field -->
+                <div class="py-2">
+                    <label for="picture_link" class="font-semibold text-gray-700 w-1/4">Picture Link</label>
+                    <div class="w-full">
+                        <input type="url" name="picture_link" id="picture_link" class="border border-gray-300 rounded-lg p-3 w-full" value="{{ form.picture_link.value }}">
+                        {% if form.picture_link.errors %}
+                            <p class="text-red-500 text-sm">{{ form.picture_link.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Restaurant Field -->
+                <div class="py-2">
+                    <label for="restaurant" class="font-semibold text-gray-700 w-1/4">Restaurant</label>
+                    <div class="w-full">
+                        <input type="text" name="restaurant" id="restaurant" class="border border-gray-300 rounded-lg p-3 w-full" value="{{ form.restaurant.value }}">
+                        {% if form.restaurant.errors %}
+                            <p class="text-red-500 text-sm">{{ form.restaurant.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Category Field -->
+                <div class="py-2">
+                    <label for="kategori" class="font-semibold text-gray-700 w-1/4">Category</label>
+                    <div class="w-full">
+                        <input type="text" name="kategori" id="kategori" class="border border-gray-300 rounded-lg p-3 w-full" value="{{ form.kategori.value }}">
+                        {% if form.kategori.errors %}
+                            <p class="text-red-500 text-sm">{{ form.kategori.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Location Field -->
+                <div class="py-2">
+                    <label for="lokasi" class="font-semibold text-gray-700 w-1/4">Location</label>
+                    <div class="w-full">
+                        <input type="text" name="lokasi" id="lokasi" class="border border-gray-300 rounded-lg p-3 w-full" value="{{ form.lokasi.value }}">
+                        {% if form.lokasi.errors %}
+                            <p class="text-red-500 text-sm">{{ form.lokasi.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Price Field -->
+                <div class="py-2">
+                    <label for="price" class="font-semibold text-gray-700 w-1/4">Price</label>
+                    <div class="w-full">
+                        <input type="number" name="price" id="price" class="border border-gray-300 rounded-lg p-3 w-full" value="{{ form.price.value }}">
+                        {% if form.price.errors %}
+                            <p class="text-red-500 text-sm">{{ form.price.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Nutrition Field -->
+                <div class="py-2">
+                    <label for="nutrition" class="font-semibold text-gray-700 w-1/4">Nutrition</label>
+                    <div class="w-full">
+                        <textarea name="nutrition" id="nutrition" rows="2" class="border border-gray-300 rounded-lg p-3 w-full">{{ form.nutrition.value }}</textarea>
+                        {% if form.nutrition.errors %}
+                            <p class="text-red-500 text-sm">{{ form.nutrition.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Description Field -->
+                <div class="py-2">
+                    <label for="description" class="font-semibold text-gray-700 w-1/4">Description</label>
+                    <div class="w-full">
+                        <textarea name="description" id="description" rows="3" class="border border-gray-300 rounded-lg p-3 w-full">{{ form.description.value }}</textarea>
+                        {% if form.description.errors %}
+                            <p class="text-red-500 text-sm">{{ form.description.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- GoFood Link Field -->
+                <div class="py-2">
+                    <label for="link_gofood" class="font-semibold text-gray-700 w-1/4">GoFood Link</label>
+                    <div class="w-full">
+                        <input type="url" name="link_gofood" id="link_gofood" class="border border-gray-300 rounded-lg p-3 w-full" value="{{ form.link_gofood.value }}">
+                        {% if form.link_gofood.errors %}
+                            <p class="text-red-500 text-sm">{{ form.link_gofood.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Save Changes Button -->
+                <div class="flex justify-end mt-4">
+                    <input type="submit" value="Save Changes" class="bg-black hover:bg-[#3845AD] text-white font-bold py-2 px-6 rounded-md">
+                </div>
+
+            </form>
+        </div>
+
     </div>
-  </div>
 </div>
 
-{% endblock %}
+{% endblock content %}

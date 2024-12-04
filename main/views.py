@@ -8,9 +8,9 @@ def show_main(request):
     
     # Pass the preferences along with other context data
     context = {
-        'nama_aplikasi': 'karesu',
+        'nama_aplikasi': 'makan-bang',
         'nama': request.user.username,
-        'npm': '2306219575',
+        'npm': '1',
         'class': 'PBP B',
     }
 

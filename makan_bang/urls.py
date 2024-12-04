@@ -27,6 +27,8 @@ urlpatterns = [
     path('preferences/', include('preference.urls')),
     path('bookmark/', include('bookmark.urls')),
     path('forum/', include('forum.urls')),
-    path('rateNreview/', include('rateNreview.urls')),
     path('meal-planning/', include('meal_planning.urls')),
+    path('rate_review/', include('rate_review.urls')),
+    path('authmobile/', include('authmobile.urls')),
 ]
+
