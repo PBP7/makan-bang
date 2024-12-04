@@ -221,45 +221,47 @@ def get_all_products(request):
         })
     return JsonResponse(product_list, safe=False)
 
-from django.views.decorators.csrf import csrf_exempt
-import json
-from django.http import JsonResponse
 
 @csrf_exempt
 def create_product_flutter(request):
     if request.method == 'POST':
         try:
+            # Parse JSON data from the request body
             data = json.loads(request.body)
             
+            # Parse additional fields: is_dataset_product and bookmarked
+            is_dataset_product = data.get("is_dataset_product", False)  # Default to False if not provided
+            bookmarked_ids = data.get("bookmarked", [])  # List of user IDs who bookmarked this product
+            
+            # Create a new ProductEntry instance
             new_product = Product.objects.create(
-                user=request.user,
+                user=request.user,  # Assuming the user is logged in and can be accessed from request
                 item=data["item"],
-                description=data["description"],
                 picture_link=data["picture_link"],
-                restaurant=data["restaurant"],
-                price=float(data["price"]),
-                kategori=data["kategori"],
-                lokasi=data["lokasi"],
-                nutrition=data["nutrition"],
-                link_gofood=data["link_gofood"]
+                description=data["description"],
+                kategori = data["kategori"],
+                lokasi = data["lokasi"],
+                restaurant = data["restaurant"],
+                nutrition =data["nutrition"],
+                price=int(data["price"]),
+                link_gofood = data["link_gofood"],
+                is_dataset_product=is_dataset_product,  # Set the is_dataset_product value
             )
-
+            
+            # Handling the ManyToMany relationship for "bookmarked" users
+            if bookmarked_ids:
+                # Assuming you have a User model and can get the users by their IDs
+                users_to_add = User.objects.filter(id__in=bookmarked_ids)
+                new_product.bookmarked.set(users_to_add)  # Set the bookmarked users
+            
+            # Save the new product instance
             new_product.save()
 
-            return JsonResponse({
-                "status": "success",
-                "message": "Product successfully created!"
-            }, status=200)
+            # Return success response
+            return JsonResponse({"status": "success"}, status=200)
         except Exception as e:
-            return JsonResponse({
-                "status": "error",
-                "message": str(e)
-            }, status=400)
+            # Handle errors and return an error response
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
     else:
-        return JsonResponse({
-            "status": "error",
-            "message": "Invalid request method"
-        }, status=401)
-
-
-
+        # Return an error response for unsupported methods
+        return JsonResponse({"status": "error", "message": "Invalid request method"}, status=401)
