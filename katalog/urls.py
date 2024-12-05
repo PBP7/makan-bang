@@ -22,4 +22,8 @@ urlpatterns = [
     path('get_all_products/', get_all_products, name='get_all_products'),
     path('rate_review/', include ('rate_review.urls')),
     path('create-flutter/', create_product_flutter, name='create_product_flutter'),
+    path('delete-flutter/<uuid:id>', delete_product_flutter, name='delete_product_flutter'),
+    path('edit-flutter/<uuid:id>', edit_product_flutter, name='edit_product_flutter'),
+
+
 ]

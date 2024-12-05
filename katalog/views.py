@@ -265,3 +265,71 @@ def create_product_flutter(request):
     else:
         # Return an error response for unsupported methods
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=401)
+
+
+@csrf_exempt
+def delete_product_flutter(request, id):
+    try:
+        # Get product by id
+        product = Product.objects.get(pk=id)
+        # Delete the product
+        product.delete()
+        
+        return JsonResponse({
+            "status": "success",
+            "message": "Product deleted successfully!"
+        }, status=200)
+    except Product.DoesNotExist:
+        return JsonResponse({
+            "status": "error",
+            "message": "Product not found!"
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            "status": "error",
+            "message": str(e)
+        }, status=500)
+@csrf_exempt
+def edit_product_flutter(request, id):
+    if request.method == 'POST':
+        try:
+            # Parse JSON data from the request body
+            data = json.loads(request.body)
+            
+            # Retrieve the product instance to be updated
+            product = Product.objects.get(id=id)
+            
+            # Update the fields with the new data provided
+            product.item = data.get("item", product.item)
+            product.picture_link = data.get("picture_link", product.picture_link)
+            product.description = data.get("description", product.description)
+            product.kategori = data.get("kategori", product.kategori)
+            product.lokasi = data.get("lokasi", product.lokasi)
+            product.restaurant = data.get("restaurant", product.restaurant)
+            product.nutrition = data.get("nutrition", product.nutrition)
+            product.price = int(data.get("price", product.price))  # Default to the existing price if not provided
+            product.link_gofood = data.get("link_gofood", product.link_gofood)
+            product.is_dataset_product = data.get("is_dataset_product", product.is_dataset_product)
+            
+            # Handling the ManyToMany relationship for "bookmarked" users
+            bookmarked_ids = data.get("bookmarked", [])
+            if bookmarked_ids is not None:
+                users_to_add = User.objects.filter(id__in=bookmarked_ids)
+                product.bookmarked.set(users_to_add)  # Update the bookmarked users
+            
+            # Save the updated product instance
+            product.save()
+
+            # Return success response
+            return JsonResponse({"status": "success"}, status=200)
+
+        except Product.DoesNotExist:
+            # Handle the case where the product doesn't exist
+            return JsonResponse({"status": "error", "message": "Product not found"}, status=404)
+        except Exception as e:
+            # Handle other exceptions
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+    
+    else:
+        # Return an error response for unsupported methods
+        return JsonResponse({"status": "error", "message": "Invalid request method"}, status=401)
