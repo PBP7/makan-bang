@@ -12,4 +12,5 @@ urlpatterns = [
     path('get-preferences/', views.get_preferences, name='get_preferences'),
     path('get-products/', views.get_products, name='get_products'),
     path('get-matching-products/', views.get_matching_products, name='get_matching_products'),
+    path('get-user-preferences-json/', views.get_user_preferences_json, name='get_user_preferences_json'),
 ]
