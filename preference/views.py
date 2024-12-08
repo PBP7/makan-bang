@@ -58,6 +58,7 @@ def add_preference_ajax(request):
 
 
 @login_required(login_url="authentication:login")
+@csrf_exempt 
 @require_POST
 def delete_preference_ajax(request, preference_id):
     try:
@@ -179,3 +180,22 @@ def get_matching_products(request):
         # Log the error for debugging
         print(f"Error in get_matching_products: {str(e)}")
         return JsonResponse({'error': 'An error occurred while fetching matching products'}, status=500)
+
+@login_required(login_url="authentication:login")
+def get_user_preferences_json(request):
+    try:
+        preferences = Preference.objects.filter(user=request.user)
+        preferences_data = [{
+            'id': pref.id,
+            'preference': pref.preference,
+        } for pref in preferences]
+        
+        return JsonResponse({
+            'status': 'success',
+            'preferences': preferences_data
+        }, safe=False)
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)

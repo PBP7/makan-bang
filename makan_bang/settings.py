@@ -155,6 +155,6 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:8000",
+    'http://localhost:*',
     "https://fariz-muhammad31-makanbang.pbp.cs.ui.ac.id",
 ]
