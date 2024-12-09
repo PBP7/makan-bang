@@ -11,6 +11,7 @@ from .forms import MealPlanForm
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.utils import timezone
+from django.core import serializers
 
 # Meal Planning Home Page
 @login_required(login_url="authentication:login")
@@ -30,11 +31,56 @@ def meal_planning(request):
     }
     return render(request, 'meal_planning.html', context)
 
+
+def get_meal_plan(request):
+    user_id = request.GET.get('user')
+    meal_plan = MealPlan.objects.filter(user_id=user_id).first()
+    if meal_plan:
+        data = json.loads(serializers('json', [meal_plan]))
+        return JsonResponse(data, safe=False)
+    return JsonResponse([], safe=False)
+
+def save_meal_plan(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        fields = data.get('fields')
+        meal_plan, created = MealPlan.objects.update_or_create(
+            pk=data.get('pk'),
+            defaults={
+                'user_id': fields.get('user'),
+                'date': fields.get('date'),
+                'time': fields.get('time'),
+                'food_items': fields.get('food_items'),
+            }
+        )
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False}, status=400)
+
 # Choices Page for Selecting Foods
 @login_required(login_url="authentication:login")
 def choices_page(request):
     product_entries = Product.objects.all()
     return render(request, 'choices_page.html', {'product_entries': product_entries})
+def show_json(request):
+    data = []
+    meal_plans = MealPlan.objects.all()
+
+    for meal_plan in meal_plans:
+        food_items = [
+            food.item for food in meal_plan.food_items.all()
+        ]
+        data.append({
+            "model": "mealplan.mealplan",  # Tambahkan nama model
+            "pk": meal_plan.id,  # ID MealPlan, bukan ID User
+            "fields": {
+                "user": meal_plan.user.id,
+                "date": meal_plan.date.strftime("%Y-%m-%d"),
+                "time": str(meal_plan.time),
+                "food_items": food_items
+            }
+        })
+
+    return JsonResponse(data, safe=False)
 
 # Add Food Item to Meal Plan
 @login_required(login_url="authentication:login")
