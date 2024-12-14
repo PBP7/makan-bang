@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render, redirect, reverse, get_object_or_404, redirect
 from django.http import HttpResponse, HttpResponseNotFound, JsonResponse, HttpResponseRedirect, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
@@ -145,3 +146,266 @@ def delete_comment(request, comment_id):
     forum_question.save()
 
     return redirect('forum:view_forum', id=forum_question.pk)
+
+def get_questions_json(request):
+    topic = request.GET.get('topic', 'All Topic')
+    
+    try:
+        if topic == 'All Topic':
+            questions = ForumQuestion.objects.all().order_by("-id")
+        else:
+            questions = ForumQuestion.objects.filter(topic=topic).order_by("-id")
+        
+        questions_data = []
+        for question in questions:
+            question_dict = {
+                'id': question.id,
+                'title': question.title,
+                'question': question.question,
+                'topic': question.topic,
+                'replycount': question.replycount,
+                'created_at': question.created_at.isoformat(),
+                'user': {
+                    'id': question.user.id,
+                    'username': question.user.username,
+                },
+                'replies': [{
+                    'id': reply.id,
+                    'reply': reply.reply,
+                    'created_at': reply.created_at.isoformat(),
+                    'user': {
+                        'id': reply.user.id,
+                        'username': reply.user.username,
+                    }
+                } for reply in question.replies.all()]
+            }
+            questions_data.append(question_dict)
+        
+        return JsonResponse(questions_data, safe=False)
+        
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
+    
+def get_replies_json(request, question_id):
+    try:
+        question = get_object_or_404(ForumQuestion, pk=question_id)
+        
+        replies = ForumReply.objects.filter(question=question).order_by("-created_at")
+        
+        replies_data = []
+        for reply in replies:
+            reply_dict = {
+                'id': reply.id,
+                'reply': reply.reply,
+                'created_at': reply.created_at.isoformat(),
+                'user': {
+                    'id': reply.user.id,
+                    'username': reply.user.username,
+                },
+                'question': {
+                    'id': reply.question.id,
+                    'title': reply.question.title
+                }
+            }
+            replies_data.append(reply_dict)
+        
+        return JsonResponse(replies_data, safe=False)
+        
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
+    
+@csrf_exempt
+def create_forum_flutter(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        
+        try:
+            new_forum = ForumQuestion.objects.create(
+                title=data['title'],
+                question=data['question'],
+                topic=data['topic'],
+                user=request.user,
+                replycount=0
+            )
+            
+            forum_data = {
+                'id': new_forum.id,
+                'title': new_forum.title,
+                'question': new_forum.question,
+                'topic': new_forum.topic,
+                'replycount': new_forum.replycount,
+                'created_at': new_forum.created_at.isoformat(),
+                'user': {
+                    'id': new_forum.user.id,
+                    'username': new_forum.user.username,
+                },
+                'replies': []
+            }
+            
+            return JsonResponse({
+                "status": "success",
+                "message": "Forum created successfully",
+                "forum": forum_data
+            }, status=201)
+        except Exception as e:
+            return JsonResponse({
+                "status": "error",
+                "message": str(e)
+            }, status=400)
+
+@csrf_exempt
+def edit_forum_flutter(request, id):
+    if request.method == 'POST':
+        try:
+            forum = ForumQuestion.objects.get(pk=id)
+            data = json.loads(request.body)
+            
+            if forum.user != request.user and request.user.username.lower() != 'admin':
+                return JsonResponse({
+                    "status": "error",
+                    "message": "You don't have permission to edit this forum"
+                }, status=403)
+            
+            forum.title = data['title']
+            forum.question = data['question']
+            forum.topic = data['topic']
+            forum.save()
+            
+            forum_data = {
+                'id': forum.id,
+                'title': forum.title,
+                'question': forum.question,
+                'topic': forum.topic,
+                'replycount': forum.replycount,
+                'created_at': forum.created_at.isoformat(),
+                'user': {
+                    'id': forum.user.id,
+                    'username': forum.user.username,
+                },
+                'replies': [{
+                    'id': reply.id,
+                    'reply': reply.reply,
+                    'created_at': reply.created_at.isoformat(),
+                    'user': {
+                        'id': reply.user.id,
+                        'username': reply.user.username,
+                    }
+                } for reply in forum.replies.all()]
+            }
+            
+            return JsonResponse({
+                "status": "success",
+                "message": "Forum updated successfully",
+                "forum": forum_data
+            })
+        except ForumQuestion.DoesNotExist:
+            return JsonResponse({
+                "status": "error",
+                "message": "Forum not found"
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                "status": "error",
+                "message": str(e)
+            }, status=400)
+
+@csrf_exempt
+def delete_forum_flutter(request, id):
+    if request.method == 'POST':
+        try:
+            forum = ForumQuestion.objects.get(pk=id)
+            
+            if forum.user != request.user and request.user.username.lower() != 'admin':
+                return JsonResponse({
+                    "status": "error",
+                    "message": "You don't have permission to delete this forum"
+                }, status=403)
+            
+            forum.delete()
+            return JsonResponse({
+                "status": "success",
+                "message": "Forum deleted successfully"
+            })
+        except ForumQuestion.DoesNotExist:
+            return JsonResponse({
+                "status": "error",
+                "message": "Forum not found"
+            }, status=404)
+        
+@csrf_exempt
+def create_reply_flutter(request, forum_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            forum = ForumQuestion.objects.get(pk=forum_id)
+            
+            new_reply = ForumReply.objects.create(
+                reply=data['reply'],
+                user=request.user,
+                question=forum
+            )
+            
+            forum.replycount += 1
+            forum.save()
+            
+            reply_data = {
+                'id': new_reply.id,
+                'reply': new_reply.reply,
+                'created_at': new_reply.created_at.isoformat(),
+                'user': {
+                    'id': new_reply.user.id,
+                    'username': new_reply.user.username,
+                }
+            }
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Reply added successfully',
+                'reply': reply_data
+            })
+            
+        except ForumQuestion.DoesNotExist:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Forum not found'
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=400)
+
+@csrf_exempt
+def delete_reply_flutter(request, reply_id):
+    if request.method == 'POST':
+        try:
+            reply = ForumReply.objects.get(pk=reply_id)
+            
+            if reply.user != request.user and request.user.username.lower() != 'admin':
+                return JsonResponse({
+                    "status": "error",
+                    "message": "You don't have permission to delete this reply"
+                }, status=403)
+            
+            forum_question = reply.question
+            
+            reply.delete()
+            
+            forum_question.replycount -= 1
+            forum_question.save()
+            
+            return JsonResponse({
+                "status": "success",
+                "message": "Reply deleted successfully"
+            })
+        except ForumReply.DoesNotExist:
+            return JsonResponse({
+                "status": "error",
+                "message": "Reply not found"
+            }, status=404)
