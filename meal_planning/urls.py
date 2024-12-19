@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import meal_planning, add_to_meal_plan, cancel_selection, choices_page, process_choices, finish_meal_plan, create_plan, delete_meal_plan, edit_meal_plan, show_json, get_meal_plan, save_meal_plan # Ensure the correct import
+from .views import meal_planning, finish_meal_plan_json, add_to_meal_plan, cancel_selection, choices_page, process_choices, finish_meal_plan, create_plan, delete_meal_plan, edit_meal_plan, show_json, get_meal_plan, save_meal_plan # Ensure the correct import
 
 urlpatterns = [
     path('meal-planning/', meal_planning, name='meal_planning'),  
@@ -9,6 +9,7 @@ urlpatterns = [
     path('meal-planning/choices/', choices_page, name='choices_page'),
     path('meal-planning/process-choices/', process_choices, name='process_choices'),
     path('finish', finish_meal_plan, name='finish_meal_plan'),
+    path('finish-json/', finish_meal_plan_json, name='finish_meal_plan_json'),
     path('create/', create_plan, name='create_plan'),
     path('meal-plan/<int:id>/delete/', delete_meal_plan, name='delete_meal_plan'),
     path('cancel-selection/', cancel_selection, name='cancel_selection'),

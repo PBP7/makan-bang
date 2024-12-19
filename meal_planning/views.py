@@ -12,6 +12,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 from django.core import serializers
+import uuid
 
 # Meal Planning Home Page
 @login_required(login_url="authentication:login")
@@ -90,6 +91,8 @@ def add_to_meal_plan(request, food_item_id):
     meal_plan.food_items.add(food_item)
     return redirect(reverse('meal_planning'))
 
+
+
 # Delete Food Item from Meal Plan
 @login_required(login_url="authentication:login")
 def delete_food_item(request, food_item_id):
@@ -116,6 +119,29 @@ def process_choices(request):
         request.session['selected_foods'] = selected_foods
         return redirect('meal_planning')
     return HttpResponse('Invalid request', status=400)
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+@csrf_exempt  # Gunakan hanya jika Flutter belum mengatur CSRF token
+def process_choices_json(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            selected_foods = data.get('selected_foods', [])
+            
+            # Simpan pilihan makanan ke session (opsional)
+            request.session['selected_foods'] = selected_foods
+            
+            return JsonResponse({'message': 'Choices processed successfully!'}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': f"An error occurred: {str(e)}"}, status=400)
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def food_list(request):
+    foods = Product.objects.all().values('id', 'name', 'category', 'price', 'picture_url')
+    return JsonResponse(list(foods), safe=False)
 
 # Finalize and Save the Meal Plan
 @login_required(login_url="authentication:login")
@@ -144,13 +170,64 @@ def finish_meal_plan(request):
     
     return HttpResponse('Invalid request', status=400)
 
+@csrf_exempt
+def finish_meal_plan_json(request):
+    print("masukkkk/....")
+    if request.method == 'POST':
+        try:
+            # Parse JSON body
+            data = json.loads(request.body)
+            selected_date = data.get('selected_date')
+            meal_time = data.get('time')
+            selected_foods = data.get('foodItems', [])
+
+            # Validate required fields
+            if not selected_date or not meal_time or not selected_foods:
+                return JsonResponse({'error': 'Date, time, and food items are required.'}, status=400)
+
+            # Validate food item IDs as UUIDs
+            # try:
+            #     selected_foods = [UUID(fid) for fid in selected_foods]
+            # except ValueError:
+            #     return JsonResponse({'error': 'Invalid UUID format in food items.'}, status=400)
+
+            # Create or get meal plan for the user
+            meal_plan = MealPlan.objects.create(
+                user=request.user,
+                date=selected_date,
+                time=meal_time
+            )
+
+            # Validate and update food items
+            food_items = Product.objects.filter(id__in=selected_foods)
+            if not food_items.exists():
+                return JsonResponse({'error': 'Invalid food items selected.'}, status=400)
+
+            # Update the meal plan's food items
+            meal_plan.food_items.set(food_items)
+            meal_plan.save()
+
+            return JsonResponse({
+                'message': 'Meal plan created successfully!',
+                'status': 'success'
+            }, status=200)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON format.'}, status=400)
+        except Exception as e:
+            print(e)
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
+
 @login_required(login_url="authentication:login")
 def create_plan(request):
     meal_plans = MealPlan.objects.filter(user=request.user)
     today = timezone.now().date()
 
     today_meal_plans = meal_plans.filter(date=today)
-    other_meal_plans = meal_plans.exclude(date=today).order_by('date')
+    future_meal_plans = meal_plans.filter(date__gt=today).order_by('date') 
     has_today_plan = today_meal_plans.exists()
     past_meal_plans = meal_plans.filter(date__lt=today)
 
@@ -171,13 +248,12 @@ def create_plan(request):
         'meal_plans': meal_plans,
         'meal_plans_json': json.dumps(meal_plans_data),  # JSON data to be used in JavaScript
         'today_meal_plans': today_meal_plans,
-        'other_meal_plans': other_meal_plans,
+        'other_meal_plans': future_meal_plans,
         'has_today_plan': has_today_plan,
         'past_meal_plans': past_meal_plans,
     }
     
     return render(request, 'create_plan.html', context)
-
 
 @login_required(login_url="authentication:login")
 def edit_meal_plan(request, id):
