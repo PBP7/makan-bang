@@ -255,7 +255,7 @@
         function confirmDelete(id) {
             const deleteConfirmed = confirm("Are you sure you want to delete this meal plan?");
             if (deleteConfirmed) {
-                fetch(`{% url 'delete_meal_plan' 0 %}`.replace('0', id), {
+                fetch(`{% url 'delete_meal_plan_django' 0 %}`.replace('0', id), {
                     method: 'POST',
                     headers: {
                         'X-CSRFToken': '{{ csrf_token }}',  // CSRF token for POST requests

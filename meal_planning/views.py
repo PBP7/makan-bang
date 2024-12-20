@@ -14,6 +14,7 @@ from django.utils import timezone
 from django.core import serializers
 import uuid
 
+
 # Meal Planning Home Page
 @login_required(login_url="authentication:login")
 def meal_planning(request):
@@ -62,6 +63,7 @@ def save_meal_plan(request):
 def choices_page(request):
     product_entries = Product.objects.all()
     return render(request, 'choices_page.html', {'product_entries': product_entries})
+
 def show_json(request):
     data = []
     meal_plans = MealPlan.objects.all()
@@ -76,6 +78,7 @@ def show_json(request):
             "fields": {
                 "user": meal_plan.user.id,
                 "date": meal_plan.date.strftime("%Y-%m-%d"),
+                "title": meal_plan.title,
                 "time": str(meal_plan.time),
                 "food_items": food_items
             }
@@ -91,8 +94,6 @@ def add_to_meal_plan(request, food_item_id):
     meal_plan.food_items.add(food_item)
     return redirect(reverse('meal_planning'))
 
-
-
 # Delete Food Item from Meal Plan
 @login_required(login_url="authentication:login")
 def delete_food_item(request, food_item_id):
@@ -102,6 +103,20 @@ def delete_food_item(request, food_item_id):
         meal_plan.food_items.remove(food_item)
         return redirect('meal_planning')
     return HttpResponse('Invalid request', status=400)
+
+
+@require_POST
+def get_food_items_by_name(request):
+    food_names = request.GET.getlist('item')  # Ambil parameter `name` sebagai list
+    if not food_names:
+        return JsonResponse({'error': 'No food names provided'}, status=400)
+
+    food_items = Product.objects.filter(name__in=food_names).values('id', 'item', 'picture_link')
+
+    if not food_items.exists():
+        return JsonResponse({'error': 'No matching food items found'}, status=404)
+
+    return JsonResponse({'food_items': list(food_items)}, safe=False)
 
 @login_required(login_url="authentication:login")
 def cancel_selection(request):
@@ -147,55 +162,51 @@ def food_list(request):
 @login_required(login_url="authentication:login")
 def finish_meal_plan(request):
     if request.method == 'POST':
+        title = request.POST.get('title')  # Added title
         selected_date = request.POST.get('selected_date')
         meal_time = request.POST.get('time')
         selected_foods = request.session.get('selected_foods', [])
-        
-        if not selected_date or not meal_time:
-            return HttpResponse('Date and time are required.', status=400)
-        
+
+        if not selected_date or not meal_time or not title:  # Validate title
+            return HttpResponse('Title, date, and time are required.', status=400)
+
         meal_plan, created = MealPlan.objects.get_or_create(
-            user=request.user, date=selected_date, time=meal_time
+            user=request.user, date=selected_date, time=meal_time, title=title  # Include title
         )
-        
+
         food_items = Product.objects.filter(pk__in=selected_foods)
         for food_item in food_items:
             meal_plan.food_items.add(food_item)
-        
+
         # Clear selected_foods after use
         if 'selected_foods' in request.session:
             del request.session['selected_foods']
-        
+
         return redirect(reverse('create_plan'))
-    
+
     return HttpResponse('Invalid request', status=400)
 
 @csrf_exempt
 def finish_meal_plan_json(request):
-    print("masukkkk/....")
     if request.method == 'POST':
         try:
             # Parse JSON body
             data = json.loads(request.body)
+            title = data.get('title')  # Added title
             selected_date = data.get('selected_date')
             meal_time = data.get('time')
             selected_foods = data.get('foodItems', [])
 
             # Validate required fields
-            if not selected_date or not meal_time or not selected_foods:
-                return JsonResponse({'error': 'Date, time, and food items are required.'}, status=400)
-
-            # Validate food item IDs as UUIDs
-            # try:
-            #     selected_foods = [UUID(fid) for fid in selected_foods]
-            # except ValueError:
-            #     return JsonResponse({'error': 'Invalid UUID format in food items.'}, status=400)
+            if not selected_date or not meal_time or not selected_foods or not title:  # Validate title
+                return JsonResponse({'error': 'Title, date, time, and food items are required.'}, status=400)
 
             # Create or get meal plan for the user
             meal_plan = MealPlan.objects.create(
                 user=request.user,
                 date=selected_date,
-                time=meal_time
+                time=meal_time,
+                title=title  # Include title
             )
 
             # Validate and update food items
@@ -215,7 +226,6 @@ def finish_meal_plan_json(request):
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON format.'}, status=400)
         except Exception as e:
-            print(e)
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
@@ -272,9 +282,72 @@ def edit_meal_plan(request, id):
     
     return render(request, 'edit_meal_plan.html', {'form': form, 'meal_plan': meal_plan})
 
-@login_required(login_url="authentication:login")
-@require_POST
+
+@csrf_exempt
 def delete_meal_plan(request, id):
+    if request.method == 'DELETE':
+        try:
+            meal_plan = get_object_or_404(MealPlan, pk=id)
+            meal_plan.delete()
+            return JsonResponse({'message': 'Meal plan deleted successfully'})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+@csrf_exempt
+def update_meal_plan(request, id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            meal_plan = MealPlan.objects.get(pk=id)
+            
+            # Update fields
+            meal_plan.date = data['selected_date']
+            meal_plan.time = data['time']
+            
+            # Update food items
+            meal_plan.food_items.clear()  # Remove existing items
+            for food_id in data['foodItems']:
+                food_item = Product.objects.get(pk=food_id)
+                meal_plan.food_items.add(food_item)
+            
+            meal_plan.save()
+            
+            return JsonResponse({
+                "status": "success",
+                "message": "Meal plan updated successfully"
+            })
+        except Exception as e:
+            return JsonResponse({
+                "status": "error",
+                "message": str(e)
+            }, status=400)
+    
+    return JsonResponse({
+        "status": "error",
+        "message": "Invalid request method"
+    }, status=405)
+    
+@csrf_exempt
+def get_food_items(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            food_ids = data.get('food_ids', [])
+            
+            food_items = Product.objects.filter(pk__in=food_ids)
+            serialized_data = serializers.serialize('json', food_items)
+            
+            return JsonResponse(json.loads(serialized_data), safe=False)
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=500)
+            
+@login_required
+@require_POST
+def delete_meal_plan_django(request, id):
     meal_plan = get_object_or_404(MealPlan, id=id, user=request.user)
     meal_plan.delete()
     return JsonResponse({'status': 'success', 'message': 'Meal plan deleted successfully.'})
