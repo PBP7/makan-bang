@@ -317,7 +317,7 @@
         }
 
         .back-to-catalog:hover {
-            background-color: #7a4064; /* Warna kuning lebih gelap saat hover */
+            background-color: #7a4064; 
         }
 
 
@@ -378,105 +378,103 @@
     
             
 {% endblock meta %}
-
 {% block content %}
 {% include 'navbar.html' %}
 
-    <br><br><br>
-  
+<br><br><br>
+<div class="section__container">
+    <!-- Header Section -->
+    <div class="header">
+        <p>OUR REVIEW PAGES</p>
+        <h1>{{ product.item }}</h1><br>
+        <img id="modalProductImage" src="{{ product.picture_link }}" alt="Product Image" class="h-96 w-full object-cover rounded-md mx-auto"><br>
+        <p>{{ product.description }}</p>
+    </div>
 
-    <div class="section__container">
-        <!-- Header Section -->
-        <div class="header">
-            <p>OUR REVIEW PAGES</p>
-            <h1>{{ product.item }}</h1><br>
-            <!-- <h2>{{ product.item }}</h2> -->
-            <img id="modalProductImage" src="{{ product.picture_link }}" alt="Product Image" class="h-96 w-full object-cover rounded-md mx-auto"><br>
-            <p>{{ product.description }}</p>
+    <div class="average-rating">
+        <h1>Current Rating</h1>
+        <h1> ★ {{ average_rate|floatformat:1 }}</h1>
+        <br><br>
+    </div>
+
+    <a href="{% url 'katalog:show_katalog' %}" class="back-to-catalog">Back to Catalog</a>
+
+    <!-- Review Cards and Add Review Form -->
+    <div class="testimonials__grid">
+        <!-- Review Cards -->
+        {% for review in reviews %}
+        <div class="card">
+            <span><i class="ri-double-quotes-l"></i></span>
+            <h3>{{ review.review_text }}</h3>
+            <hr>
+            <p class="name">{{ review.user.username }}</p>
+            <div class="star-rating">
+                {% for i in 1|to:5 %}
+                    <span class="star {% if i <= review.rate %}selected{% endif %}">&#9733;</span>
+                {% endfor %}
+            </div>
+            <p><em>{{ review.date }}</em></p>
+
+            <!-- Edit and Delete Buttons -->
+            <div class="review-actions">
+                {% if request.user == review.user or request.user.is_superuser %}
+                    <a href="{% url 'rate_review:edit_review' review.id %}" class="action-icon edit-icon" title="Edit">&#9998;</a>
+                    <form method="POST" action="{% url 'rate_review:delete_review' review.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="action-icon delete-icon" title="Delete">&#128465;</button>
+                    </form>
+                {% endif %}
+            </div>
         </div>
-        
-        <div class="average-rating">
-            <h1>Current Rating</h1>
-            <h1> ★ {{ average_rate|floatformat:1 }}</h1>
-            <br><br>
-        </div>
-        
-          
-        <a href="{% url 'katalog:show_katalog' %}" class="back-to-catalog">Back to Catalog</a>
-    
-        <!-- Review Cards and Add Review Form -->
-        <div class="testimonials__grid">
-            <!-- Review Cards -->
-            {% for review in reviews %}
-            <div class="card">
-                <span><i class="ri-double-quotes-l"></i></span>
-                <h3>{{ review.review_text }}</h3>
-                <hr>
-                <p class="name">{{ review.user.username }}</p>
-                <div class="star-rating">
-                    {% for i in 1|to:5 %}
-                        <span class="star {% if i <= review.rate %}selected{% endif %}">&#9733;</span>
+        {% endfor %}
+
+        <!-- Add Review Form -->
+        {% if user.is_authenticated and not user_has_reviewed %}
+        <div class="add-review card">
+            <h3>Add Your Review</h3>
+            <form id="review-form" method="POST" action="{% url 'rate_review:submit_review' product.id %}">
+                {% csrf_token %}
+                <div id="star-rating-form" class="star-rating">
+                    {% for rate in 1|to:5 %}
+                        <input type="radio" id="id_rate_{{ rate }}" name="rate" value="{{ rate }}" hidden>
+                        <label for="id_rate_{{ rate }}" class="star">&#9733;</label>
                     {% endfor %}
                 </div>
-                <p><em>{{ review.date }}</em></p>
-
-                <!-- Edit and Delete Buttons -->
-       
-                <div class="review-actions">
-                    
-                    {% if request.user == review.user or request.user.is_superuser%}
-                        
-                        <a href="{% url 'rate_review:edit_review' review.id %}" class="action-icon edit-icon" title="Edit">&#9998;</a>
-                        <form method="POST" action="{% url 'rate_review:delete_review' review.id %}" style="display: inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="action-icon delete-icon" title="Delete">&#128465;</button>
-                        </form>
-                    {% endif %}
+                <div>
+                    <label for="review">Your Review:</label>
+                    <textarea id="review" name="review_text" rows="4" placeholder="Write your review..."></textarea>
                 </div>
-            </div>
-            {% endfor %}
-
-    
-            <!-- Add Review Form -->
-            {% if user.is_authenticated and not user_has_reviewed %}
-                <div class="add-review card">
-                    <h3>Add Your Review</h3>
-                    <form method="POST" action="{% url 'rate_review:submit_review' product.id %}">
-                        {% csrf_token %}
-                        <div class="star-rating">
-                            {% for rate in 1|to:5 %}
-                                <input type="radio" id="id_rate_{{ rate }}" name="rate" value="{{ rate }}" hidden>
-                                <label for="id_rate_{{ rate }}" class="star">&#9733;</label>
-                            {% endfor %}
-                        </div>
-                        <div>
-                            <label for="review">Your Review:</label>
-                            <textarea id="review" name="review_text" rows="4" placeholder="Write your review..."></textarea>
-                        </div>
-                        <button type="submit">Submit Review</button>
-                    </form>
-                </div>
-            {% endif %}
+                <button type="submit">Submit Review</button>
+            </form>
         </div>
-    </div> 
+        {% endif %}
+    </div>
+</div>
 
-    <script>
-        // JavaScript untuk membuat bintang interaktif di formulir review
-        const starLabels = document.querySelectorAll('#star-rating-form label');
-        starLabels.forEach(label => {
-            label.addEventListener('click', function () {
-                // Menghapus seleksi dari bintang lain
-                starLabels.forEach(star => star.classList.remove('selected'));
-                // Menambahkan seleksi ke bintang yang dipilih dan yang sebelumnya
-                this.classList.add('selected');
-                let previousStar = this.previousElementSibling;
-                while (previousStar) {
-                    if (previousStar.tagName === "LABEL") {
-                        previousStar.classList.add('selected');
-                    }
-                    previousStar = previousStar.previousElementSibling;
+<script>
+    // JavaScript untuk validasi bintang interaktif
+    document.getElementById('review-form').addEventListener('submit', function (event) {
+        const selectedRate = document.querySelector('input[name="rate"]:checked');
+        if (!selectedRate) {
+            alert("Please select a star rating before submitting.");
+            event.preventDefault(); // Mencegah pengiriman formulir
+        }
+    });
+
+    // Interaktivitas Bintang
+    const starLabels = document.querySelectorAll('#star-rating-form label');
+    starLabels.forEach(label => {
+        label.addEventListener('click', function () {
+            starLabels.forEach(star => star.classList.remove('selected'));
+            this.classList.add('selected');
+            let previousStar = this.previousElementSibling;
+            while (previousStar) {
+                if (previousStar.tagName === "LABEL") {
+                    previousStar.classList.add('selected');
                 }
-            });
+                previousStar = previousStar.previousElementSibling;
+            }
         });
-    </script>
+    });
+</script>
 {% endblock content %}

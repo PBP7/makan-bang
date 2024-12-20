@@ -1,3 +1,4 @@
+import json
 from pyexpat.errors import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -32,7 +33,6 @@ def submit_review(request, id):
             rate=rate,
             review_text=review_text
         )
-        
         return redirect('rate_review:product_detail', id=id)
 
 def product_detail(request, id):
@@ -76,6 +76,107 @@ def user_rating(request):
     }
     return render(request, 'user_rating.html', context)
 
+
+@csrf_exempt
+def create_review_flutter(request):
+    if request.method == 'POST':
+        try:
+            # Parse JSON data from the request body
+            data = json.loads(request.body)
+            product = get_object_or_404(Product, pk=product)
+
+        # Buat review baru
+            review = RateReview.objects.create(
+                product=product,
+                user=request.user,  # Gunakan pengguna saat ini
+                rate=data['rate'],
+                review_text=data['review_text'],
+            )
+            return JsonResponse({
+                'pk': review.pk,
+                'product': product.pk,
+                'rate': review.rate,
+                'review_text': review.review_text,
+                'user': review.user.username,
+                'date': review.date,
+            }, status=200)
+        except Exception as e:
+            # Handle errors and return an error response
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+    else:
+        # Return an error response for unsupported methods
+        return JsonResponse({"status": "error", "message": "Invalid request method"}, status=401)
+    
+def show_review_flutter(request):
+    review = RateReview.objects.all()
+    data = []
+    for item in review:
+        each_data = {
+            'pk': item.review.pk,
+            'product': item.product.pk,
+            'rate': item.review.rate,
+            'review_text': item.review.review_text,
+            'user': item.review.user.username,
+            'date': item.review.date,
+        }
+        item.append(each_data)
+
+    return HttpResponse(json.dumps(data), content_type="application/json")
+
+@csrf_exempt
+def delete_review_flutter(request, id):
+    try:
+        # Get product by id
+        reviews = RateReview.objects.get(pk=id)
+        # Delete the product
+        reviews.delete()
+        
+        return JsonResponse({
+            "status": "success",
+            "message": "Product deleted successfully!"
+        }, status=200)
+    except Product.DoesNotExist:
+        return JsonResponse({
+            "status": "error",
+            "message": "Product not found!"
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            "status": "error",
+            "message": str(e)
+        }, status=500)
+@csrf_exempt
+def edit_review_flutter(request, id):
+    if request.method == 'POST':
+        try:
+            # Parse JSON data from the request body
+            data = json.loads(request.body)
+            
+            # Retrieve the product instance to be updated
+            review = RateReview.objects.get(id=id)
+
+            review.product = data.get("product", review.product)
+            review.rate = data.get("rate", review.rate)
+            review.review_text = data.get("review_text", review.review_text)
+            review.date = data.get("date", review.date)
+            
+            # Save the updated product instance
+            review.save()
+
+            # Return success response
+            return JsonResponse({"status": "success"}, status=200)
+
+        except Product.DoesNotExist:
+            # Handle the case where the product doesn't exist
+            return JsonResponse({"status": "error", "message": "Product not found"}, status=404)
+        except Exception as e:
+            # Handle other exceptions
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+    
+    else:
+        # Return an error response for unsupported methods
+        return JsonResponse({"status": "error", "message": "Invalid request method"}, status=401)
+
 @csrf_exempt
 @login_required(login_url="authentication:login")
 def delete_review(request, review_id):
@@ -94,24 +195,56 @@ def edit_review(request, review_id):
         form = RateReviewForm(request.POST, instance=review)
         if form.is_valid():
             form.save()
-            return redirect('rate_review:product_detail', id=review.product_id)  # Ganti dengan nama URL yang sesuai
+            return redirect('rate_review:product_detail', id=review.product_id)  # Redirect ke halaman detail produk
     else:
         form = RateReviewForm(instance=review)
 
     return render(request, 'edit_review.html', {'form': form, 'review': review, 'product': product})  # Sertakan product dalam konteks
 
+@csrf_exempt
+@login_required(login_url="authentication:login")
 def show_xml(request):
     data = Product.objects.filter(user=request.user)
     return HttpResponse(serializers.serialize("xml", data), content_type="application/xml")
 
+@csrf_exempt
+@login_required(login_url="authentication:login")
 def show_json(request):
     data = Product.objects.filter(user=request.user)
     return HttpResponse(serializers.serialize("json", data), content_type="application/json")
 
+@csrf_exempt
+@login_required(login_url="authentication:login")
 def show_xml_by_id(request, id):
     data = Product.objects.filter(pk=id)
     return HttpResponse(serializers.serialize("xml", data), content_type="application/xml")
 
+@csrf_exempt
+@login_required(login_url="authentication:login")
 def show_json_by_id(request, id):
     data = Product.objects.filter(pk=id)
+    return HttpResponse(serializers.serialize("json", data), content_type="application/json")
+
+@csrf_exempt
+@login_required(login_url="authentication:login")
+def show_xml(request):
+    data = RateReview.objects.filter(user=request.user)
+    return HttpResponse(serializers.serialize("xml", data), content_type="application/xml")
+
+@csrf_exempt
+@login_required(login_url="authentication:login")
+def show_json(request):
+    data = RateReview.objects.filter(user=request.user)
+    return HttpResponse(serializers.serialize("json", data), content_type="application/json")
+
+@csrf_exempt
+@login_required(login_url="authentication:login")
+def show_xml_by_id(request, id):
+    data = RateReview.objects.filter(pk=id)
+    return HttpResponse(serializers.serialize("xml", data), content_type="application/xml")
+
+@csrf_exempt
+@login_required(login_url="authentication:login")
+def show_json_by_id(request, id):
+    data = RateReview.objects.filter(pk=id)
     return HttpResponse(serializers.serialize("json", data), content_type="application/json")

@@ -343,7 +343,13 @@
             background-color: #7a4064; /* Warna kuning lebih gelap saat hover */
         }
 
-
+        .center-text {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%; /* atau tinggi spesifik dari kontainer */
+            text-align: center;
+        }
 
         @media (width < 900px) {
             .testimonials__grid {
@@ -375,34 +381,37 @@
         <h1>My Reviews</h1>
         <h2>Discover Your Flavoury Journey and Experiences!</h2>
     </div>
-
-    <div class="testimonials__grid">
-        <a href="{% url 'katalog:show_katalog' %}" class="back-to-catalog">Back to Catalog</a>
-        {% for review in user_reviews %}
-            <div class="card">
-                <h2>{{ review.product.item }}</h2>
-                <img id="modalProductImage" src="{{ review.product.picture_link }}" alt="Product Image" class="h-96 w-full object-cover rounded-md mb-4">
-                <p>{{ review.product.price }}</p>
-                <h3>{{ review.review_text }}</h3>
-                <div class="star-rating">
-                    {% for i in 1|to:5 %}
-                        <span class="star {% if i <= review.rate %}selected{% endif %}">&#9733;</span>
-                    {% endfor %}
+    {% if user_reviews %}
+        <div class="testimonials__grid">
+            <a href="{% url 'katalog:show_katalog' %}" class="back-to-catalog">Back to Catalog</a>
+            {% for review in user_reviews %}
+                <div class="card">
+                    <h2>{{ review.product.item }}</h2>
+                    <img id="modalProductImage" src="{{ review.product.picture_link }}" alt="Product Image" class="h-96 w-full object-cover rounded-md mb-4">
+                    <p>{{ review.product.price }}</p>
+                    <h3>{{ review.review_text }}</h3>
+                    <div class="star-rating">
+                        {% for i in 1|to:5 %}
+                            <span class="star {% if i <= review.rate %}selected{% endif %}">&#9733;</span>
+                        {% endfor %}
+                    </div>
+                    <p><em>{{ review.date }}</em></p>
+                    <!-- Edit and Delete Buttons -->
+                    <div>
+                        <a href="{% url 'rate_review:product_detail' review.product.id %}" class="action-icon back-to-review" title="Back to Product Review">Back to This Product Review</a>
+                    </div>
+                    <div class="review-actions">
+                        <a href="{% url 'rate_review:edit_review' review.id %}" class="action-icon edit-icon" title="Edit">&#9998;</a>
+                        <form method="POST" action="{% url 'rate_review:delete_review' review.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="action-icon delete-icon" title="Delete">&#128465;</button>
+                        </form>
+                    </div>
                 </div>
-                <p><em>{{ review.date }}</em></p>
-                <!-- Edit and Delete Buttons -->
-                <div>
-                    <a href="{% url 'rate_review:product_detail' review.product.id %}" class="action-icon back-to-review" title="Back to Product Review">Back to This Product Review</a>
-                </div>
-                <div class="review-actions">
-                    <a href="{% url 'rate_review:edit_review' review.id %}" class="action-icon edit-icon" title="Edit">&#9998;</a>
-                    <form method="POST" action="{% url 'rate_review:delete_review' review.id %}" style="display: inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="action-icon delete-icon" title="Delete">&#128465;</button>
-                    </form>
-                </div>
-            </div>
-        {% endfor %}
-    </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <h2 class="center-text">No reviews yet.</h2>
+    {% endif %}
 </div>
 {% endblock %}
