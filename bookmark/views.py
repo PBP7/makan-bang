@@ -42,7 +42,7 @@ def bookmarked_list(request):
                     "item": product.item,  # Nama produk
                     "picture_link": product.picture_link,  # Gambar produk
                     "restaurant": product.restaurant,  # Nama restoran
-                    "kategori": product.kateogri,  # Kategori produk
+                    "kategori": product.kategori,  # Kategori produk
                     "lokasi": product.lokasi,  # Lokasi
                     "price": product.price,  # Harga
                     "nutrition": product.nutrition,  # Informasi nutrisi

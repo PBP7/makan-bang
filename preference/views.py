@@ -171,7 +171,7 @@ def get_matching_products(request):
                     'picture_link': product.get('Link Foto', ''),
                     'restaurant': product.get('Restoran', ''),
                     'lokasi': product.get('Lokasi', ''),
-                    'nutrition': product.get('Nutrition', 'Not available'),  # Provide a default value
+                    'nutrition': product.get('Nutrisi', 'Not available'),  # Provide a default value
                     'link_gofood': product.get('Link GoFood', ''),
                 })
         

@@ -75,7 +75,7 @@ def login_mobile(request):
                 "username": user.username,
                 "status": True,
                 "message": "Login sukses!",
-                "id" : id
+                "id" : user.id
                 # Tambahkan data lainnya jika ingin mengirim data ke Flutter.
             }, status=200)
         else:

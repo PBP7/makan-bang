@@ -83,7 +83,7 @@ def register(request):
             "username": user.username,
             "status": 'success',
             "message": "User created successfully!",
-            "id" : id
+            "id" : user.id
         }, status=200)
     
     else:
