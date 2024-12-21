@@ -11,4 +11,5 @@ urlpatterns = [
     path('login-mobile/', login, name='login-mobile'),
     path('logout-mobile/', logout, name='logout-mobile'),
     path('register-mobile/', register_mobile, name='register-mobile'),   
+    path('status/', get_auth_status, name='get_auth_status'), 
 ]

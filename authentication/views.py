@@ -147,3 +147,16 @@ def register_mobile(request):
             "status": False,
             "message": "Invalid request method."
         }, status=400)
+    
+@csrf_exempt
+def get_auth_status(request):
+    if request.user.is_authenticated:
+        return JsonResponse({
+            "is_authenticated": True,
+            "username": request.user.username
+        }, status=200)
+    else:
+        return JsonResponse({
+            "is_authenticated": False,
+            "username": None
+        }, status=200)
