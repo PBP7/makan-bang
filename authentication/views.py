@@ -26,6 +26,7 @@ import json
 id = 0
 
 def register(request):
+    global id
     form = UserCreationForm()
 
     if request.method == "POST":
@@ -61,7 +62,7 @@ def logout_user(request):
     return response
 
 @csrf_exempt
-def login(request):
+def login_mobile(request):
     global id
     username = request.POST['username']
     password = request.POST['password']
@@ -70,7 +71,6 @@ def login(request):
         if user.is_active:
             auth_login(request, user)
             # Status login sukses.
-            print(id)
             return JsonResponse({
                 "username": user.username,
                 "status": True,
@@ -91,7 +91,7 @@ def login(request):
         }, status=401)
 
 @csrf_exempt
-def logout(request):
+def logout_mobile(request):
     username = request.user.username
 
     try:
@@ -134,7 +134,6 @@ def register_mobile(request):
         user = User.objects.create_user(username=username, password=password1)
         user.save()
         id += 1
-        print(id)
         return JsonResponse({
             "username": user.username,
             "status": 'success',
