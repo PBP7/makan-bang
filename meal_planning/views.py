@@ -223,10 +223,10 @@ def finish_meal_plan_json(request):
             time = data.get('time')
             food_ids = data.get('foodItems', [])
 
-            print("Title:", title)
-            print("Date:", selected_date)
-            print("Time:", time)
-            print("Food IDs:", food_ids)
+            # print("Title:", title)
+            # print("Date:", selected_date)
+            # print("Time:", time)
+            # print("Food IDs:", food_ids)
 
             # Create meal plan dengan user yang sedang login
             print("Creating meal plan for user:", request.user)
@@ -338,6 +338,7 @@ def update_meal_plan(request, id):
             meal_plan = MealPlan.objects.get(pk=id)
             
             # Update fields
+            meal_plan.title = data['title']
             meal_plan.date = data['selected_date']
             meal_plan.time = data['time']
             
