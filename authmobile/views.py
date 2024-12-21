@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 import json
 
 # Create your views here.
+id =0
 
 @csrf_exempt
 def login(request):
@@ -77,11 +78,12 @@ def register(request):
         # Create the new user
         user = User.objects.create_user(username=username, password=password1)
         user.save()
-        
+        id += 1
         return JsonResponse({
             "username": user.username,
             "status": 'success',
-            "message": "User created successfully!"
+            "message": "User created successfully!",
+            "id" : id
         }, status=200)
     
     else:
