@@ -159,78 +159,114 @@ def food_list(request):
     return JsonResponse(list(foods), safe=False)
 
 # Finalize and Save the Meal Plan
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.shortcuts import redirect, reverse
+from .models import MealPlan, Product  # Pastikan model sesuai dengan aplikasi Anda
+
 @login_required(login_url="authentication:login")
 def finish_meal_plan(request):
     if request.method == 'POST':
-        title = request.POST.get('title')  # Added title
+        # Mengambil data dari POST request
+        title = request.POST.get('title')
         selected_date = request.POST.get('selected_date')
         meal_time = request.POST.get('time')
         selected_foods = request.session.get('selected_foods', [])
 
-        if not selected_date or not meal_time or not title:  # Validate title
+        # Validasi input
+        if not title or not selected_date or not meal_time:
             return HttpResponse('Title, date, and time are required.', status=400)
 
-        meal_plan, created = MealPlan.objects.get_or_create(
-            user=request.user, date=selected_date, time=meal_time, title=title  # Include title
-        )
-
-        food_items = Product.objects.filter(pk__in=selected_foods)
-        for food_item in food_items:
-            meal_plan.food_items.add(food_item)
-
-        # Clear selected_foods after use
-        if 'selected_foods' in request.session:
-            del request.session['selected_foods']
-
-        return redirect(reverse('create_plan'))
-
-    return HttpResponse('Invalid request', status=400)
-
-@csrf_exempt
-def finish_meal_plan_json(request):
-    if request.method == 'POST':
         try:
-            # Parse JSON body
-            data = json.loads(request.body)
-            title = data.get('title')  # Added title
-            selected_date = data.get('selected_date')
-            meal_time = data.get('time')
-            selected_foods = data.get('foodItems', [])
-
-            # Validate required fields
-            if not selected_date or not meal_time or not selected_foods or not title:  # Validate title
-                return JsonResponse({'error': 'Title, date, time, and food items are required.'}, status=400)
-
-            # Create or get meal plan for the user
-            meal_plan = MealPlan.objects.create(
+            # Buat atau ambil MealPlan berdasarkan user, tanggal, waktu, dan judul
+            meal_plan, created = MealPlan.objects.get_or_create(
                 user=request.user,
                 date=selected_date,
                 time=meal_time,
-                title=title  # Include title
+                title=title
             )
 
-            # Validate and update food items
-            food_items = Product.objects.filter(id__in=selected_foods)
-            if not food_items.exists():
-                return JsonResponse({'error': 'Invalid food items selected.'}, status=400)
+            # Tambahkan food_items yang dipilih ke MealPlan
+            food_items = Product.objects.filter(pk__in=selected_foods)
+            meal_plan.food_items.add(*food_items)  # Tambahkan semua dalam satu langkah
 
-            # Update the meal plan's food items
+            # Hapus selected_foods dari sesi setelah digunakan
+            request.session.pop('selected_foods', None)
+
+            # Redirect ke halaman yang diinginkan
+            return redirect(reverse('create_plan'))
+
+        except Exception as e:
+            # Tangani kesalahan secara umum
+            return HttpResponse(f'An error occurred: {str(e)}', status=500)
+
+    # Jika metode HTTP bukan POST
+    return HttpResponse('Invalid request', status=400)
+
+
+
+@csrf_exempt
+@login_required
+def finish_meal_plan_json(request):
+    if request.method == 'POST':
+        try:
+            # Debug prints
+            print("Request received")
+            print("Request body:", request.body)
+            
+            data = json.loads(request.body)
+            print("Parsed data:", data)
+
+            # Ambil data dari request
+            title = data.get('title')
+            selected_date = data.get('selected_date')
+            time = data.get('time')
+            food_ids = data.get('foodItems', [])
+
+            print("Title:", title)
+            print("Date:", selected_date)
+            print("Time:", time)
+            print("Food IDs:", food_ids)
+
+            # Create meal plan dengan user yang sedang login
+            print("Creating meal plan for user:", request.user)
+
+            meal_plan = MealPlan.objects.create(
+                title=title,
+                date=selected_date,
+                time=time,
+                user=request.user
+            )
+
+            # Tambahkan food items
+            food_items = Product.objects.filter(id__in=food_ids)
             meal_plan.food_items.set(food_items)
-            meal_plan.save()
+
+            print("Meal plan created successfully")
 
             return JsonResponse({
-                'message': 'Meal plan created successfully!',
-                'status': 'success'
-            }, status=200)
+                'status': 'success',
+                'message': 'Meal plan created successfully!'
+            })
 
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON format.'}, status=400)
+        except json.JSONDecodeError as e:
+            print("JSON Decode Error:", str(e))
+            return JsonResponse({
+                'status': 'error',
+                'message': f"Invalid JSON format: {str(e)}"
+            }, status=400)
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
+            print("Error:", str(e))
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=400)
 
-    return JsonResponse({'error': 'Invalid request method.'}, status=405)
-
-
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request method'
+    }, status=405)
+ 
 @login_required(login_url="authentication:login")
 def create_plan(request):
     meal_plans = MealPlan.objects.filter(user=request.user)
@@ -327,24 +363,39 @@ def update_meal_plan(request, id):
         "status": "error",
         "message": "Invalid request method"
     }, status=405)
-    
+
 @csrf_exempt
 def get_food_items(request):
+    print(f"Request method: {request.method}")  # Debug log
+    print(f"Request body: {request.body}")      # Debug log
+    
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             food_ids = data.get('food_ids', [])
             
-            food_items = Product.objects.filter(pk__in=food_ids)
-            serialized_data = serializers.serialize('json', food_items)
+            print(f"Food IDs received: {food_ids}")  # Debug log
             
+            food_items = Product.objects.filter(item__in=food_ids)
+            
+            print(f"Found {food_items.count()} items")  # Debug log
+            
+            serialized_data = serializers.serialize('json', food_items)
             return JsonResponse(json.loads(serialized_data), safe=False)
+            
         except Exception as e:
+            print(f"Error: {str(e)}")  # Debug log
             return JsonResponse({
                 'status': 'error',
                 'message': str(e)
             }, status=500)
             
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Only POST method is allowed'
+    }, status=405)
+    
+                
 @login_required
 @require_POST
 def delete_meal_plan_django(request, id):

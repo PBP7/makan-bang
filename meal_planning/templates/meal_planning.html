@@ -149,48 +149,120 @@
             <div class="card">
                 <h2 class="text-2xl font-bold text-[#F65035] mb-0 text-dark">Select Your</h2>
                 <h2 class="text-2xl font-bold text-[#F65035] mb-4 text-dark">Right Time</h2>
+                
+                <!-- New Title Input -->
                 <div class="mb-6">
-                    <input type="hidden" id="selected_date" name="selected_date">
-                    <div id="datepicker" class="mt-2 p-2 border border-gray-300 rounded"></div>
+                    <label for="title" class="block text-dark mb-2">Meal Plan Title</label>
+                    <input 
+                        type="text" 
+                        id="title" 
+                        name="title" 
+                        class="w-full mt-2 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400" 
+                        placeholder="Enter your meal plan title" 
+                        required>
+                </div>
+                
+                <div class="mb-6">
+                    <label for="date" class="block text-dark mb-2">Select Date</label>
+                    <input 
+                        type="date" 
+                        id="selected_date" 
+                        name="selected_date" 
+                        class="w-full mt-2 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        required>
                 </div>
                 <div class="mb-6">
                     <label for="time" class="block text-dark mb-2">Select Time</label>
                     <input id="time" name="time" type="time" class="w-full mt-2 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400" required>
                 </div>
-            </div>
+            </div>            
         </div>
     </form>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const form = document.getElementById("mealPlanForm");
-            
-            form.addEventListener("submit", function (event) {
-                const selectedDate = document.getElementById("selected_date").value;
-                const time = document.getElementById("time").value;
-                
-                if (!selectedDate || !time) {
-                    event.preventDefault();
-                    alert("Please fill out the date before saving.");
-                    return; 
-                }
-
-                const foodItemsContainer = document.querySelector(".scrollable-content");
-                const foodItems = foodItemsContainer.querySelectorAll(".bg-white");
-                
-                if (foodItems.length === 0) {
-                    event.preventDefault();
-                    alert("Please add at least one food item to your meal plan before saving.");
+            // Initialize flatpickr
+            const fp = flatpickr("#datepicker", {
+                inline: true,
+                dateFormat: "Y-m-d",
+                minDate: "today",
+                onChange: function(selectedDates, dateStr) {
+                    if (selectedDates.length > 0) {
+                        // Format the date as YYYY-MM-DD
+                        const date = selectedDates[0];
+                        const formattedDate = date.getFullYear() + '-' + 
+                            String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                            String(date.getDate()).padStart(2, '0');
+                        
+                        // Update the hidden input value
+                        document.getElementById('selected_date').value = formattedDate;
+                        console.log('Date selected:', formattedDate); // Debug log
+                    }
                 }
             });
-        });
+    
+            // Form validation
+const form = document.getElementById("mealPlanForm");
 
-        flatpickr("#datepicker", {
-            inline: true,
-            dateFormat: "Y-m-d", 
-            minDate: "today",
-            onChange: function(selectedDates, dateStr, instance) {
-                document.getElementById('selected_date').value = dateStr;
+form.addEventListener("submit", function (event) {
+    event.preventDefault(); // Prevent form submission initially
+
+    // Get form values
+    const title = document.getElementById("title").value;
+    const selectedDate = document.getElementById("selected_date").value;
+    const time = document.getElementById("time").value;
+    const foodItemsContainer = document.querySelector(".scrollable-content");
+    const foodItems = foodItemsContainer.querySelectorAll(".bg-white");
+
+    // Validation checks
+    let errors = [];
+
+    // Check title
+    if (!title.trim()) {
+        errors.push("Please provide a title for your meal plan.");
+    }
+
+    // Check date
+    if (!selectedDate) {
+        errors.push("Please select a date for your meal plan.");
+    }
+
+    // Check time
+    if (!time) {
+        errors.push("Please select a time for your meal plan.");
+    }
+
+    // Check food items
+    if (foodItems.length === 0) {
+        errors.push("Please add at least one food item to your meal plan.");
+    }
+
+    // If there are errors, show them
+    if (errors.length > 0) {
+        alert(errors.join("\n"));
+        return;
+    }
+
+    // Debug logs
+    console.log('Submitting form with values:', {
+        title: title,
+        date: selectedDate,
+        time: time,
+        foodItemsCount: foodItems.length
+    });
+
+    // If all validations pass, submit the form
+    form.submit();
+});
+
+            
+            // Initialize with current date if no date is selected
+            if (!document.getElementById('selected_date').value) {
+                const today = new Date();
+                const formattedToday = today.getFullYear() + '-' + 
+                    String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                    String(today.getDate()).padStart(2, '0');
+                document.getElementById('selected_date').value = formattedToday;
             }
         });
     </script>
